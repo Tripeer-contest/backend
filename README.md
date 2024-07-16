@@ -20,7 +20,9 @@
 develop/{feature-name or domain-name}
 ```
 
-`Commit` 메세지 예시
+
+
+`PR` 제목 및 `Commit` 메세지 예시
 
 ```
 {TYPE}: 뭐시기 저시기~
