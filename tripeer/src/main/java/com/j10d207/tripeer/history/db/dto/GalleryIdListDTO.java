@@ -1,12 +1,12 @@
 package com.j10d207.tripeer.history.db.dto;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @NoArgsConstructor
-public class GallertIdListDTO {
-    List<Long> gallertIdList;
+public class GalleryIdListDTO {
+	List<Long> galleryIdList;
 }
