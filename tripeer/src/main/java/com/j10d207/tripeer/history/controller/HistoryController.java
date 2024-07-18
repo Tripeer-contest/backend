@@ -15,12 +15,14 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.j10d207.tripeer.exception.CustomException;
+import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.history.dto.request.CostReqDTO;
+import com.j10d207.tripeer.history.dto.request.GalleryIdListDTO;
+import com.j10d207.tripeer.history.dto.request.PlanSaveReqDTO;
 import com.j10d207.tripeer.history.dto.response.CostResDTO;
 import com.j10d207.tripeer.history.dto.response.GalleryDTO;
-import com.j10d207.tripeer.history.dto.request.GalleryIdListDTO;
 import com.j10d207.tripeer.history.dto.response.HistoryDetailResDTO;
-import com.j10d207.tripeer.history.dto.request.PlanSaveReqDTO;
 import com.j10d207.tripeer.history.service.GalleryService;
 import com.j10d207.tripeer.history.service.HistoryService;
 import com.j10d207.tripeer.plan.db.dto.PlanListResDTO;
@@ -38,6 +40,10 @@ public class HistoryController implements HistoryControllerDocs {
 
 	final HistoryService historyService;
 	final GalleryService galleryService;
+	// 갤러리 저장시 허용할 MIME 타입들 설정 (이미지, 동영상 파일만 허용하는 경우)
+	static final List<String> ALLOWED_MIME_TYPES = List.of(
+		"image/jpeg", "image/png", "image/gif", "video/mp4", "video/webm",
+		"video/ogg", "video/3gpp", "video/x-msvideo", "video/quicktime");
 
 	@GetMapping
 	public Response<List<PlanListResDTO>> getPlanList(HttpServletRequest request) {
@@ -54,6 +60,11 @@ public class HistoryController implements HistoryControllerDocs {
 		HttpServletRequest request,
 		@PathVariable("planDayId") long planDayId,
 		@RequestPart(value = "images") List<MultipartFile> multipartFiles) {
+		multipartFiles.stream()
+			.filter(multipartFile -> !ALLOWED_MIME_TYPES.contains(multipartFile.getContentType()))
+			.findAny()
+			.orElseThrow(() -> new CustomException(ErrorCode.UNSUPPORTED_FILE_TYPE));
+
 		List<GalleryDTO> galleryList = galleryService.uploadsImageAndMovie(multipartFiles,
 			request.getHeader("Authorization"), planDayId);
 		return Response.of(HttpStatus.OK, "업로드 성공", galleryList);

@@ -42,11 +42,6 @@ public class GalleryServiceImpl implements GalleryService {
 	private final PlanDayRepository planDayRepository;
 	private final UserRepository userRepository;
 
-	// 갤러리 저장시 허용할 MIME 타입들 설정 (이미지, 동영상 파일만 허용하는 경우)
-	static final List<String> ALLOWED_MIME_TYPES = List.of(
-		"image/jpeg", "image/png", "image/gif", "video/mp4", "video/webm",
-		"video/ogg", "video/3gpp", "video/x-msvideo", "video/quicktime");
-
 	//이름 중복 방지를 위해 랜덤으로 생성
 	private String changedImageName(String originName) {
 		String random = UUID.randomUUID().toString();
@@ -74,9 +69,6 @@ public class GalleryServiceImpl implements GalleryService {
 
 			// 허용되지 않는 MIME 타입의 파일은 처리하지 않음
 			String fileContentType = file.getContentType();
-			if (!ALLOWED_MIME_TYPES.contains(fileContentType)) {
-				throw new CustomException(ErrorCode.UNSUPPORTED_FILE_TYPE);
-			}
 
 			ObjectMetadata metadata = new ObjectMetadata(); //메타데이터
 
