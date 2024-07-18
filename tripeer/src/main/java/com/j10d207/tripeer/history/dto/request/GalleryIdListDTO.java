@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.history.db.dto;
+package com.j10d207.tripeer.history.dto.request;
 
 import java.util.List;
 

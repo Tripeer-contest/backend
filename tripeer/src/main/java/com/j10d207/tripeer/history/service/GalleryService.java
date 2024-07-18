@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.j10d207.tripeer.history.db.dto.GalleryDTO;
+import com.j10d207.tripeer.history.dto.response.GalleryDTO;
 
 public interface GalleryService {
 

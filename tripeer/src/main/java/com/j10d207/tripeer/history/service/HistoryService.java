@@ -1,9 +1,9 @@
 package com.j10d207.tripeer.history.service;
 
-import com.j10d207.tripeer.history.db.dto.CostReqDTO;
-import com.j10d207.tripeer.history.db.dto.CostResDTO;
-import com.j10d207.tripeer.history.db.dto.HistoryDetailResDTO;
-import com.j10d207.tripeer.history.db.dto.PlanSaveReqDTO;
+import com.j10d207.tripeer.history.dto.request.CostReqDTO;
+import com.j10d207.tripeer.history.dto.response.CostResDTO;
+import com.j10d207.tripeer.history.dto.response.HistoryDetailResDTO;
+import com.j10d207.tripeer.history.dto.request.PlanSaveReqDTO;
 import com.j10d207.tripeer.plan.db.dto.PlanListResDTO;
 
 import java.util.List;

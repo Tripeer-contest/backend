@@ -3,11 +3,18 @@ package com.j10d207.tripeer.history.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
-import com.j10d207.tripeer.history.db.dto.*;
 import com.j10d207.tripeer.history.db.entity.GalleryEntity;
 import com.j10d207.tripeer.history.db.repository.GalleryRepository;
 import com.j10d207.tripeer.history.db.repository.RouteDetailRepository;
 import com.j10d207.tripeer.history.db.repository.RouteRepository;
+import com.j10d207.tripeer.history.dto.request.CostReqDTO;
+import com.j10d207.tripeer.history.dto.request.PlanSaveReqDTO;
+import com.j10d207.tripeer.history.dto.response.CostResDTO;
+import com.j10d207.tripeer.history.dto.response.HistoryDayDTO;
+import com.j10d207.tripeer.history.dto.response.HistoryDetailResDTO;
+import com.j10d207.tripeer.history.dto.response.HistorySpotResDTO;
+import com.j10d207.tripeer.history.dto.response.RouteDTO;
+import com.j10d207.tripeer.history.dto.response.RouteDetailDTO;
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.repository.SpotInfoRepository;
@@ -345,7 +352,7 @@ public class HistoryServiceImpl implements HistoryService{
         HistoryDetailResDTO historyDetailResDTO = HistoryDetailResDTO.builder()
                 .diaryDetail(planListResDTO)
                 .diaryDayList(diaryDayList)
-                .plan_id(planId)
+                .planId(planId)
                 .cityIdTownIdList(cityTownIdList)
                 .build();
         return historyDetailResDTO;

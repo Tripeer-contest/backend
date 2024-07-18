@@ -17,9 +17,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
-import com.j10d207.tripeer.history.db.dto.GalleryDTO;
 import com.j10d207.tripeer.history.db.entity.GalleryEntity;
 import com.j10d207.tripeer.history.db.repository.GalleryRepository;
+import com.j10d207.tripeer.history.dto.response.GalleryDTO;
 import com.j10d207.tripeer.plan.db.entity.PlanDayEntity;
 import com.j10d207.tripeer.plan.db.repository.PlanDayRepository;
 import com.j10d207.tripeer.user.config.JWTUtil;
@@ -42,6 +42,11 @@ public class GalleryServiceImpl implements GalleryService {
 	private final PlanDayRepository planDayRepository;
 	private final UserRepository userRepository;
 
+	// 갤러리 저장시 허용할 MIME 타입들 설정 (이미지, 동영상 파일만 허용하는 경우)
+	static final List<String> ALLOWED_MIME_TYPES = List.of(
+		"image/jpeg", "image/png", "image/gif", "video/mp4", "video/webm",
+		"video/ogg", "video/3gpp", "video/x-msvideo", "video/quicktime");
+
 	//이름 중복 방지를 위해 랜덤으로 생성
 	private String changedImageName(String originName) {
 		String random = UUID.randomUUID().toString();
@@ -50,10 +55,6 @@ public class GalleryServiceImpl implements GalleryService {
 
 	@Override
 	public List<GalleryDTO> uploadsImageAndMovie(List<MultipartFile> files, String token, long planDayId) {
-
-		// 허용할 MIME 타입들 설정 (이미지, 동영상 파일만 허용하는 경우)
-		List<String> allowedMimeTypes = List.of("image/jpeg", "image/png", "image/gif", "video/mp4", "video/webm",
-			"video/ogg", "video/3gpp", "video/x-msvideo", "video/quicktime");
 
 		PlanDayEntity planDay = planDayRepository.findByPlanDayId(planDayId);
 
@@ -73,7 +74,7 @@ public class GalleryServiceImpl implements GalleryService {
 
 			// 허용되지 않는 MIME 타입의 파일은 처리하지 않음
 			String fileContentType = file.getContentType();
-			if (!allowedMimeTypes.contains(fileContentType)) {
+			if (!ALLOWED_MIME_TYPES.contains(fileContentType)) {
 				throw new CustomException(ErrorCode.UNSUPPORTED_FILE_TYPE);
 			}
 
@@ -93,7 +94,7 @@ public class GalleryServiceImpl implements GalleryService {
 				).withCannedAcl(CannedAccessControlList.PublicRead));
 
 			} catch (IOException e) {
-				log.error("file upload error " + e.getMessage());
+				log.error("file upload error {}", e.getMessage());
 				throw new CustomException(ErrorCode.S3_UPLOAD_ERROR);
 			}
 			//저장된 Url
@@ -135,8 +136,6 @@ public class GalleryServiceImpl implements GalleryService {
 		}
 		return galleryList;
 	}
-
-	;
 
 	public String deleteGalleryList(List<Long> galleryIdList) {
 		for (Long galleryId : galleryIdList) {
