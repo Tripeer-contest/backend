@@ -1,5 +1,7 @@
 package com.j10d207.tripeer.user.config;
 
+import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
+import com.j10d207.tripeer.user.db.dto.TestResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -30,8 +33,9 @@ public class JWTFilter extends OncePerRequestFilter {
         String access = request.getHeader("Authorization");
         //access 헤더 검증
         if ( access == null ) {
+            System.out.println("비로그인 상태");
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                setContext(null, "ROLE_NONE");
+                setContext(0L, "ROLE_NONE");
             }
             filterChain.doFilter(request, response);
             //조건이 해당되면 메소드 종료 (필수)
@@ -63,15 +67,19 @@ public class JWTFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
+
+        System.out.println("로그인 상태");
         //토큰에서 email과 role 획득
-        setContext(jwtUtil.getName(accessToken), jwtUtil.getRole(accessToken));
+        setContext(jwtUtil.getUserId(accessToken), jwtUtil.getRole(accessToken));
         filterChain.doFilter(request, response);
     }
 
-    private void setContext(String nickname, String role) {
+    private void setContext(long userId, String role) {
+        TestResponse testResponse = new TestResponse();
+        CustomOAuth2User test = new CustomOAuth2User(testResponse, role, userId);
 
         //스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(null, null, getAuthorities(role));
+        Authentication authToken = new UsernamePasswordAuthenticationToken(test, null, getAuthorities(role));
         //세션에 사용자 등록
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }

@@ -6,9 +6,11 @@ import com.j10d207.tripeer.place.service.SpotService;
 import com.j10d207.tripeer.place.service.TownService;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
+import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -64,8 +66,8 @@ public class PlaceController {
     public Response<SpotListDto> getStayList(@RequestParam("cityId") Integer cityId,
                                              @RequestParam("townId") Integer townId,
                                              @RequestParam("page") Integer page,
-                                             HttpServletRequest request) {
-        return Response.of(HttpStatus.OK, "숙소 조회", spotService.getSpotByContentType(page,32, cityId, townId, request.getHeader("Authorization")));
+                                             @AuthenticationPrincipal CustomOAuth2User user) {
+        return Response.of(HttpStatus.OK, "숙소 조회", spotService.getSpotByContentType(page,32, cityId, townId, user.getUserId()));
     }
 
 
@@ -77,8 +79,8 @@ public class PlaceController {
     public Response<SpotListDto> getRestaurantList(@RequestParam("cityId") Integer cityId,
                                                    @RequestParam("townId") Integer townId,
                                                    @RequestParam("page") Integer page,
-                                                   HttpServletRequest request) {
-        return Response.of(HttpStatus.OK, "식당 조회", spotService.getSpotByContentType(page,39, cityId, townId, request.getHeader("Authorization")));
+                                                   @AuthenticationPrincipal CustomOAuth2User user) {
+        return Response.of(HttpStatus.OK, "식당 조회", spotService.getSpotByContentType(page,39, cityId, townId, user.getUserId()));
     }
 
 
@@ -90,9 +92,9 @@ public class PlaceController {
     public Response<SpotListDto> getmeccaList(@RequestParam("cityId") Integer cityId,
                                               @RequestParam("townId") Integer townId,
                                               @RequestParam("page") Integer page,
-                                              HttpServletRequest request) {
+                                              @AuthenticationPrincipal CustomOAuth2User user) {
         List<Integer> contentTypeIds = Arrays.asList(32, 39);
-        return Response.of(HttpStatus.OK, "명소 조회", spotService.getSpotByContentType(page, contentTypeIds, cityId, townId, request.getHeader("Authorization")));
+        return Response.of(HttpStatus.OK, "명소 조회", spotService.getSpotByContentType(page, contentTypeIds, cityId, townId, user.getUserId()));
     }
 
 
@@ -110,9 +112,9 @@ public class PlaceController {
      * 스팟 생성
      * */
     @PostMapping("/spot/create")
-    public Response<SpotAddResDto> createNewSpot(@RequestBody SpotAddReqDto spotAddReqDto, HttpServletRequest request) {
+    public Response<SpotAddResDto> createNewSpot(@RequestBody SpotAddReqDto spotAddReqDto, @AuthenticationPrincipal CustomOAuth2User user) {
 
-        return Response.of(HttpStatus.OK, "새로운 스팟 생성", spotService.createNewSpot(spotAddReqDto, request));
+        return Response.of(HttpStatus.OK, "새로운 스팟 생성", spotService.createNewSpot(spotAddReqDto, user.getUserId()));
     }
 
     /*
@@ -125,9 +127,9 @@ public class PlaceController {
 
     //즐겨찾기 추가
     @PostMapping("/wishList/{spotInfoId}")
-    public Response<?> addWishList(@PathVariable("spotInfoId") int spotInfoId, HttpServletRequest request) {
+    public Response<?> addWishList(@PathVariable("spotInfoId") int spotInfoId, @AuthenticationPrincipal CustomOAuth2User user) {
         try {
-            planService.addWishList(spotInfoId, request.getHeader("Authorization"));
+            planService.addWishList(spotInfoId, user.getUserId());
             return Response.of(HttpStatus.OK, "즐겨찾기 추가 완료", null);
         } catch (Exception e) {
             throw new RuntimeException(e);

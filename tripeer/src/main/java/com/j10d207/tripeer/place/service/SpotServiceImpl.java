@@ -45,10 +45,8 @@ public class SpotServiceImpl implements SpotService{
     }
 
     @Override
-    public SpotListDto getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, String token) {
+    public SpotListDto getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, long userId) {
         Pageable pageable = PageRequest.of(page,15);
-        String access = jwtUtil.splitToken(token);
-        long userId = jwtUtil.getUserId(access);
 
         List<SpotInfoEntity> spotInfoEntities;
         if (townId == -1) {
@@ -68,11 +66,8 @@ public class SpotServiceImpl implements SpotService{
     }
 
     @Override
-    public SpotListDto getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, String token) {
+    public SpotListDto getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, long userId) {
         Pageable pageable = PageRequest.of(page,15);
-        String access = jwtUtil.splitToken(token);
-        long userId = jwtUtil.getUserId(access);
-
         List<SpotInfoEntity> spotInfoEntities;
         if (townId == -1) {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityId(ContentTypeId, cityId, pageable);
@@ -203,7 +198,7 @@ public class SpotServiceImpl implements SpotService{
     
     @Override
     @Transactional
-    public SpotAddResDto createNewSpot(SpotAddReqDto spotAddReqDTO, HttpServletRequest request) {
+    public SpotAddResDto createNewSpot(SpotAddReqDto spotAddReqDTO, long userId) {
 
 //        1. city 찾기
         String fullAddr = spotAddReqDTO.getAddr1();
@@ -261,7 +256,7 @@ public class SpotServiceImpl implements SpotService{
         createNewDescrip(newSpotInfo, spotAddReqDTO);
 
         if(spotAddReqDTO.isAddPlanCheck()) {
-            planService.addPlanSpot(spotAddReqDTO.getPlanId(), newSpotInfo.getSpotInfoId(), request.getHeader("Authorization"));
+            planService.addPlanSpot(spotAddReqDTO.getPlanId(), newSpotInfo.getSpotInfoId(), userId);
         }
 
         return SpotAddResDto.builder()

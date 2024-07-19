@@ -47,15 +47,12 @@ public class GalleryServiceImpl implements GalleryService{
     }
 
     @Override
-    public List<GalleryDTO> uploadsImageAndMovie(List<MultipartFile> files, String token, long planDayId) {
+    public List<GalleryDTO> uploadsImageAndMovie(List<MultipartFile> files, long userId, long planDayId) {
 
         // 허용할 MIME 타입들 설정 (이미지, 동영상 파일만 허용하는 경우)
         List<String> allowedMimeTypes = List.of("image/jpeg", "image/png", "image/gif", "video/mp4", "video/webm", "video/ogg", "video/3gpp", "video/x-msvideo", "video/quicktime");
 
         PlanDayEntity planDay = planDayRepository.findByPlanDayId(planDayId);
-
-        String access = jwtUtil.splitToken(token);
-        long userId = jwtUtil.getUserId(access);
 
         UserEntity user = userRepository.findByUserId(userId);
 

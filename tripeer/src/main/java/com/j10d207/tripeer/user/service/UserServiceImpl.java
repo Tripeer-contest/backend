@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService{
 
     //프로필 사진 변경
     @Override
-    public String uploadProfileImage(MultipartFile file, String token){
+    public String uploadProfileImage(MultipartFile file, long userId){
 
         // 허용할 MIME 타입들 설정 (이미지만 허용하는 경우)
         List<String> allowedMimeTypes = List.of("image/jpg", "image/jpeg", "image/png");
@@ -108,7 +108,6 @@ public class UserServiceImpl implements UserService{
 
         metadata.setContentLength(file.getSize()); // 파일 크기 명시
         metadata.setContentType(fileContentType);   // 파일 확장자 명시
-        long userId = jwtUtil.getUserId(jwtUtil.splitToken(token));
         UserEntity user = userRepository.findByUserId(userId);
 
 
@@ -141,8 +140,8 @@ public class UserServiceImpl implements UserService{
 
     //내 정보 수정
     @Override
-    public void modifyMyInfo(String token, UserInfoDTO info) {
-        UserEntity user = userRepository.findByUserId(jwtUtil.getUserId(jwtUtil.splitToken(token)));
+    public void modifyMyInfo(long userId, UserInfoDTO info) {
+        UserEntity user = userRepository.findByUserId(userId);
         if(!user.getNickname().equals(info.getNickname()) && userRepository.existsByNickname(info.getNickname())){
             throw new CustomException(ErrorCode.DUPLICATE_USER);
         }
@@ -201,9 +200,9 @@ public class UserServiceImpl implements UserService{
 
     //내 정보 불러오기
     @Override
-    public UserInfoDTO getMyInfo(String token) {
+    public UserInfoDTO getMyInfo(long userId) {
         // 정보 확장시 DTO 새로 만들어야함
-        UserEntity user = userRepository.findByUserId(jwtUtil.getUserId(jwtUtil.splitToken(token)));
+        UserEntity user = userRepository.findByUserId(userId);
         return UserInfoDTO.builder()
                 .userId(user.getUserId())
                 .nickname(user.getNickname())

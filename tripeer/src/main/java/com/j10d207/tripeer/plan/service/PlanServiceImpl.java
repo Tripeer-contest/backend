@@ -71,11 +71,9 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 생성
     @Override
-    public PlanResDTO createPlan(CreatePlanDTO createPlanDTO, String token) {
+    public PlanResDTO createPlan(CreatePlanDTO createPlanDTO, long userId) {
 
         PlanResDTO planResponseDTO = new PlanResDTO();
-        String access = jwtUtil.splitToken(token);
-        long userId = jwtUtil.getUserId(access);
         planResponseDTO.setCreateDay(LocalDate.now(ZoneId.of("Asia/Seoul")));
 
         //플랜 생성
@@ -141,9 +139,7 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 이름 변경
     @Override
-    public void changeTitle(TitleChangeDTO titleChangeDTO, String token) {
-        String access = jwtUtil.splitToken(token);
-        long userId = jwtUtil.getUserId(access);
+    public void changeTitle(TitleChangeDTO titleChangeDTO, long userId) {
         PlanEntity plan = planRepository.findByPlanId(titleChangeDTO.getPlanId());
 
         if(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(titleChangeDTO.getPlanId(), userId)) {
@@ -158,8 +154,8 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 탈퇴
     @Override
-    public void planOut(long planId, String token) {
-        Optional<CoworkerEntity> coworkerOptional = coworkerRepository.findByPlan_PlanIdAndUser_UserId(planId, jwtUtil.getUserId(jwtUtil.splitToken(token)));
+    public void planOut(long planId, long userId) {
+        Optional<CoworkerEntity> coworkerOptional = coworkerRepository.findByPlan_PlanIdAndUser_UserId(planId, userId);
         if(coworkerOptional.isPresent()) {
             coworkerRepository.delete(coworkerOptional.get());
         } else {
@@ -170,11 +166,10 @@ public class PlanServiceImpl implements PlanService {
 
     //내 플랜 리스트 조회
     @Override
-    public List<PlanListResDTO> planList(String token) {
-        String access = jwtUtil.splitToken(token);
+    public List<PlanListResDTO> planList(long userId) {
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1);
         // 사용자가 소유중인 플랜의 리스트 목록을 가져옴
-        List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(jwtUtil.getUserId(access), today);
+        List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(userId, today);
 
         // 반환리스트를 담아줄 DTO 생성
         List<PlanListResDTO> planListResDTOList = new ArrayList<>();
@@ -236,10 +231,10 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 디테일 메인 조회
     @Override
-    public PlanDetailMainResDTO getPlanDetailMain(long planId, String token) {
+    public PlanDetailMainResDTO getPlanDetailMain(long planId, long userId) {
         PlanEntity plan = planRepository.findByPlanId(planId);
         //로그인 사용자가 소유하지 않은 플랜 접근시
-        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planId, jwtUtil.getUserId(jwtUtil.splitToken(token)))) {
+        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planId, userId)) {
             throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
         }
         List<PlanTownEntity> planTown = planTownRepository.findByPlan_PlanId(plan.getPlanId());
@@ -294,8 +289,8 @@ public class PlanServiceImpl implements PlanService {
 
     //동행자 추가
     @Override
-    public void joinPlan(CoworkerReqDTO coworkerReqDTO, String token) {
-        UserEntity userEntity = userRepository.findById(jwtUtil.getUserId(jwtUtil.splitToken(token)))
+    public void joinPlan(CoworkerReqDTO coworkerReqDTO, long userId) {
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         PlanEntity planEntity = planRepository.findById(coworkerReqDTO.getPlanId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
@@ -353,11 +348,10 @@ public class PlanServiceImpl implements PlanService {
 
     //관광지 검색
     @Override
-    public List<SpotSearchResDTO> getSpotSearch(long planId, String keyword, int page, int sortType, String token) {
+    public List<SpotSearchResDTO> getSpotSearch(long planId, String keyword, int page, int sortType, long userId) {
         Specification<SpotInfoEntity> spotInfoSpec = Specification.where(null);
         List<PlanTownEntity> planTownList = planTownRepository.findByPlan_PlanId(planId);
         Pageable pageable = PageRequest.of(page, 10);
-        String access = jwtUtil.splitToken(token);
 
         Specification<SpotInfoEntity> titleSpec = Specification.where(null);
         titleSpec = titleSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("title"), "%" + keyword + "%"));
@@ -404,25 +398,7 @@ public class PlanServiceImpl implements PlanService {
 
         List<SpotSearchResDTO> spotSearchResDTOList = new ArrayList<>();
         for (SpotInfoEntity spotInfoEntity : spotInfoList) {
-            SpotSearchResDTO spotSearchResDTO = new SpotSearchResDTO();
-            String img;
-            if (spotInfoEntity.getFirstImage().contains("default")) {
-                img = spotInfoEntity.getFirstImage();
-            } else {
-                img = "https://tripeer207.s3.ap-northeast-2.amazonaws.com/spot/"+spotInfoEntity.getSpotInfoId()+".png";
-            }
-
-            spotSearchResDTO.setSpotInfoId(spotInfoEntity.getSpotInfoId());
-            spotSearchResDTO.setTitle(spotInfoEntity.getTitle());
-            spotSearchResDTO.setContentType(ContentTypeEnum.getNameByCode(spotInfoEntity.getContentTypeId()));
-            spotSearchResDTO.setAddr(spotInfoEntity.getAddr1());
-            spotSearchResDTO.setLatitude(spotInfoEntity.getLatitude());
-            spotSearchResDTO.setLongitude(spotInfoEntity.getLongitude());
-            spotSearchResDTO.setImg(img);
-            spotSearchResDTO.setWishlist(wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(jwtUtil.getUserId(access), spotInfoEntity.getSpotInfoId()));
-            spotSearchResDTO.setSpot(planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, spotInfoEntity.getSpotInfoId()));
-
-            spotSearchResDTOList.add(spotSearchResDTO);
+            spotSearchResDTOList.add(SpotSearchResDTO.SpotInfoEntityToDTO(spotInfoEntity, wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoEntity.getSpotInfoId()), planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, spotInfoEntity.getSpotInfoId())));
         }
 
         return spotSearchResDTOList;
@@ -430,12 +406,11 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 버킷 관광지 추가
     @Override
-    public void addPlanSpot(long planId, int spotInfoId, String token) {
+    public void addPlanSpot(long planId, int spotInfoId, long userId) {
         if(planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, spotInfoId)) {
             throw new CustomException(ErrorCode.HAS_BUCKET);
         }
-        String access = jwtUtil.splitToken(token);
-        if(!(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planId, jwtUtil.getUserId(access)))) {
+        if(!(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planId, userId))) {
             throw new CustomException(ErrorCode.USER_NOT_CORRESPOND);
         }
 
@@ -447,7 +422,7 @@ public class PlanServiceImpl implements PlanService {
                         .spotInfoId(spotInfoId)
                         .build())
                 .user(UserEntity.builder()
-                        .userId(jwtUtil.getUserId(access))
+                        .userId(userId)
                         .build())
                 .build();
 
@@ -456,11 +431,11 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 버킷 관광지 삭제
     @Override
-    public void delPlanSpot(long planId, int spotInfoId, String token) {
+    public void delPlanSpot(long planId, int spotInfoId, long userId) {
         Optional<PlanBucketEntity> planBucket = planBucketRepository.findByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, spotInfoId);
         if (planBucket.isPresent()){
             PlanBucketEntity planBucketEntity = planBucket.get();
-            if (coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planBucketEntity.getPlan().getPlanId(), jwtUtil.getUserId(jwtUtil.splitToken(token)))) {
+            if (coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planBucketEntity.getPlan().getPlanId(), userId)) {
                 planBucketRepository.delete(planBucketEntity);
             } else {
                 // 로그인된 사용자가 가지고 있지 않은 변경
@@ -475,8 +450,7 @@ public class PlanServiceImpl implements PlanService {
 
     //즐겨찾기 추가
     @Override
-    public void addWishList(int spotInfoId, String token) {
-        long userId = jwtUtil.getUserId(jwtUtil.splitToken(token));
+    public void addWishList(int spotInfoId, long userId) {
         Optional<WishListEntity> optionalWishList = wishListRepository.findBySpotInfo_SpotInfoIdAndUser_UserId(spotInfoId, userId);
         if (optionalWishList.isPresent()) {
             wishListRepository.delete(optionalWishList.get());
@@ -495,25 +469,13 @@ public class PlanServiceImpl implements PlanService {
 
     //즐겨찾기 조회
     @Override
-    public List<SpotSearchResDTO> getWishList(String token, long planId) {
-        String access = jwtUtil.splitToken(token);
-        List<WishListEntity> wishList = wishListRepository.findByUser_UserId(jwtUtil.getUserId(access));
+    public List<SpotSearchResDTO> getWishList(long userId, long planId) {
+        List<WishListEntity> wishList = wishListRepository.findByUser_UserId(userId);
 
         List<SpotSearchResDTO> spotSearchResDTOList = new ArrayList<>();
 
         for (WishListEntity wishListEntity : wishList) {
-            SpotSearchResDTO spotSearchResDTO = new SpotSearchResDTO();
-            spotSearchResDTO.setSpotInfoId(wishListEntity.getSpotInfo().getSpotInfoId());
-            spotSearchResDTO.setTitle(wishListEntity.getSpotInfo().getTitle());
-            spotSearchResDTO.setContentType(ContentTypeEnum.getNameByCode(wishListEntity.getSpotInfo().getContentTypeId()));
-            spotSearchResDTO.setAddr(wishListEntity.getSpotInfo().getAddr1());
-            spotSearchResDTO.setLatitude(wishListEntity.getSpotInfo().getLatitude());
-            spotSearchResDTO.setLongitude(wishListEntity.getSpotInfo().getLongitude());
-            spotSearchResDTO.setImg(wishListEntity.getSpotInfo().getFirstImage());
-            spotSearchResDTO.setWishlist(true);
-            spotSearchResDTO.setSpot(planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, wishListEntity.getSpotInfo().getSpotInfoId()));
-
-            spotSearchResDTOList.add(spotSearchResDTO);
+            spotSearchResDTOList.add(SpotSearchResDTO.WishEntityToDTO(wishListEntity, planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, wishListEntity.getSpotInfo().getSpotInfoId())));
         }
 
         return  spotSearchResDTOList;
@@ -582,8 +544,7 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 나의 정보 조회(기존 내정보 + 나의 coworker에서의 순서)
     @Override
-    public CoworkerReqDTO getPlanMyinfo(long planId, String token) {
-        long userId = jwtUtil.getUserId(jwtUtil.splitToken(token));
+    public CoworkerReqDTO getPlanMyinfo(long planId, long userId) {
         //요청된 플랜의 동행자 목록 조회
         List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanId(planId);
         int order = -1;
