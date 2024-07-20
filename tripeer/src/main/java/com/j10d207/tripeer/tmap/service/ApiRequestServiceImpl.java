@@ -89,18 +89,7 @@ public class ApiRequestServiceImpl implements ApiRequestService {
         List<PublicRootDTO.PublicRootDetail> detailList = new ArrayList<>();
         List<PublicRootDetailEntity> publicRootDetailEntityList = publicRootDetailRepository.findByPublicRoot_PublicRootId(publicRootEntity.getPublicRootId());
         for (PublicRootDetailEntity publicRootDetailEntity : publicRootDetailEntityList) {
-            PublicRootDTO.PublicRootDetail detail = new PublicRootDTO.PublicRootDetail();
-            detail.setStartName(publicRootDetailEntity.getStartName());
-            detail.setStartLat(publicRootDetailEntity.getStartLat());
-            detail.setStartLon(publicRootDetailEntity.getStartLon());
-            detail.setEndName(publicRootDetailEntity.getEndName());
-            detail.setEndLat(publicRootDetailEntity.getEndLat());
-            detail.setEndLon(publicRootDetailEntity.getEndLon());
-            detail.setDistance(publicRootDetailEntity.getDistance());
-            detail.setSectionTime(publicRootDetailEntity.getSectionTime());
-            detail.setMode(publicRootDetailEntity.getMode());
-            detail.setRoute(publicRootDetailEntity.getRoute());
-            detailList.add(detail);
+            detailList.add(PublicRootDTO.PublicRootDetail.EntityToDTO(publicRootDetailEntity));
         }
         result.setPublicRootDetailList(detailList);
 

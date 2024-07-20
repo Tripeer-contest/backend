@@ -755,55 +755,8 @@ public class PlanServiceImpl implements PlanService {
             return rootOptimizeDTO;
         }
         JsonObject infoObject = rootInfo.getAsJsonObject();
-        PublicRootDTO publicRoot = new PublicRootDTO();
 
-        publicRoot.setPathType(infoObject.get("pathType").getAsInt());
-        publicRoot.setTotalFare(infoObject.getAsJsonObject("fare").getAsJsonObject("regular").get("totalFare").getAsInt());
-        publicRoot.setTotalDistance(infoObject.get("totalDistance").getAsInt());
-        publicRoot.setTotalWalkTime(infoObject.get("totalWalkTime").getAsInt());
-        publicRoot.setTotalWalkDistance(infoObject.get("totalWalkDistance").getAsInt());
-
-        JsonArray legs = infoObject.getAsJsonArray("legs");
-
-        List<PublicRootDTO.PublicRootDetail> detailList = new ArrayList<>();
-
-        for (JsonElement leg : legs) {
-            JsonObject legObject = leg.getAsJsonObject();
-            PublicRootDTO.PublicRootDetail detail = new PublicRootDTO.PublicRootDetail();
-
-            //구간 이동 거리 (m)
-            detail.setDistance(legObject.get("distance").getAsInt());
-            //구간 소요 시간
-            detail.setSectionTime(legObject.get("sectionTime").getAsInt()/60);
-            /* 경로 탐색 결과 종류
-             * 0 - 자동차(택시)
-             * 1 - 도보 WALK
-             * 2 - 버스 BUS
-             * 3 - 지하철 SUBWAY
-             * 4 - 고속/시외버스 EXPRESS BUS
-             * 5 - 기차 TRAIN
-             * 6 - 항공 AIRPLANE
-             * 7 - 해운 FERRY
-             */
-            detail.setMode(legObject.get("mode").getAsString());
-
-            //대중교통 노선 명칭
-            detail.setRoute(legObject.has("route") ? legObject.get("route").getAsString() : null);
-
-            //시작 지점 정보
-            detail.setStartName(legObject.getAsJsonObject("start").get("name").getAsString());
-            detail.setStartLat(legObject.getAsJsonObject("start").get("lat").getAsDouble());
-            detail.setStartLon(legObject.getAsJsonObject("start").get("lon").getAsDouble());
-            //구간 도착 지점 정보
-            detail.setEndName(legObject.getAsJsonObject("end").get("name").getAsString());
-            detail.setEndLat(legObject.getAsJsonObject("end").get("lat").getAsDouble());
-            detail.setEndLon(legObject.getAsJsonObject("end").get("lon").getAsDouble());
-
-
-
-            detailList.add(detail);
-        }
-        publicRoot.setPublicRootDetailList(detailList);
+        PublicRootDTO publicRoot = PublicRootDTO.JsonToDTO(infoObject);
 
 
         List<PublicRootDTO> rootList = new ArrayList<>();
