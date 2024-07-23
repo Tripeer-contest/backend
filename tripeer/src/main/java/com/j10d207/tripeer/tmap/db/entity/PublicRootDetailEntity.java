@@ -1,5 +1,7 @@
 package com.j10d207.tripeer.tmap.db.entity;
 
+import com.nimbusds.jose.shaded.gson.JsonElement;
+import com.nimbusds.jose.shaded.gson.JsonObject;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,4 +34,23 @@ public class PublicRootDetailEntity {
     private int sectionTime;
     private String mode;
     private String route;
+
+    public static PublicRootDetailEntity JsonToDTO (JsonElement json, long rootId) {
+        JsonObject legObject = json.getAsJsonObject();
+
+        return PublicRootDetailEntity.builder()
+                .publicRoot(PublicRootEntity.builder().publicRootId(rootId).build())
+                .distance(legObject.get("distance").getAsInt())
+                .sectionTime(legObject.get("sectionTime").getAsInt() / 60)
+                .mode(legObject.get("mode").getAsString())
+                .route(legObject.has("route") ? legObject.get("route").getAsString() : null)
+                .startName(legObject.getAsJsonObject("start").get("name").getAsString())
+                .startLat(legObject.getAsJsonObject("start").get("lat").getAsDouble())
+                .startLon(legObject.getAsJsonObject("start").get("lon").getAsDouble())
+                .endName(legObject.getAsJsonObject("end").get("name").getAsString())
+                .endLat(legObject.getAsJsonObject("end").get("lat").getAsDouble())
+                .endLon(legObject.getAsJsonObject("end").get("lon").getAsDouble())
+                .build();
+
+    }
 }

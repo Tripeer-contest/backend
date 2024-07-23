@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.plan.service;
 
+import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
 import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
 import com.j10d207.tripeer.user.db.dto.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonArray;
@@ -50,8 +51,6 @@ import java.util.*;
 @Slf4j
 public class PlanServiceImpl implements PlanService {
 
-    private final JWTUtil jwtUtil;
-
     private final UserRepository userRepository;
     private final CoworkerRepository coworkerRepository;
     private final WishListRepository wishListRepository;
@@ -73,26 +72,12 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 생성
     @Override
-    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanDetailMainDTO.CreateInfo createInfo, long userId) {
-
-        PlanDetailMainDTO.CreateResultInfo planResponseDTO = new PlanDetailMainDTO.CreateResultInfo();
-        planResponseDTO.setCreateDay(LocalDate.now(ZoneId.of("Asia/Seoul")));
+    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanCreateInfoVO createInfo, long userId) {
 
         //플랜 생성
-        PlanEntity plan = PlanEntity.builder()
-                .title(createInfo.getTitle())
-                .vehicle(createInfo.getVehicle())
-                .startDate(createInfo.getStartDay())
-                .endDate(createInfo.getEndDay())
-                .createDate(planResponseDTO.getCreateDay())
-                .build();
-        plan = planRepository.save(plan);
-        planResponseDTO.setPlanId(plan.getPlanId());
-        planResponseDTO.setTitle(createInfo.getTitle());
-        planResponseDTO.setVehicle(createInfo.getVehicle());
-        planResponseDTO.setStartDay(createInfo.getStartDay());
-        planResponseDTO.setEndDay(createInfo.getEndDay());
-        planResponseDTO.setTownList(createInfo.getTownList());
+        PlanEntity plan = planRepository.save(PlanEntity.VOToEntity(createInfo));
+
+        PlanDetailMainDTO.CreateResultInfo planResponseDTO = PlanDetailMainDTO.CreateResultInfo.VOToDTO(createInfo, plan.getPlanId());
 
         //생성된 플랜을 가지기
         UserEntity user = userRepository.findByUserId(userId);
@@ -169,9 +154,8 @@ public class PlanServiceImpl implements PlanService {
     //내 플랜 리스트 조회
     @Override
     public List<PlanDetailMainDTO.MyPlan> planList(long userId) {
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1);
         // 사용자가 소유중인 플랜의 리스트 목록을 가져옴
-        List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(userId, today);
+        List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(userId, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1));
 
         // 반환리스트를 담아줄 DTO 생성
         List<PlanDetailMainDTO.MyPlan> myPlans = new ArrayList<>();
@@ -181,46 +165,22 @@ public class PlanServiceImpl implements PlanService {
 
         // 내가 가진 플랜을 하나씩 조회
         for (CoworkerEntity coworker : coworkerList) {
-            PlanDetailMainDTO.MyPlan myPlan = new PlanDetailMainDTO.MyPlan();
-
             // 플랜 상세정보 가져오기
             PlanEntity plan = planRepository.findByPlanId(coworker.getPlan().getPlanId());
-
-            myPlan.setPlanId(plan.getPlanId());
-            myPlan.setTitle(plan.getTitle());
-
             // 플랜에서 선택한 타운 리스트 가져오기
             List<PlanTownEntity> planTown = planTownRepository.findByPlan_PlanId(plan.getPlanId());
-            List<String> townNameList = new ArrayList<>();
-            for(PlanTownEntity planTownEntity : planTown) {
-                if(planTownEntity.getTown() == null) {
-                    townNameList.add(planTownEntity.getCityOnly().getCityName());
-                } else {
-                    townNameList.add(planTownEntity.getTown().getTownName());
-                }
-            }
-            myPlan.setTownList(townNameList);
+            // 플랜의 멤버 리스트 넣기
+            List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
+
+            String img;
             // 선택한 도시 중 첫번째 도시의 이미지 경로 넣기
             if(planTown.getFirst().getTown() == null ) {
-                myPlan.setImg(planTown.getFirst().getCityOnly().getCityImg());
+                img = planTown.getFirst().getCityOnly().getCityImg();
             } else {
-                myPlan.setImg(planTown.getFirst().getTown().getTownImg());
+                img = planTown.getFirst().getTown().getTownImg();
             }
-            myPlan.setStartDay(plan.getStartDate());
-            myPlan.setEndDay(plan.getEndDate());
-
-            // 플랜의 멤버 리스트 넣기
-            List<UserDTO.Search> memberList = new ArrayList<>();
-            List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
-            for (CoworkerEntity coworkerEntity : coworkerEntityList) {
-                memberList.add(UserDTO.Search.CoworkerEntityToDTO(coworkerEntity));
-            }
-            myPlan.setMember(memberList);
-            int day = (int) ChronoUnit.DAYS.between(plan.getCreateDate(), today);
-            // 3일 이내면 true
-            myPlan.setNewPlan(day < 3);
+            PlanDetailMainDTO.MyPlan myPlan = PlanDetailMainDTO.MyPlan.EntityToDTO(plan, img, planTown, coworkerEntityList);
             myPlans.add(myPlan);
-
         }
 
         return myPlans;
@@ -243,13 +203,7 @@ public class PlanServiceImpl implements PlanService {
             townDTOList.add(TownDTO.EntityToDTO(planTownEntity));
         }
 
-        //멤버 목록 구성
-        List<UserDTO.Search> memberList = new ArrayList<>();
-        for (CoworkerEntity coworkerEntity : coworkerEntityList) {
-            memberList.add(UserDTO.Search.CoworkerEntityToDTO(coworkerEntity));
-        }
-
-        return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, memberList);
+        return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, UserDTO.Search.CoworkerEntityToDTO(coworkerEntityList));
     }
 
     //동행자 추가
@@ -441,22 +395,7 @@ public class PlanServiceImpl implements PlanService {
     //플랜 디테일 저장
     @Override
     public void addPlanDetail(PlanDetailVO planDetailVO) {
-        PlanDetailEntity planDetail = PlanDetailEntity.builder()
-                .planDetailId(planDetailVO.getPlanDetailId())
-                .planDay(PlanDayEntity.builder()
-                        .planDayId(planDetailVO.getPlanDayId())
-                        .build())
-                .spotInfo(SpotInfoEntity.builder()
-                        .spotInfoId(planDetailVO.getSpotInfoId())
-                        .build())
-                .day(planDetailVO.getDay())
-                .spotTime(planDetailVO.getSpotTime())
-                .step(planDetailVO.getStep())
-                .description(planDetailVO.getDescription())
-                .cost(planDetailVO.getCost())
-                .build();
-
-        planDetailRepository.save(planDetail);
+        planDetailRepository.save(PlanDetailEntity.VOToEntity(planDetailVO));
     }
 
     //플랜 디테일 전체 조회

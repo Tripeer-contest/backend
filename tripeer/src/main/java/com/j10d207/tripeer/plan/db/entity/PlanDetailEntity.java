@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.plan.db.entity;
 
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
+import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,4 +42,21 @@ public class PlanDetailEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PUBLIC_ROOT_ID")
     private PublicRootEntity publicRoot;
+
+    public static PlanDetailEntity VOToEntity (PlanDetailVO planDetailVO) {
+        return PlanDetailEntity.builder()
+                .planDetailId(planDetailVO.getPlanDetailId())
+                .planDay(PlanDayEntity.builder()
+                        .planDayId(planDetailVO.getPlanDayId())
+                        .build())
+                .spotInfo(SpotInfoEntity.builder()
+                        .spotInfoId(planDetailVO.getSpotInfoId())
+                        .build())
+                .day(planDetailVO.getDay())
+                .spotTime(planDetailVO.getSpotTime())
+                .step(planDetailVO.getStep())
+                .description(planDetailVO.getDescription())
+                .cost(planDetailVO.getCost())
+                .build();
+    }
 }

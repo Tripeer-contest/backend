@@ -1,5 +1,8 @@
 package com.j10d207.tripeer.plan.db.dto;
 
+import com.j10d207.tripeer.plan.db.entity.PlanEntity;
+import com.j10d207.tripeer.plan.db.entity.PlanTownEntity;
+import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
 import com.j10d207.tripeer.user.db.dto.UserDTO;
 import com.j10d207.tripeer.user.db.dto.UserSearchDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
@@ -9,22 +12,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Getter
 public class PlanDetailMainDTO {
 
     @Getter
-    public static class CreateInfo {
-        private String title;
-        private List<TownDTO> townList;
-        private String vehicle;
-        private LocalDate startDay;
-        private LocalDate endDay;
-    }
-
-    @Getter
-    @Setter
+    @Builder
     public static class CreateResultInfo {
         private long planId;
         private String title;
@@ -33,9 +29,23 @@ public class PlanDetailMainDTO {
         private LocalDate startDay;
         private LocalDate endDay;
         private LocalDate createDay;
+
+        public static CreateResultInfo VOToDTO (PlanCreateInfoVO createInfo, long planId) {
+
+            return CreateResultInfo.builder()
+                    .planId(planId)
+                    .title(createInfo.getTitle())
+                    .townList(createInfo.getTownList())
+                    .vehicle(createInfo.getVehicle())
+                    .startDay(createInfo.getStartDay())
+                    .endDay(createInfo.getEndDay())
+                    .createDay(LocalDate.now(ZoneId.of("Asia/Seoul")))
+                    .build();
+        }
     }
 
     @Getter
+    @Builder
     @Setter
     public static class MyPlan {
         private long planId;
@@ -46,6 +56,19 @@ public class PlanDetailMainDTO {
         private LocalDate endDay;
         private List<UserDTO.Search> member;
         private boolean newPlan;
+
+        public static MyPlan EntityToDTO (PlanEntity plan, String img, List<PlanTownEntity> planTown, List<CoworkerEntity> memberList) {
+            return MyPlan.builder()
+                    .planId(plan.getPlanId())
+                    .title(plan.getTitle())
+                    .img(img)
+                    .townList(PlanTownEntity.ConvertToNameList(planTown))
+                    .startDay(plan.getStartDate())
+                    .endDay(plan.getEndDate())
+                    .member(UserDTO.Search.CoworkerEntityToDTO(memberList))
+                    .newPlan((int) ChronoUnit.DAYS.between(plan.getCreateDate(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)) < 3)
+                    .build();
+        }
     }
 
     @Getter

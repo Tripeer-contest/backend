@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.plan.controller;
 
 import com.j10d207.tripeer.plan.db.dto.*;
+import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
 import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
@@ -25,7 +26,7 @@ public class PlanController {
     private final PlanService planService;
     //플랜 생성
     @PostMapping
-    public Response<PlanDetailMainDTO.CreateResultInfo> createPlan(@RequestBody PlanDetailMainDTO.CreateInfo createInfo, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<PlanDetailMainDTO.CreateResultInfo> createPlan(@RequestBody PlanCreateInfoVO createInfo, @AuthenticationPrincipal CustomOAuth2User user) {
         PlanDetailMainDTO.CreateResultInfo result = planService.createPlan(createInfo, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 생성 완료", result);
     }

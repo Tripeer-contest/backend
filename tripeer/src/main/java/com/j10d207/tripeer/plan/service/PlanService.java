@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.plan.service;
 
 import com.j10d207.tripeer.plan.db.dto.*;
+import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
 import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
 
 import java.io.IOException;
@@ -10,7 +11,7 @@ import java.util.Map;
 public interface PlanService {
 
     //플랜 생성
-    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanDetailMainDTO.CreateInfo createInfo, long userId);
+    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanCreateInfoVO createInfo, long userId);
     //플랜 이름 변경
     public void changeTitle(PlanDetailMainDTO.TitleChange titleChangeDTO, long userId);
     //플랜 탈퇴

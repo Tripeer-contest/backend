@@ -58,21 +58,24 @@ public class PublicRootDTO {
                 .totalFare(jsonObject.getAsJsonObject("fare").getAsJsonObject("regular").get("totalFare").getAsInt())
                 .publicRootDetailList(detailList)
                 .build();
-
-        /*
-                publicRoot.setPathType(infoObject.get("pathType").getAsInt());
-        publicRoot.setTotalFare(infoObject.getAsJsonObject("fare").getAsJsonObject("regular").get("totalFare").getAsInt());
-        publicRoot.setTotalDistance(infoObject.get("totalDistance").getAsInt());
-        publicRoot.setTotalWalkTime(infoObject.get("totalWalkTime").getAsInt());
-        publicRoot.setTotalWalkDistance(infoObject.get("totalWalkDistance").getAsInt());
-
-
-         */
     }
 
-//    public static PublicRootDTO JsonToDTO () {
-//
-//    }
+    public static PublicRootDTO EntityToDTO (PublicRootEntity publicRoot, List<PublicRootDetailEntity> publicRootDetailEntityList) {
+        List<PublicRootDTO.PublicRootDetail> detailList = new ArrayList<>();
+        for (PublicRootDetailEntity publicRootDetailEntity : publicRootDetailEntityList) {
+            detailList.add(PublicRootDTO.PublicRootDetail.EntityToDTO(publicRootDetailEntity));
+        }
+
+        return PublicRootDTO.builder()
+                .totalDistance(publicRoot.getTotalDistance())
+                .totalWalkTime(publicRoot.getTotalWalkTime())
+                .totalWalkDistance(publicRoot.getTotalWalkDistance())
+                .pathType(publicRoot.getPathType())
+                .totalFare(publicRoot.getTotalFare())
+                .totalTime(publicRoot.getTotalTime())
+                .publicRootDetailList(detailList)
+                .build();
+    }
     @Getter
     @Setter
     @Builder

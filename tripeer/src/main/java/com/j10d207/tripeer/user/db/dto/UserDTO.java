@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class UserDTO {
@@ -54,12 +56,18 @@ public class UserDTO {
                     .build();
         }
 
-        public static Search CoworkerEntityToDTO(CoworkerEntity coworkerEntity) {
-            return Search.builder()
-                    .userId(coworkerEntity.getUser().getUserId())
-                    .nickname(coworkerEntity.getUser().getNickname())
-                    .profileImage(coworkerEntity.getUser().getProfileImage())
-                    .build();
+        public static List<Search> CoworkerEntityToDTO(List<CoworkerEntity> coworkerEntityList) {
+            List<Search> memberList = new ArrayList<>();
+            for (CoworkerEntity coworkerEntity : coworkerEntityList) {
+                memberList.add(
+                        Search.builder()
+                        .userId(coworkerEntity.getUser().getUserId())
+                        .nickname(coworkerEntity.getUser().getNickname())
+                        .profileImage(coworkerEntity.getUser().getProfileImage())
+                        .build()
+                        );
+            }
+            return memberList;
         }
     }
 
