@@ -1,5 +1,7 @@
 package com.j10d207.tripeer.plan.service;
 
+import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
+import com.j10d207.tripeer.user.db.dto.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonArray;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
@@ -71,26 +73,26 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 생성
     @Override
-    public PlanResDTO createPlan(CreatePlanDTO createPlanDTO, long userId) {
+    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanDetailMainDTO.CreateInfo createInfo, long userId) {
 
-        PlanResDTO planResponseDTO = new PlanResDTO();
+        PlanDetailMainDTO.CreateResultInfo planResponseDTO = new PlanDetailMainDTO.CreateResultInfo();
         planResponseDTO.setCreateDay(LocalDate.now(ZoneId.of("Asia/Seoul")));
 
         //플랜 생성
         PlanEntity plan = PlanEntity.builder()
-                .title(createPlanDTO.getTitle())
-                .vehicle(createPlanDTO.getVehicle())
-                .startDate(createPlanDTO.getStartDay())
-                .endDate(createPlanDTO.getEndDay())
+                .title(createInfo.getTitle())
+                .vehicle(createInfo.getVehicle())
+                .startDate(createInfo.getStartDay())
+                .endDate(createInfo.getEndDay())
                 .createDate(planResponseDTO.getCreateDay())
                 .build();
         plan = planRepository.save(plan);
         planResponseDTO.setPlanId(plan.getPlanId());
-        planResponseDTO.setTitle(createPlanDTO.getTitle());
-        planResponseDTO.setVehicle(createPlanDTO.getVehicle());
-        planResponseDTO.setStartDay(createPlanDTO.getStartDay());
-        planResponseDTO.setEndDay(createPlanDTO.getEndDay());
-        planResponseDTO.setTownList(createPlanDTO.getTownList());
+        planResponseDTO.setTitle(createInfo.getTitle());
+        planResponseDTO.setVehicle(createInfo.getVehicle());
+        planResponseDTO.setStartDay(createInfo.getStartDay());
+        planResponseDTO.setEndDay(createInfo.getEndDay());
+        planResponseDTO.setTownList(createInfo.getTownList());
 
         //생성된 플랜을 가지기
         UserEntity user = userRepository.findByUserId(userId);
@@ -101,7 +103,7 @@ public class PlanServiceImpl implements PlanService {
 
         coworkerRepository.save(coworker);
 
-        for (TownDTO townDTO : createPlanDTO.getTownList()) {
+        for (TownDTO townDTO : createInfo.getTownList()) {
             //request 기반으로 townEntity 받아오기
             if(townDTO.getTownId() == -1) {
                 PlanTownEntity planTown = PlanTownEntity.builder()
@@ -122,12 +124,12 @@ public class PlanServiceImpl implements PlanService {
                 planTownRepository.save(planTown);
             }
         }
-        int day = (int) ChronoUnit.DAYS.between(createPlanDTO.getStartDay(), createPlanDTO.getEndDay()) + 1;
+        int day = (int) ChronoUnit.DAYS.between(createInfo.getStartDay(), createInfo.getEndDay()) + 1;
         for (int i = 0; i < day; i++) {
             PlanDayEntity planDay = PlanDayEntity.builder()
                     .plan(plan)
-                    .day(createPlanDTO.getStartDay().plusDays(i))
-                    .vehicle(createPlanDTO.getVehicle())
+                    .day(createInfo.getStartDay().plusDays(i))
+                    .vehicle(createInfo.getVehicle())
                     .build();
             planDayRepository.save(planDay);
         }
@@ -139,7 +141,7 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 이름 변경
     @Override
-    public void changeTitle(TitleChangeDTO titleChangeDTO, long userId) {
+    public void changeTitle(PlanDetailMainDTO.TitleChange titleChangeDTO, long userId) {
         PlanEntity plan = planRepository.findByPlanId(titleChangeDTO.getPlanId());
 
         if(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(titleChangeDTO.getPlanId(), userId)) {
@@ -166,26 +168,26 @@ public class PlanServiceImpl implements PlanService {
 
     //내 플랜 리스트 조회
     @Override
-    public List<PlanListResDTO> planList(long userId) {
+    public List<PlanDetailMainDTO.MyPlan> planList(long userId) {
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1);
         // 사용자가 소유중인 플랜의 리스트 목록을 가져옴
         List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(userId, today);
 
         // 반환리스트를 담아줄 DTO 생성
-        List<PlanListResDTO> planListResDTOList = new ArrayList<>();
+        List<PlanDetailMainDTO.MyPlan> myPlans = new ArrayList<>();
         if(coworkerList.isEmpty()) {
-            return planListResDTOList;
+            return myPlans;
         }
 
         // 내가 가진 플랜을 하나씩 조회
         for (CoworkerEntity coworker : coworkerList) {
-            PlanListResDTO planListResDTO = new PlanListResDTO();
+            PlanDetailMainDTO.MyPlan myPlan = new PlanDetailMainDTO.MyPlan();
 
             // 플랜 상세정보 가져오기
             PlanEntity plan = planRepository.findByPlanId(coworker.getPlan().getPlanId());
 
-            planListResDTO.setPlanId(plan.getPlanId());
-            planListResDTO.setTitle(plan.getTitle());
+            myPlan.setPlanId(plan.getPlanId());
+            myPlan.setTitle(plan.getTitle());
 
             // 플랜에서 선택한 타운 리스트 가져오기
             List<PlanTownEntity> planTown = planTownRepository.findByPlan_PlanId(plan.getPlanId());
@@ -197,41 +199,36 @@ public class PlanServiceImpl implements PlanService {
                     townNameList.add(planTownEntity.getTown().getTownName());
                 }
             }
-            planListResDTO.setTownList(townNameList);
+            myPlan.setTownList(townNameList);
             // 선택한 도시 중 첫번째 도시의 이미지 경로 넣기
             if(planTown.getFirst().getTown() == null ) {
-                planListResDTO.setImg(planTown.getFirst().getCityOnly().getCityImg());
+                myPlan.setImg(planTown.getFirst().getCityOnly().getCityImg());
             } else {
-                planListResDTO.setImg(planTown.getFirst().getTown().getTownImg());
+                myPlan.setImg(planTown.getFirst().getTown().getTownImg());
             }
-            planListResDTO.setStartDay(plan.getStartDate());
-            planListResDTO.setEndDay(plan.getEndDate());
+            myPlan.setStartDay(plan.getStartDate());
+            myPlan.setEndDay(plan.getEndDate());
 
             // 플랜의 멤버 리스트 넣기
-            List<UserSearchDTO> memberList = new ArrayList<>();
+            List<UserDTO.Search> memberList = new ArrayList<>();
             List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
             for (CoworkerEntity coworkerEntity : coworkerEntityList) {
-                UserSearchDTO userSearchDTO = UserSearchDTO.builder()
-                        .userId(coworkerEntity.getUser().getUserId())
-                        .nickname(coworkerEntity.getUser().getNickname())
-                        .profileImage(coworkerEntity.getUser().getProfileImage())
-                        .build();
-                memberList.add(userSearchDTO);
+                memberList.add(UserDTO.Search.CoworkerEntityToDTO(coworkerEntity));
             }
-            planListResDTO.setMember(memberList);
+            myPlan.setMember(memberList);
             int day = (int) ChronoUnit.DAYS.between(plan.getCreateDate(), today);
             // 3일 이내면 true
-            planListResDTO.setNewPlan(day < 3);
-            planListResDTOList.add(planListResDTO);
+            myPlan.setNewPlan(day < 3);
+            myPlans.add(myPlan);
 
         }
 
-        return planListResDTOList;
+        return myPlans;
     }
 
     //플랜 디테일 메인 조회
     @Override
-    public PlanDetailMainResDTO getPlanDetailMain(long planId, long userId) {
+    public PlanDetailMainDTO.MainPageInfo getPlanDetailMain(long planId, long userId) {
         PlanEntity plan = planRepository.findByPlanId(planId);
         //로그인 사용자가 소유하지 않은 플랜 접근시
         if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planId, userId)) {
@@ -243,66 +240,34 @@ public class PlanServiceImpl implements PlanService {
         //선택한 도시 목록 구성
         List<TownDTO> townDTOList = new ArrayList<>();
         for (PlanTownEntity planTownEntity : planTown) {
-            if(planTownEntity.getTown() == null) {
-                TownDTO townDTO = TownDTO.builder()
-                        .cityId(planTownEntity.getCityOnly().getCityId())
-                        .title(planTownEntity.getCityOnly().getCityName())
-                        .description(planTownEntity.getCityOnly().getDescription())
-                        .img(planTownEntity.getCityOnly().getCityImg())
-                        .latitude(planTownEntity.getCityOnly().getLatitude())
-                        .longitude(planTownEntity.getCityOnly().getLongitude())
-                        .build();
-                townDTOList.add(townDTO);
-            } else {
-                TownDTO townDTO = TownDTO.builder()
-                        .cityId(planTownEntity.getTown().getTownPK().getCity().getCityId())
-                        .townId(planTownEntity.getTown().getTownPK().getTownId())
-                        .title(planTownEntity.getTown().getTownName())
-                        .description(planTownEntity.getTown().getDescription())
-                        .img(planTownEntity.getTown().getTownImg())
-                        .latitude(planTownEntity.getTown().getLatitude())
-                        .longitude(planTownEntity.getTown().getLongitude())
-                        .build();
-                townDTOList.add(townDTO);
-            }
-
+            townDTOList.add(TownDTO.EntityToDTO(planTownEntity));
         }
 
         //멤버 목록 구성
-        List<UserSearchDTO> memberList = new ArrayList<>();
+        List<UserDTO.Search> memberList = new ArrayList<>();
         for (CoworkerEntity coworkerEntity : coworkerEntityList) {
-            UserSearchDTO userSearchDTO = UserSearchDTO.builder()
-                    .userId(coworkerEntity.getUser().getUserId())
-                    .nickname(coworkerEntity.getUser().getNickname())
-                    .profileImage(coworkerEntity.getUser().getProfileImage())
-                    .build();
-            memberList.add(userSearchDTO);
+            memberList.add(UserDTO.Search.CoworkerEntityToDTO(coworkerEntity));
         }
 
-        return PlanDetailMainResDTO.builder()
-                .planId(planId)
-                .title(plan.getTitle())
-                .townList(townDTOList)
-                .coworkerList(memberList)
-                .build();
+        return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, memberList);
     }
 
     //동행자 추가
     @Override
-    public void joinPlan(CoworkerReqDTO coworkerReqDTO, long userId) {
+    public void joinPlan(PlanDetailMainDTO.PlanCoworker planCoworker, long userId) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        PlanEntity planEntity = planRepository.findById(coworkerReqDTO.getPlanId())
+        PlanEntity planEntity = planRepository.findById(planCoworker.getPlanId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
-        UserEntity user = UserEntity.builder().userId(coworkerReqDTO.getUserId()).build();
+        UserEntity user = UserEntity.builder().userId(planCoworker.getUserId()).build();
 
-        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerReqDTO.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
+        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(planCoworker.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
             throw new CustomException(ErrorCode.TOO_MANY_PLAN);
         }
 
-        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerReqDTO.getPlanId(), coworkerReqDTO.getUserId())) {
+        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planCoworker.getPlanId(), planCoworker.getUserId())) {
             CoworkerEntity coworker = CoworkerEntity.builder()
-                    .plan(PlanEntity.builder().planId(coworkerReqDTO.getPlanId()).build())
+                    .plan(PlanEntity.builder().planId(planCoworker.getPlanId()).build())
                     .user(user)
                     .build();
             coworkerRepository.save(coworker);
@@ -325,24 +290,16 @@ public class PlanServiceImpl implements PlanService {
 
     //동행자 조회
     @Override
-    public List<CoworkerReqDTO> getCoworker(long planId) {
+    public List<PlanDetailMainDTO.PlanCoworker> getCoworker(long planId) {
         //요청된 플랜의 동행자 목록 조회
         List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanId(planId);
         //DTO로 변환
-        List<CoworkerReqDTO> coworkerReqDTOList = new ArrayList<>();
+        List<PlanDetailMainDTO.PlanCoworker> planCoworkerList = new ArrayList<>();
         int order = 0;
         for (CoworkerEntity coworker : coworkerList) {
-            UserEntity user = coworker.getUser();
-            CoworkerReqDTO coworkerReqDTO = CoworkerReqDTO.builder()
-                    .order(order++)
-                    .planId(coworker.getPlan().getPlanId())
-                    .userId(user.getUserId())
-                    .nickname(user.getNickname())
-                    .profileImage(user.getProfileImage())
-                    .build();
-            coworkerReqDTOList.add(coworkerReqDTO);
+            planCoworkerList.add(PlanDetailMainDTO.PlanCoworker.CoworkerToDTO(coworker, order++));
         }
-        return coworkerReqDTOList;
+        return planCoworkerList;
     }
 
 
@@ -483,20 +440,20 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 디테일 저장
     @Override
-    public void addPlanDetail(PlanDetailReqDTO planDetailReqDTO) {
+    public void addPlanDetail(PlanDetailVO planDetailVO) {
         PlanDetailEntity planDetail = PlanDetailEntity.builder()
-                .planDetailId(planDetailReqDTO.getPlanDetailId())
+                .planDetailId(planDetailVO.getPlanDetailId())
                 .planDay(PlanDayEntity.builder()
-                        .planDayId(planDetailReqDTO.getPlanDayId())
+                        .planDayId(planDetailVO.getPlanDayId())
                         .build())
                 .spotInfo(SpotInfoEntity.builder()
-                        .spotInfoId(planDetailReqDTO.getSpotInfoId())
+                        .spotInfoId(planDetailVO.getSpotInfoId())
                         .build())
-                .day(planDetailReqDTO.getDay())
-                .spotTime(planDetailReqDTO.getSpotTime())
-                .step(planDetailReqDTO.getStep())
-                .description(planDetailReqDTO.getDescription())
-                .cost(planDetailReqDTO.getCost())
+                .day(planDetailVO.getDay())
+                .spotTime(planDetailVO.getSpotTime())
+                .step(planDetailVO.getStep())
+                .description(planDetailVO.getDescription())
+                .cost(planDetailVO.getCost())
                 .build();
 
         planDetailRepository.save(planDetail);
@@ -544,7 +501,7 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 나의 정보 조회(기존 내정보 + 나의 coworker에서의 순서)
     @Override
-    public CoworkerReqDTO getPlanMyinfo(long planId, long userId) {
+    public PlanDetailMainDTO.PlanCoworker getPlanMyinfo(long planId, long userId) {
         //요청된 플랜의 동행자 목록 조회
         List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanId(planId);
         int order = -1;
@@ -552,14 +509,14 @@ public class PlanServiceImpl implements PlanService {
             order++;
             UserEntity user = coworker.getUser();
             if(userId != coworker.getUser().getUserId()) continue;
-            CoworkerReqDTO coworkerReqDTO = CoworkerReqDTO.builder()
+            PlanDetailMainDTO.PlanCoworker planCoworker = PlanDetailMainDTO.PlanCoworker.builder()
                     .order(order)
                     .planId(coworker.getPlan().getPlanId())
                     .userId(user.getUserId())
                     .nickname(user.getNickname())
                     .profileImage(user.getProfileImage())
                     .build();
-            return coworkerReqDTO;
+            return planCoworker;
         }
         throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
     }

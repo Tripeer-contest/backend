@@ -20,32 +20,26 @@ public class TownDTO {
     public static TownDTO EntityToDTO (PlanTownEntity planTown) {
         if (planTown.getTown() == null) {
 
-        } else {
+            return TownDTO.builder()
+                    .cityId(planTown.getCityOnly().getCityId())
+                    .cityId(planTown.getCityOnly().getCityId())
+                    .title(planTown.getCityOnly().getCityName())
+                    .description(planTown.getCityOnly().getDescription())
+                    .img(planTown.getCityOnly().getCityImg())
+                    .latitude(planTown.getCityOnly().getLatitude())
+                    .longitude(planTown.getCityOnly().getLongitude())
+                    .build();
 
+        } else {
+            return TownDTO.builder()
+                    .cityId(planTown.getTown().getTownPK().getCity().getCityId())
+                    .townId(planTown.getTown().getTownPK().getTownId())
+                    .title(planTown.getTown().getTownName())
+                    .description(planTown.getTown().getDescription())
+                    .img(planTown.getTown().getTownImg())
+                    .latitude(planTown.getTown().getLatitude())
+                    .longitude(planTown.getTown().getLongitude())
+                    .build();
         }
-        /*
-        if(planTownEntity.getTown() == null) {
-                TownDTO townDTO = TownDTO.builder()
-                        .cityId(planTownEntity.getCityOnly().getCityId())
-                        .title(planTownEntity.getCityOnly().getCityName())
-                        .description(planTownEntity.getCityOnly().getDescription())
-                        .img(planTownEntity.getCityOnly().getCityImg())
-                        .latitude(planTownEntity.getCityOnly().getLatitude())
-                        .longitude(planTownEntity.getCityOnly().getLongitude())
-                        .build();
-                townDTOList.add(townDTO);
-            } else {
-                TownDTO townDTO = TownDTO.builder()
-                        .cityId(planTownEntity.getTown().getTownPK().getCity().getCityId())
-                        .townId(planTownEntity.getTown().getTownPK().getTownId())
-                        .title(planTownEntity.getTown().getTownName())
-                        .description(planTownEntity.getTown().getDescription())
-                        .img(planTownEntity.getTown().getTownImg())
-                        .latitude(planTownEntity.getTown().getLatitude())
-                        .longitude(planTownEntity.getTown().getLongitude())
-                        .build();
-                townDTOList.add(townDTO);
-            }
-         */
     }
 }

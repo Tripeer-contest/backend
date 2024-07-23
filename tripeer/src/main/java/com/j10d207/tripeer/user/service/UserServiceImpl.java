@@ -2,6 +2,7 @@ package com.j10d207.tripeer.user.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
+import com.j10d207.tripeer.user.db.vo.JoinVO;
 import io.jsonwebtoken.ExpiredJwtException;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
@@ -44,9 +45,9 @@ public class UserServiceImpl implements UserService{
 
     //회원 가입
     @Override
-    public String memberSignup(JoinDTO joinDTO, HttpServletResponse response) {
+    public String memberSignup(JoinVO join, HttpServletResponse response) {
         //생일 값 형식변환
-        LocalDate birth = LocalDate.parse(joinDTO.getYear() + "-" + joinDTO.getMonth() + "-" + joinDTO.getDay());
+        LocalDate birth = LocalDate.parse(join.getYear() + "-" + join.getMonth() + "-" + join.getDay());
 
 
         //소셜정보 가져오기
@@ -71,19 +72,19 @@ public class UserServiceImpl implements UserService{
                 .provider(customUserDetails.getProvider())
                 .providerId(customUserDetails.getProviderId())
                 .email(customUserDetails.getEmail())
-                .nickname(joinDTO.getNickname())
+                .nickname(join.getNickname())
                 .birth(birth)
                 .profileImage(newImg)
                 .role("ROLE_USER")
-                .style1(joinDTO.getStyle1() == null ? null : TripStyleEnum.getNameByCode(joinDTO.getStyle1()))
-                .style2(joinDTO.getStyle2() == null ? null : TripStyleEnum.getNameByCode(joinDTO.getStyle2()))
-                .style3(joinDTO.getStyle3() == null ? null : TripStyleEnum.getNameByCode(joinDTO.getStyle3()))
+                .style1(join.getStyle1() == null ? null : TripStyleEnum.getNameByCode(join.getStyle1()))
+                .style2(join.getStyle2() == null ? null : TripStyleEnum.getNameByCode(join.getStyle2()))
+                .style3(join.getStyle3() == null ? null : TripStyleEnum.getNameByCode(join.getStyle3()))
                 .isOnline(false)
                 .build();
         user = userRepository.save(user);
 
-        String access = "Bearer " + jwtUtil.createJwt("Authorization", joinDTO.getNickname(), "ROLE_USER", user.getUserId(), accessTime);
-        String refresh = jwtUtil.createJwt("Authorization-re", joinDTO.getNickname(), "ROLE_USER", user.getUserId(), refreshTime);
+        String access = "Bearer " + jwtUtil.createJwt("Authorization", join.getNickname(), "ROLE_USER", user.getUserId(), accessTime);
+        String refresh = jwtUtil.createJwt("Authorization-re", join.getNickname(), "ROLE_USER", user.getUserId(), refreshTime);
 
         //access 토큰 헤더에 넣기
         response.setHeader("Authorization", access);
@@ -140,7 +141,7 @@ public class UserServiceImpl implements UserService{
 
     //내 정보 수정
     @Override
-    public void modifyMyInfo(long userId, UserInfoDTO info) {
+    public void modifyMyInfo(long userId, UserDTO.Info info) {
         UserEntity user = userRepository.findByUserId(userId);
         if(!user.getNickname().equals(info.getNickname()) && userRepository.existsByNickname(info.getNickname())){
             throw new CustomException(ErrorCode.DUPLICATE_USER);
@@ -164,12 +165,12 @@ public class UserServiceImpl implements UserService{
 
     //소셜정보 불러오기
     @Override
-    public SocialInfoDTO getSocialInfo() {
+    public UserDTO.Social getSocialInfo() {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
-        return SocialInfoDTO.builder()
+        return UserDTO.Social.builder()
                 .nickname(customUserDetails.getName())
                 .profileImage(customUserDetails.getProfileImage())
                 .build();
@@ -183,36 +184,23 @@ public class UserServiceImpl implements UserService{
 
     //유저 검색
     @Override
-    public List<UserSearchDTO> userSearch(String nickname) {
+    public List<UserDTO.Search> userSearch(String nickname) {
         List<UserEntity> userEntityList = userRepository.findByNicknameContains(nickname);
-        List<UserSearchDTO> userSearchDTOList = new ArrayList<>();
+        List<UserDTO.Search> searchList = new ArrayList<>();
         for(UserEntity user : userEntityList) {
-            UserSearchDTO userSearchDTO = UserSearchDTO.builder()
-                    .nickname(user.getNickname())
-                    .userId(user.getUserId())
-                    .profileImage(user.getProfileImage())
-                    .build();
-            userSearchDTOList.add(userSearchDTO);
+            UserDTO.Search search = UserDTO.Search.UserEntityToDTO(user);
+            searchList.add(search);
         }
 
-        return userSearchDTOList;
+        return searchList;
     }
 
     //내 정보 불러오기
     @Override
-    public UserInfoDTO getMyInfo(long userId) {
+    public UserDTO.Info getMyInfo(long userId) {
         // 정보 확장시 DTO 새로 만들어야함
         UserEntity user = userRepository.findByUserId(userId);
-        return UserInfoDTO.builder()
-                .userId(user.getUserId())
-                .nickname(user.getNickname())
-                .email(user.getEmail())
-                .birth(user.getBirth())
-                .profileImage(user.getProfileImage())
-                .style1(user.getStyle1())
-                .style2(user.getStyle2())
-                .style3(user.getStyle3())
-                .build();
+        return UserDTO.Info.EntityToDTO(user);
     }
 
 

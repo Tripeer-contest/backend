@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.plan.controller;
 
 import com.j10d207.tripeer.plan.db.dto.*;
+import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
@@ -24,14 +25,14 @@ public class PlanController {
     private final PlanService planService;
     //플랜 생성
     @PostMapping
-    public Response<PlanResDTO> createPlan(@RequestBody CreatePlanDTO createPlanDTO, @AuthenticationPrincipal CustomOAuth2User user) {
-        PlanResDTO result = planService.createPlan(createPlanDTO, user.getUserId());
+    public Response<PlanDetailMainDTO.CreateResultInfo> createPlan(@RequestBody PlanDetailMainDTO.CreateInfo createInfo, @AuthenticationPrincipal CustomOAuth2User user) {
+        PlanDetailMainDTO.CreateResultInfo result = planService.createPlan(createInfo, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 생성 완료", result);
     }
 
     //플랜 이름 변경
     @PatchMapping("/title")
-    public Response<Boolean> changeTitle(@RequestBody TitleChangeDTO titleChangeDTO, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<Boolean> changeTitle(@RequestBody PlanDetailMainDTO.TitleChange titleChangeDTO, @AuthenticationPrincipal CustomOAuth2User user) {
         planService.changeTitle(titleChangeDTO, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 이름 변경 완료", true);
     }
@@ -45,37 +46,37 @@ public class PlanController {
 
     //내 플랜 리스트 조회
     @GetMapping
-    public Response<List<PlanListResDTO>> getPlanList(@AuthenticationPrincipal CustomOAuth2User user) {
-        List<PlanListResDTO> planList = planService.planList(user.getUserId());
+    public Response<List<PlanDetailMainDTO.MyPlan>> getPlanList(@AuthenticationPrincipal CustomOAuth2User user) {
+        List<PlanDetailMainDTO.MyPlan> planList = planService.planList(user.getUserId());
         return Response.of(HttpStatus.OK, "내 플랜 리스트 조회", planList);
     }
 
     //플랜 디테일 메인 조회
     @GetMapping("/main/{planId}")
-    public Response<PlanDetailMainResDTO> getPlanDetailMain(@PathVariable("planId") long planId, @AuthenticationPrincipal CustomOAuth2User user) {
-        PlanDetailMainResDTO result = planService.getPlanDetailMain(planId, user.getUserId());
+    public Response<PlanDetailMainDTO.MainPageInfo> getPlanDetailMain(@PathVariable("planId") long planId, @AuthenticationPrincipal CustomOAuth2User user) {
+        PlanDetailMainDTO.MainPageInfo result = planService.getPlanDetailMain(planId, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 메인 조회", result);
     }
 
     //동행자 추가
     @PostMapping("/member")
-    public Response<?> joinPlan(@RequestBody CoworkerReqDTO coworkerReqDTO, @AuthenticationPrincipal CustomOAuth2User user) {
-        planService.joinPlan(coworkerReqDTO, user.getUserId());
+    public Response<?> joinPlan(@RequestBody PlanDetailMainDTO.PlanCoworker planCoworker, @AuthenticationPrincipal CustomOAuth2User user) {
+        planService.joinPlan(planCoworker, user.getUserId());
         return Response.of(HttpStatus.OK, "초대 완료", null);
     }
 
     //플랜에서 나의 정보 조회(기존 내정보 + 나의 coworker에서의 순서)
     @GetMapping("/myinfo/{planId}")
-    public Response<CoworkerReqDTO> getCoworker(@PathVariable("planId") long planId, @AuthenticationPrincipal CustomOAuth2User user) {
-        CoworkerReqDTO coworkerReqDTOList = planService.getPlanMyinfo(planId, user.getUserId());
-        return Response.of(HttpStatus.OK, "조회 완료", coworkerReqDTOList);
+    public Response<PlanDetailMainDTO.PlanCoworker> getCoworker(@PathVariable("planId") long planId, @AuthenticationPrincipal CustomOAuth2User user) {
+        PlanDetailMainDTO.PlanCoworker planCoworker = planService.getPlanMyinfo(planId, user.getUserId());
+        return Response.of(HttpStatus.OK, "조회 완료", planCoworker);
     }
 
     //동행자 조회
     @GetMapping("/member/{planId}")
-    public Response<List<CoworkerReqDTO>> getCoworker(@PathVariable("planId") long planId) {
-        List<CoworkerReqDTO> coworkerReqDTOList = planService.getCoworker(planId);
-        return Response.of(HttpStatus.OK, "조회 완료", coworkerReqDTOList);
+    public Response<List<PlanDetailMainDTO.PlanCoworker>> getCoworker(@PathVariable("planId") long planId) {
+        List<PlanDetailMainDTO.PlanCoworker> planCoworkerList = planService.getCoworker(planId);
+        return Response.of(HttpStatus.OK, "조회 완료", planCoworkerList);
     }
 
     //관광지 검색
@@ -115,8 +116,8 @@ public class PlanController {
 
     //플랜 디테일 저장
     @PostMapping("/detail")
-    public Response<?> addPlanDetail(@RequestBody PlanDetailReqDTO planDetailReqDTO) {
-        planService.addPlanDetail(planDetailReqDTO);
+    public Response<?> addPlanDetail(@RequestBody PlanDetailVO planDetailVO) {
+        planService.addPlanDetail(planDetailVO);
         return Response.of(HttpStatus.OK, "플랜 디테일 저장 완료", null);
     }
 

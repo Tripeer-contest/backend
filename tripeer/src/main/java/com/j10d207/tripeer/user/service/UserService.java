@@ -1,9 +1,7 @@
 package com.j10d207.tripeer.user.service;
 
-import com.j10d207.tripeer.user.db.dto.JoinDTO;
-import com.j10d207.tripeer.user.db.dto.SocialInfoDTO;
-import com.j10d207.tripeer.user.db.dto.UserInfoDTO;
-import com.j10d207.tripeer.user.db.dto.UserSearchDTO;
+import com.j10d207.tripeer.user.db.dto.*;
+import com.j10d207.tripeer.user.db.vo.JoinVO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,19 +12,19 @@ import java.util.List;
 public interface UserService {
 
     //회원가입
-    public String memberSignup(JoinDTO joinDTO, HttpServletResponse response);
+    public String memberSignup(JoinVO join, HttpServletResponse response);
     //프로필 사진 변경
     public String uploadProfileImage(MultipartFile file, long userId);
     //내 정보 수정
-    public void modifyMyInfo(long userId, UserInfoDTO info);
+    public void modifyMyInfo(long userId, UserDTO.Info info);
     //소셜 정보 획득
-    public SocialInfoDTO getSocialInfo();
+    public UserDTO.Social getSocialInfo();
     //닉네임 중복체크
     public boolean nicknameDuplicateCheck(String nickname);
     //유저 검색
-    public List<UserSearchDTO> userSearch(String nickname);
+    public List<UserDTO.Search> userSearch(String nickname);
     //내 정보 불러오기
-    public UserInfoDTO getMyInfo(long userId);
+    public UserDTO.Info getMyInfo(long userId);
     //access 토큰 재발급
     public void tokenRefresh(String token, Cookie[] cookies, HttpServletResponse response);
 

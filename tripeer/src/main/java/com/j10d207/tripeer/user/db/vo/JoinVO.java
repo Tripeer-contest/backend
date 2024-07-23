@@ -1,10 +1,9 @@
-package com.j10d207.tripeer.user.db.dto;
+package com.j10d207.tripeer.user.db.vo;
 
 import lombok.Getter;
 
 @Getter
-public class JoinDTO {
-
+public class JoinVO {
     private String nickname;
     private String year;
     private String month;
