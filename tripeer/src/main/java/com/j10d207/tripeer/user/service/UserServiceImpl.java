@@ -23,8 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,42 +44,8 @@ public class UserServiceImpl implements UserService{
     //회원 가입
     @Override
     public String memberSignup(JoinVO join, HttpServletResponse response) {
-        //생일 값 형식변환
-        LocalDate birth = LocalDate.parse(join.getYear() + "-" + join.getMonth() + "-" + join.getDay());
 
-
-        //소셜정보 가져오기
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-        CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
-
-        String newImg;
-        //프로필 사진 경로 필터
-        if (customUserDetails.getProfileImage() != null) {
-            String[] splitImg = customUserDetails.getProfileImage().split(":");
-            if(splitImg[0].equals("http")) {
-                newImg = splitImg[0] + "s" + ":" + splitImg[1];
-            } else {
-                newImg = customUserDetails.getProfileImage();
-            }
-        } else {
-            newImg = "https://tripeer207.s3.ap-northeast-2.amazonaws.com/front/static/profileImg.png";
-        }
-
-        UserEntity user = UserEntity.builder()
-                .provider(customUserDetails.getProvider())
-                .providerId(customUserDetails.getProviderId())
-                .email(customUserDetails.getEmail())
-                .nickname(join.getNickname())
-                .birth(birth)
-                .profileImage(newImg)
-                .role("ROLE_USER")
-                .style1(join.getStyle1() == null ? null : TripStyleEnum.getNameByCode(join.getStyle1()))
-                .style2(join.getStyle2() == null ? null : TripStyleEnum.getNameByCode(join.getStyle2()))
-                .style3(join.getStyle3() == null ? null : TripStyleEnum.getNameByCode(join.getStyle3()))
-                .isOnline(false)
-                .build();
-        user = userRepository.save(user);
+        UserEntity user = userRepository.save(UserEntity.JoinVOToEntity(join));
 
         String access = "Bearer " + jwtUtil.createJwt("Authorization", join.getNickname(), "ROLE_USER", user.getUserId(), accessTime);
         String refresh = jwtUtil.createJwt("Authorization-re", join.getNickname(), "ROLE_USER", user.getUserId(), refreshTime);
@@ -186,13 +150,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<UserDTO.Search> userSearch(String nickname) {
         List<UserEntity> userEntityList = userRepository.findByNicknameContains(nickname);
-        List<UserDTO.Search> searchList = new ArrayList<>();
-        for(UserEntity user : userEntityList) {
-            UserDTO.Search search = UserDTO.Search.UserEntityToDTO(user);
-            searchList.add(search);
-        }
-
-        return searchList;
+        return userEntityList.stream().map(UserDTO.Search::UserEntityToDTO).toList();
     }
 
     //내 정보 불러오기

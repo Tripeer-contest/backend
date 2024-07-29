@@ -65,7 +65,7 @@ public class PlanDetailMainDTO {
                     .townList(PlanTownEntity.ConvertToNameList(planTown))
                     .startDay(plan.getStartDate())
                     .endDay(plan.getEndDate())
-                    .member(UserDTO.Search.CoworkerEntityToDTO(memberList))
+                    .member(memberList.stream().map(UserDTO.Search::CoworkerEntityToDTO).toList())
                     .newPlan((int) ChronoUnit.DAYS.between(plan.getCreateDate(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)) < 3)
                     .build();
         }

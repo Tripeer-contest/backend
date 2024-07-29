@@ -203,7 +203,7 @@ public class PlanServiceImpl implements PlanService {
             townDTOList.add(TownDTO.EntityToDTO(planTownEntity));
         }
 
-        return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, UserDTO.Search.CoworkerEntityToDTO(coworkerEntityList));
+        return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, coworkerEntityList.stream().map(UserDTO.Search::CoworkerEntityToDTO).toList());
     }
 
     //동행자 추가
@@ -416,22 +416,7 @@ public class PlanServiceImpl implements PlanService {
             // 얻으려는 일차의 플랜을 step 순서로 정렬
             List<PlanDetailEntity> planDetailEntityList = planDetailRepository.findByPlanDay_PlanDayId(planDayId, Sort.by(Sort.Direction.ASC, "step"));
 
-
-            List<PlanDetailResDTO> planDetailResDTOList = new ArrayList<>();
-            for (PlanDetailEntity planDetailEntity : planDetailEntityList) {
-                //정렬해서 가져온 리스트를 DTO에 저장
-                PlanDetailResDTO planDetailResDTO = PlanDetailResDTO.builder()
-                        .planDetailId(planDetailEntity.getPlanDetailId())
-                        .title(planDetailEntity.getSpotInfo().getTitle())
-                        .contentType(ContentTypeEnum.getNameByCode(planDetailEntity.getSpotInfo().getContentTypeId()))
-                        .day(planDetailEntity.getDay())
-                        .step(planDetailEntity.getStep())
-                        .spotTime(planDetailEntity.getSpotTime())
-                        .description(planDetailEntity.getDescription())
-                        .cost(planDetailEntity.getCost())
-                        .build();
-                planDetailResDTOList.add(planDetailResDTO);
-            }
+            List<PlanDetailResDTO> planDetailResDTOList = PlanDetailResDTO.EntityToDTO(planDetailEntityList);
             planDetailResDTOMap.put(i+1, planDetailResDTOList);
 
         }

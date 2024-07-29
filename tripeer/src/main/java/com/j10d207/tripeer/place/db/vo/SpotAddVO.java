@@ -1,16 +1,9 @@
-package com.j10d207.tripeer.place.db.dto;
+package com.j10d207.tripeer.place.db.vo;
 
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class SpotAddReqDto {
+public class SpotAddVO {
 
     private int cityId;
     private int townId;
@@ -30,4 +23,5 @@ public class SpotAddReqDto {
     private String cat2;
     private String cat3;
     private boolean addPlanCheck;
+
 }

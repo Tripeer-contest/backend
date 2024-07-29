@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.place.controller;
 
 import com.j10d207.tripeer.place.db.dto.*;
+import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import com.j10d207.tripeer.place.service.CityService;
 import com.j10d207.tripeer.place.service.SpotService;
 import com.j10d207.tripeer.place.service.TownService;
@@ -112,9 +113,9 @@ public class PlaceController {
      * 스팟 생성
      * */
     @PostMapping("/spot/create")
-    public Response<SpotAddResDto> createNewSpot(@RequestBody SpotAddReqDto spotAddReqDto, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<SpotAddResDto> createNewSpot(@RequestBody SpotAddVO spotAddVO, @AuthenticationPrincipal CustomOAuth2User user) {
 
-        return Response.of(HttpStatus.OK, "새로운 스팟 생성", spotService.createNewSpot(spotAddReqDto, user.getUserId()));
+        return Response.of(HttpStatus.OK, "새로운 스팟 생성", spotService.createNewSpot(spotAddVO, user.getUserId()));
     }
 
     /*

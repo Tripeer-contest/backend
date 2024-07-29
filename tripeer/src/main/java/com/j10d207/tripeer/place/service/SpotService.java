@@ -1,10 +1,10 @@
 package com.j10d207.tripeer.place.service;
 
-import com.j10d207.tripeer.place.db.dto.SpotAddReqDto;
 import com.j10d207.tripeer.place.db.dto.SpotAddResDto;
 import com.j10d207.tripeer.place.db.dto.SpotDetailDto;
 import com.j10d207.tripeer.place.db.dto.SpotListDto;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
+import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -16,9 +16,9 @@ public interface SpotService {
 
     public SpotDetailDto getSpotDetail(Integer spotId);
 
-    public SpotAddResDto createNewSpot(SpotAddReqDto spotAddReqDto, long userId);
+    public SpotAddResDto createNewSpot(SpotAddVO spotAddVO, long userId);
 
-    public void createNewDescrip(SpotInfoEntity spotInfoEntity, SpotAddReqDto spotAddReqDto);
+    public void createNewDescrip(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO);
 
-    public void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddReqDto spotAddReqDto);
+    public void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO);
 }
