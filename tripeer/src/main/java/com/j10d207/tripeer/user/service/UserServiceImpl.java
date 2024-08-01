@@ -2,6 +2,8 @@ package com.j10d207.tripeer.user.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
+import com.j10d207.tripeer.common.S3Component;
+import com.j10d207.tripeer.user.db.vo.InfoVO;
 import com.j10d207.tripeer.user.db.vo.JoinVO;
 import io.jsonwebtoken.ExpiredJwtException;
 import com.j10d207.tripeer.exception.CustomException;
@@ -40,6 +42,7 @@ public class UserServiceImpl implements UserService{
     private long refreshTime;
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
+    private final S3Component s3Component;
 
     //회원 가입
     @Override
@@ -59,22 +62,11 @@ public class UserServiceImpl implements UserService{
     //프로필 사진 변경
     @Override
     public String uploadProfileImage(MultipartFile file, long userId){
-
         // 허용할 MIME 타입들 설정 (이미지만 허용하는 경우)
         List<String> allowedMimeTypes = List.of("image/jpg", "image/jpeg", "image/png");
 
-        // 허용되지 않는 MIME 타입의 파일은 처리하지 않음
-        String fileContentType = file.getContentType();
-        if (!allowedMimeTypes.contains(fileContentType)) {
-            throw new CustomException(ErrorCode.UNSUPPORTED_FILE_TYPE);
-        }
-
-        ObjectMetadata metadata = new ObjectMetadata(); //메타데이터
-
-        metadata.setContentLength(file.getSize()); // 파일 크기 명시
-        metadata.setContentType(fileContentType);   // 파일 확장자 명시
+        ObjectMetadata metadata = s3Component.MakeMetaData(file, allowedMimeTypes);
         UserEntity user = userRepository.findByUserId(userId);
-
 
         String originName = file.getOriginalFilename(); //원본 이미지 이름
         String ext = originName.substring(originName.lastIndexOf(".")); //확장자
@@ -87,57 +79,27 @@ public class UserServiceImpl implements UserService{
             amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
         }
 
-        try {
-            PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(
-                    bucketName, changedName, file.getInputStream(), metadata
-            ).withCannedAcl(CannedAccessControlList.PublicRead));
-
-        } catch (IOException e) {
-            log.error("file upload error " + e.getMessage());
-            throw new CustomException(ErrorCode.S3_UPLOAD_ERROR);
-        }
+        s3Component.FileUpload(file, changedName, metadata);
 
         user.setProfileImage(amazonS3.getUrl(bucketName, changedName).toString());
         userRepository.save(user);
-        String url = "https://tripeer207.s3.ap-northeast-2.amazonaws.com/" + changedName;
-        return url;
+        return "https://tripeer207.s3.ap-northeast-2.amazonaws.com/" + changedName;
     }
 
     //내 정보 수정
     @Override
-    public void modifyMyInfo(long userId, UserDTO.Info info) {
+    public void modifyMyInfo(long userId, InfoVO infoVO) {
         UserEntity user = userRepository.findByUserId(userId);
-        if(!user.getNickname().equals(info.getNickname()) && userRepository.existsByNickname(info.getNickname())){
+        if(!user.getNickname().equals(infoVO.getNickname()) && userRepository.existsByNickname(infoVO.getNickname())){
             throw new CustomException(ErrorCode.DUPLICATE_USER);
         }
-        UserEntity newUser = UserEntity.builder()
-                .userId(user.getUserId())
-                .provider(user.getProvider())
-                .providerId(user.getProviderId())
-                .email(info.getEmail())
-                .nickname(info.getNickname())
-                .birth(user.getBirth())
-                .profileImage(user.getProfileImage())
-                .role(user.getRole())
-                .style1(TripStyleEnum.getNameByCode(info.getStyle1Num()))
-                .style2(TripStyleEnum.getNameByCode(info.getStyle2Num()))
-                .style3(TripStyleEnum.getNameByCode(info.getStyle3Num()))
-                .isOnline(user.isOnline())
-                .build();
-        userRepository.save(newUser);
+        userRepository.save(UserEntity.InfoVOToEntity(infoVO, user));
     }
 
     //소셜정보 불러오기
     @Override
     public UserDTO.Social getSocialInfo() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-        CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
-
-        return UserDTO.Social.builder()
-                .nickname(customUserDetails.getName())
-                .profileImage(customUserDetails.getProfileImage())
-                .build();
+        return UserDTO.Social.ContextToDTO();
     }
 
     //닉네임 중복체크
@@ -161,7 +123,6 @@ public class UserServiceImpl implements UserService{
         return UserDTO.Info.EntityToDTO(user);
     }
 
-
     // access 토큰 재발급
     @Override
     public void tokenRefresh(String token, Cookie[] cookies, HttpServletResponse response) {
@@ -172,26 +133,12 @@ public class UserServiceImpl implements UserService{
                 refresh = cookie.getValue();
             }
         }
-
         // refresh 만료 확인
-        try {
-            jwtUtil.isExpired(refresh);
-        } catch (ExpiredJwtException e) {
-            throw new CustomException(ErrorCode.TOKEN_EXPIRED_ERROR);
-        }
-
-        String access = jwtUtil.splitToken(token);
-        // access 만료 확인
-        try {
-            jwtUtil.isExpired(access);
-            throw new CustomException(ErrorCode.TOKEN_EXPIRED_ERROR);
-        } catch (ExpiredJwtException e) {
-            // access 토큰 재발급 후 헤더에 저장
-            String newAccess = jwtUtil.createJwt("Authorization", jwtUtil.getName(refresh), jwtUtil.getRole(refresh), jwtUtil.getUserId(refresh), accessTime);
-            response.setHeader("Authorization", "Bearer " + newAccess);
-        }
-
-
+        jwtUtil.isExpired(refresh);
+        // 기존 access 토크의 만료 확인 과정 제거
+        // refresh 미만료 + access 만료 일때만 재발급을 해줬는데 access 만료를 궂이 확인할 필요성이 없다고 판단.
+        String newAccess = jwtUtil.createJwt("Authorization", jwtUtil.getName(refresh), jwtUtil.getRole(refresh), jwtUtil.getUserId(refresh), accessTime);
+        response.setHeader("Authorization", "Bearer " + newAccess);
     }
 
     @Override

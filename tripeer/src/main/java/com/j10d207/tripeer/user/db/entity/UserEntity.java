@@ -3,6 +3,7 @@ package com.j10d207.tripeer.user.db.entity;
 
 import com.j10d207.tripeer.user.db.TripStyleEnum;
 import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
+import com.j10d207.tripeer.user.db.vo.InfoVO;
 import com.j10d207.tripeer.user.db.vo.JoinVO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -70,6 +71,24 @@ public class UserEntity {
                 .style2(join.getStyle2() == null ? null : TripStyleEnum.getNameByCode(join.getStyle2()))
                 .style3(join.getStyle3() == null ? null : TripStyleEnum.getNameByCode(join.getStyle3()))
                 .isOnline(false)
+                .build();
+    }
+
+    public static UserEntity InfoVOToEntity(InfoVO infoVO, UserEntity userEntity) {
+
+        return UserEntity.builder()
+                .userId(userEntity.getUserId())
+                .provider(userEntity.getProvider())
+                .providerId(userEntity.getProviderId())
+                .email(infoVO.getEmail())
+                .nickname(infoVO.getNickname())
+                .birth(userEntity.getBirth())
+                .profileImage(userEntity.getProfileImage())
+                .role(userEntity.getRole())
+                .style1(TripStyleEnum.getNameByCode(infoVO.getStyle1Num()))
+                .style2(TripStyleEnum.getNameByCode(infoVO.getStyle2Num()))
+                .style3(TripStyleEnum.getNameByCode(infoVO.getStyle3Num()))
+                .isOnline(userEntity.isOnline())
                 .build();
     }
 

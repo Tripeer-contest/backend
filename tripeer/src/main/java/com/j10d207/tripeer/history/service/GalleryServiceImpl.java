@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
+import com.j10d207.tripeer.common.S3Component;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.history.db.dto.GalleryDTO;
@@ -39,6 +40,7 @@ public class GalleryServiceImpl implements GalleryService{
     private final GalleryRepository galleryRepository;
     private final PlanDayRepository planDayRepository;
     private final UserRepository userRepository;
+    private final S3Component s3Component;
 
     //이름 중복 방지를 위해 랜덤으로 생성
     private String changedImageName(String originName) {
@@ -64,32 +66,14 @@ public class GalleryServiceImpl implements GalleryService{
         List<GalleryDTO> createInfo = new ArrayList<>();
 
         for(MultipartFile file : files) {
-
-            // 허용되지 않는 MIME 타입의 파일은 처리하지 않음
-            String fileContentType = file.getContentType();
-            if (!allowedMimeTypes.contains(fileContentType)) {
-                throw  new CustomException(ErrorCode.UNSUPPORTED_FILE_TYPE);
-            }
-
-            ObjectMetadata metadata = new ObjectMetadata(); //메타데이터
-
-            metadata.setContentLength(file.getSize()); // 파일 크기 명시
-            metadata.setContentType(fileContentType);   // 파일 확장자 명시
+            ObjectMetadata metadata = s3Component.MakeMetaData(file, allowedMimeTypes);
 
             String originName = file.getOriginalFilename(); //원본 이미지 이름
             //새로 생성된 이미지 이름 및 저장경로
             String changedName = "Gallery/" + userId + "/" + dateString + "/" + changedImageName(originName);
 //            String ext = originName.substring(originName.lastIndexOf(".")); //확장자
 
-            try {
-                PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(
-                        bucketName, changedName, file.getInputStream(), metadata
-                ).withCannedAcl(CannedAccessControlList.PublicRead));
-
-            } catch (IOException e) {
-                log.error("file upload error " + e.getMessage());
-                throw  new CustomException(ErrorCode.S3_UPLOAD_ERROR);
-            }
+            s3Component.FileUpload(file, changedName, metadata);
             //저장된 Url
             String url = "https://tripeer207.s3.ap-northeast-2.amazonaws.com/" + changedName;
             //DB에 업로드 정보 저장

@@ -7,7 +7,6 @@ import com.j10d207.tripeer.history.service.HistoryService;
 import com.j10d207.tripeer.plan.db.dto.PlanListResDTO;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

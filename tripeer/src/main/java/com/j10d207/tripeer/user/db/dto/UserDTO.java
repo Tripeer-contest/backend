@@ -4,6 +4,9 @@ import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -71,5 +74,16 @@ public class UserDTO {
         private String nickname;
         private String birth;
         private String profileImage;
+
+        public static Social ContextToDTO () {
+            SecurityContext context = SecurityContextHolder.getContext();
+            Authentication authentication = context.getAuthentication();
+            CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
+
+            return UserDTO.Social.builder()
+                    .nickname(customUserDetails.getName())
+                    .profileImage(customUserDetails.getProfileImage())
+                    .build();
+        }
     }
 }

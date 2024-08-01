@@ -1,6 +1,6 @@
 package com.j10d207.tripeer.plan.db.dto;
 
-import com.j10d207.tripeer.user.db.dto.UserSearchDTO;
+import com.j10d207.tripeer.user.db.dto.UserDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +17,7 @@ public class PlanListResDTO {
     private List<String> townList;
     private LocalDate startDay;
     private LocalDate endDay;
-    private List<UserSearchDTO> member;
+    private List<UserDTO.Search> member;
     private boolean newPlan;
 
 }

@@ -25,7 +25,7 @@ import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootDetailRepository;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootRepository;
 import com.j10d207.tripeer.user.config.JWTUtil;
-import com.j10d207.tripeer.user.db.dto.UserSearchDTO;
+import com.j10d207.tripeer.user.db.dto.UserDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.repository.CoworkerRepository;
 import lombok.RequiredArgsConstructor;
@@ -90,17 +90,8 @@ public class HistoryServiceImpl implements HistoryService{
             planListResDTO.setEndDay(plan.getEndDate());
 
             // 플랜의 멤버 리스트 넣기
-            List<UserSearchDTO> memberList = new ArrayList<>();
             List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
-            for (CoworkerEntity coworkerEntity : coworkerEntityList) {
-                UserSearchDTO userSearchDTO = UserSearchDTO.builder()
-                        .userId(coworkerEntity.getUser().getUserId())
-                        .nickname(coworkerEntity.getUser().getNickname())
-                        .profileImage(coworkerEntity.getUser().getProfileImage())
-                        .build();
-                memberList.add(userSearchDTO);
-            }
-            planListResDTO.setMember(memberList);
+            planListResDTO.setMember(coworkerEntityList.stream().map(UserDTO.Search::CoworkerEntityToDTO).toList());
 
             planListResDTO.setNewPlan(false);
             planListResDTOList.add(planListResDTO);
@@ -224,17 +215,9 @@ public class HistoryServiceImpl implements HistoryService{
             planListResDTO.setImg(planTown.getFirst().getTown().getTownImg());
         }
 
-        List<UserSearchDTO> memberList = new ArrayList<>();
         List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
-        for (CoworkerEntity coworkerEntity : coworkerEntityList) {
-            UserSearchDTO userSearchDTO = UserSearchDTO.builder()
-                    .userId(coworkerEntity.getUser().getUserId())
-                    .nickname(coworkerEntity.getUser().getNickname())
-                    .profileImage(coworkerEntity.getUser().getProfileImage())
-                    .build();
-            memberList.add(userSearchDTO);
-        }
-        planListResDTO.setMember(memberList);
+        planListResDTO.setMember(coworkerEntityList.stream().map(UserDTO.Search::CoworkerEntityToDTO).toList());
+
 
         List<HistoryDayDTO> diaryDayList = new ArrayList<>();
         List<PlanDayEntity> planDayList = planDayRepository.findAllByPlan_PlanIdOrderByDayAsc(planId);

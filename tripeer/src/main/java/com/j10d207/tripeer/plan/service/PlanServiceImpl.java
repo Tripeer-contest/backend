@@ -24,8 +24,6 @@ import com.j10d207.tripeer.tmap.db.dto.CoordinateDTO;
 import com.j10d207.tripeer.tmap.db.dto.RootInfoDTO;
 import com.j10d207.tripeer.tmap.service.FindRoot;
 import com.j10d207.tripeer.tmap.service.TMapService;
-import com.j10d207.tripeer.user.config.JWTUtil;
-import com.j10d207.tripeer.user.db.dto.UserSearchDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.entity.WishListEntity;

@@ -4,6 +4,7 @@ import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.db.dto.*;
+import com.j10d207.tripeer.user.db.vo.InfoVO;
 import com.j10d207.tripeer.user.db.vo.JoinVO;
 import com.j10d207.tripeer.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,8 +65,8 @@ public class UserController {
 
     //내 정보 수정
     @PatchMapping("/myinfo")
-    public Response<?> myInfoModify(@AuthenticationPrincipal CustomOAuth2User user, @RequestBody UserDTO.Info info) {
-        userService.modifyMyInfo(user.getUserId(), info);
+    public Response<?> myInfoModify(@AuthenticationPrincipal CustomOAuth2User user, @RequestBody InfoVO infoVO) {
+        userService.modifyMyInfo(user.getUserId(), infoVO);
         return Response.of(HttpStatus.OK, "내 정보 수정 완료", null);
     }
 

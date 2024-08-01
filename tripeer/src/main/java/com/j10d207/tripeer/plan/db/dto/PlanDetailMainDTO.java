@@ -4,7 +4,6 @@ import com.j10d207.tripeer.plan.db.entity.PlanEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanTownEntity;
 import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
 import com.j10d207.tripeer.user.db.dto.UserDTO;
-import com.j10d207.tripeer.user.db.dto.UserSearchDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

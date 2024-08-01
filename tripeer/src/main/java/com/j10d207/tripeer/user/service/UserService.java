@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.user.service;
 
 import com.j10d207.tripeer.user.db.dto.*;
+import com.j10d207.tripeer.user.db.vo.InfoVO;
 import com.j10d207.tripeer.user.db.vo.JoinVO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,7 +17,7 @@ public interface UserService {
     //프로필 사진 변경
     public String uploadProfileImage(MultipartFile file, long userId);
     //내 정보 수정
-    public void modifyMyInfo(long userId, UserDTO.Info info);
+    public void modifyMyInfo(long userId, InfoVO infoVO);
     //소셜 정보 획득
     public UserDTO.Social getSocialInfo();
     //닉네임 중복체크
