@@ -27,4 +27,15 @@ public class WishListEntity {
     @ManyToOne
     @JoinColumn(name = "SPOT_INFO_ID")
     private SpotInfoEntity spotInfo;
+
+    public static WishListEntity MakeWishListEntity (int spotInfoId, long userId) {
+        return WishListEntity.builder()
+                .user(UserEntity.builder()
+                        .userId(userId)
+                        .build())
+                .spotInfo(SpotInfoEntity.builder()
+                        .spotInfoId(spotInfoId)
+                        .build())
+                .build();
+    }
 }

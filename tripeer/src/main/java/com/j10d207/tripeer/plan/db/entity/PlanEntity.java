@@ -30,12 +30,12 @@ public class PlanEntity {
     private LocalDate endDate;
     private LocalDate createDate;
 
-    public static PlanEntity VOToEntity (PlanCreateInfoVO createInfo) {
+    public static PlanEntity DTOToEntity (PlanDetailMainDTO.CreateResultInfo CreateResultInfo) {
         return PlanEntity.builder()
-                .title(createInfo.getTitle())
-                .vehicle(createInfo.getVehicle())
-                .startDate(createInfo.getStartDay())
-                .endDate(createInfo.getEndDay())
+                .title(CreateResultInfo.getTitle())
+                .vehicle(CreateResultInfo.getVehicle())
+                .startDate(CreateResultInfo.getStartDay())
+                .endDate(CreateResultInfo.getEndDay())
                 .createDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .build();
     }

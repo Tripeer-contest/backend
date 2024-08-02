@@ -2,6 +2,8 @@ package com.j10d207.tripeer.plan.db.entity;
 
 import com.j10d207.tripeer.place.db.entity.CityEntity;
 import com.j10d207.tripeer.place.db.entity.TownEntity;
+import com.j10d207.tripeer.place.db.entity.TownPK;
+import com.j10d207.tripeer.plan.db.dto.TownDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -45,5 +47,34 @@ public class PlanTownEntity {
         }
 
         return townNameList;
+    }
+
+    public static PlanTownEntity TownDTOToEntity (TownDTO townDTO, PlanEntity planEntity)
+    {
+        PlanTownEntity planTown;
+        if(townDTO.getTownId() == -1) {
+            planTown = PlanTownEntity.builder()
+                    .plan(planEntity)
+                    .cityOnly(CityEntity.builder().cityId(townDTO.getCityId()).build())
+                    .build();
+        } else {
+            TownPK townPK = TownPK.builder()
+                    .townId(townDTO.getTownId())
+                    .city(CityEntity.builder().cityId(townDTO.getCityId()).build())
+                    .build();
+            planTown = PlanTownEntity.builder()
+                    .plan(planEntity)
+                    .town(TownEntity.builder().townPK(townPK).build())
+                    .build();
+        }
+        return planTown;
+    }
+
+    public static String getFirstImg (List<PlanTownEntity> planTownEntityList) {
+        if(planTownEntityList.getFirst().getTown() == null ) {
+            return planTownEntityList.getFirst().getCityOnly().getCityImg();
+        } else {
+            return planTownEntityList.getFirst().getTown().getTownImg();
+        }
     }
 }

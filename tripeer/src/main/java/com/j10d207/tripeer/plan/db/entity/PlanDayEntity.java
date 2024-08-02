@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.plan.db.entity;
 
+import com.j10d207.tripeer.plan.db.dto.PlanDetailMainDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,4 +29,13 @@ public class PlanDayEntity {
     private LocalDate day;
     private LocalTime startTime;
     private String vehicle;
+
+    public static PlanDayEntity MakeDayEntity(PlanDetailMainDTO.CreateResultInfo createResultInfo, PlanEntity planEntity, int i) {
+        return PlanDayEntity.builder()
+                .plan(planEntity)
+                .day(createResultInfo.getStartDay().plusDays(i))
+                .vehicle(createResultInfo.getVehicle())
+                .build();
+
+    }
 }

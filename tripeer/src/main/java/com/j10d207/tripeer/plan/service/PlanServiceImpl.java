@@ -1,9 +1,9 @@
 package com.j10d207.tripeer.plan.service;
 
-import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
+import com.j10d207.tripeer.plan.db.vo.CoworkerInvitedVO;
 import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
+import com.j10d207.tripeer.plan.db.vo.TitleChangeVO;
 import com.j10d207.tripeer.user.db.dto.UserDTO;
-import com.nimbusds.jose.shaded.gson.JsonArray;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.j10d207.tripeer.email.db.dto.EmailDTO;
@@ -11,11 +11,7 @@ import com.j10d207.tripeer.email.service.EmailService;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.kakao.service.KakaoService;
-import com.j10d207.tripeer.place.db.ContentTypeEnum;
-import com.j10d207.tripeer.place.db.entity.CityEntity;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
-import com.j10d207.tripeer.place.db.entity.TownEntity;
-import com.j10d207.tripeer.place.db.entity.TownPK;
 import com.j10d207.tripeer.place.db.repository.SpotInfoRepository;
 import com.j10d207.tripeer.plan.db.dto.*;
 import com.j10d207.tripeer.plan.db.entity.*;
@@ -43,6 +39,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -70,65 +67,34 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 생성
     @Override
-    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanCreateInfoVO createInfo, long userId) {
-
-        //플랜 생성
-        PlanEntity plan = planRepository.save(PlanEntity.VOToEntity(createInfo));
-
-        PlanDetailMainDTO.CreateResultInfo planResponseDTO = PlanDetailMainDTO.CreateResultInfo.VOToDTO(createInfo, plan.getPlanId());
-
+    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanDetailMainDTO.CreateResultInfo createResultInfo, long userId) {
+        //플랜 생성 + 플랜번호 등록
+        PlanEntity plan = planRepository.save(PlanEntity.DTOToEntity(createResultInfo));
+        createResultInfo.setPlanId(plan.getPlanId());
         //생성된 플랜을 가지기
         UserEntity user = userRepository.findByUserId(userId);
-        CoworkerEntity coworker = CoworkerEntity.builder()
-                .user(user)
-                .plan(plan)
-                .build();
+        coworkerRepository.save(CoworkerEntity.MakeCoworkerEntity(user, plan));
 
-        coworkerRepository.save(coworker);
-
-        for (TownDTO townDTO : createInfo.getTownList()) {
+        for (TownDTO townDTO : createResultInfo.getTownList()) {
             //request 기반으로 townEntity 받아오기
-            if(townDTO.getTownId() == -1) {
-                PlanTownEntity planTown = PlanTownEntity.builder()
-                        .plan(plan)
-                        .cityOnly(CityEntity.builder().cityId(townDTO.getCityId()).build())
-                        .build();
-                planTownRepository.save(planTown);
-            } else {
-                TownPK townPK = TownPK.builder()
-                        .townId(townDTO.getTownId())
-                        .city(CityEntity.builder().cityId(townDTO.getCityId()).build())
-                        .build();
-
-                PlanTownEntity planTown = PlanTownEntity.builder()
-                        .plan(plan)
-                        .town(TownEntity.builder().townPK(townPK).build())
-                        .build();
-                planTownRepository.save(planTown);
-            }
+            planTownRepository.save(PlanTownEntity.TownDTOToEntity(townDTO, plan));
         }
-        int day = (int) ChronoUnit.DAYS.between(createInfo.getStartDay(), createInfo.getEndDay()) + 1;
+        int day = (int) ChronoUnit.DAYS.between(createResultInfo.getStartDay(), createResultInfo.getEndDay()) + 1;
         for (int i = 0; i < day; i++) {
-            PlanDayEntity planDay = PlanDayEntity.builder()
-                    .plan(plan)
-                    .day(createInfo.getStartDay().plusDays(i))
-                    .vehicle(createInfo.getVehicle())
-                    .build();
-            planDayRepository.save(planDay);
+            planDayRepository.save(PlanDayEntity.MakeDayEntity(createResultInfo, plan, i));
         }
-
         // 이메일 전송 스케쥴링
         planSchedulerService.schedulePlanTasks(plan);
-        return planResponseDTO;
+        return createResultInfo;
     }
 
     //플랜 이름 변경
     @Override
-    public void changeTitle(PlanDetailMainDTO.TitleChange titleChangeDTO, long userId) {
-        PlanEntity plan = planRepository.findByPlanId(titleChangeDTO.getPlanId());
+    public void changeTitle(TitleChangeVO titleChangeVO, long userId) {
+        PlanEntity plan = planRepository.findByPlanId(titleChangeVO.getPlanId());
 
-        if(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(titleChangeDTO.getPlanId(), userId)) {
-            plan.setTitle(titleChangeDTO.getTitle());
+        if(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(titleChangeVO.getPlanId(), userId)) {
+            plan.setTitle(titleChangeVO.getTitle());
             planRepository.save(plan);
         } else {
             // 토큰과 소유자가 일치하지 않음
@@ -167,17 +133,7 @@ public class PlanServiceImpl implements PlanService {
             PlanEntity plan = planRepository.findByPlanId(coworker.getPlan().getPlanId());
             // 플랜에서 선택한 타운 리스트 가져오기
             List<PlanTownEntity> planTown = planTownRepository.findByPlan_PlanId(plan.getPlanId());
-            // 플랜의 멤버 리스트 넣기
-            List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
-
-            String img;
-            // 선택한 도시 중 첫번째 도시의 이미지 경로 넣기
-            if(planTown.getFirst().getTown() == null ) {
-                img = planTown.getFirst().getCityOnly().getCityImg();
-            } else {
-                img = planTown.getFirst().getTown().getTownImg();
-            }
-            PlanDetailMainDTO.MyPlan myPlan = PlanDetailMainDTO.MyPlan.EntityToDTO(plan, img, planTown, coworkerEntityList);
+            PlanDetailMainDTO.MyPlan myPlan = PlanDetailMainDTO.MyPlan.EntityToDTO(plan, PlanTownEntity.getFirstImg(planTown), planTown, coworkerRepository.findByPlan_PlanId(plan.getPlanId())); // 플랜의 멤버 리스트 넣기
             myPlans.add(myPlan);
         }
 
@@ -196,45 +152,29 @@ public class PlanServiceImpl implements PlanService {
         List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
 
         //선택한 도시 목록 구성
-        List<TownDTO> townDTOList = new ArrayList<>();
-        for (PlanTownEntity planTownEntity : planTown) {
-            townDTOList.add(TownDTO.EntityToDTO(planTownEntity));
-        }
+        List<TownDTO> townDTOList = planTown.stream().map(TownDTO::EntityToDTO).toList();
 
         return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, coworkerEntityList.stream().map(UserDTO.Search::CoworkerEntityToDTO).toList());
     }
 
     //동행자 추가
     @Override
-    public void joinPlan(PlanDetailMainDTO.PlanCoworker planCoworker, long userId) {
+    public void joinPlan(CoworkerInvitedVO coworkerInvitedVO, long userId) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        PlanEntity planEntity = planRepository.findById(planCoworker.getPlanId())
+        PlanEntity planEntity = planRepository.findById(coworkerInvitedVO.getPlanId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
-        UserEntity user = UserEntity.builder().userId(planCoworker.getUserId()).build();
+        UserEntity user = UserEntity.builder().userId(coworkerInvitedVO.getUserId()).build();
 
-        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(planCoworker.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
+        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerInvitedVO.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
             throw new CustomException(ErrorCode.TOO_MANY_PLAN);
         }
 
-        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planCoworker.getPlanId(), planCoworker.getUserId())) {
-            CoworkerEntity coworker = CoworkerEntity.builder()
-                    .plan(PlanEntity.builder().planId(planCoworker.getPlanId()).build())
-                    .user(user)
-                    .build();
-            coworkerRepository.save(coworker);
+        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedVO.getPlanId(), coworkerInvitedVO.getUserId())) {
+            CoworkerEntity coworkerEntity = CoworkerEntity.MakeCoworkerEntity(user, PlanEntity.builder().planId(coworkerInvitedVO.getPlanId()).build());
+            coworkerRepository.save(coworkerEntity);
 
-            String title = userEntity.getNickname() + "님의 초대입니다";
-            String content = userEntity.getNickname() + "님이 " + planEntity.getTitle()
-                    + " 여행계획에 초대하셨습니다.";
-
-            EmailDTO emailDTO = EmailDTO.builder()
-                    .userId(user.getUserId())
-                    .content(content)
-                    .title(title)
-                    .build();
-
-            emailService.sendEmail(emailDTO);
+            emailService.sendEmail(EmailDTO.MakeInvitedEmail(planEntity.getTitle(), userEntity.getNickname(), user.getUserId()));
         } else {
             throw new CustomException(ErrorCode.DUPLICATE_USER);
         }
@@ -246,12 +186,8 @@ public class PlanServiceImpl implements PlanService {
         //요청된 플랜의 동행자 목록 조회
         List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanId(planId);
         //DTO로 변환
-        List<PlanDetailMainDTO.PlanCoworker> planCoworkerList = new ArrayList<>();
-        int order = 0;
-        for (CoworkerEntity coworker : coworkerList) {
-            planCoworkerList.add(PlanDetailMainDTO.PlanCoworker.CoworkerToDTO(coworker, order++));
-        }
-        return planCoworkerList;
+        AtomicInteger order = new AtomicInteger();
+        return coworkerList.stream().map(test -> PlanDetailMainDTO.PlanCoworker.CoworkerToDTO(test, order.getAndIncrement())).toList();
     }
 
 
@@ -322,20 +258,7 @@ public class PlanServiceImpl implements PlanService {
         if(!(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planId, userId))) {
             throw new CustomException(ErrorCode.USER_NOT_CORRESPOND);
         }
-
-        PlanBucketEntity planBucket = PlanBucketEntity.builder()
-                .plan(PlanEntity.builder()
-                        .planId(planId)
-                        .build())
-                .spotInfo(SpotInfoEntity.builder()
-                        .spotInfoId(spotInfoId)
-                        .build())
-                .user(UserEntity.builder()
-                        .userId(userId)
-                        .build())
-                .build();
-
-        planBucketRepository.save(planBucket);
+        planBucketRepository.save(PlanBucketEntity.MakePlanBucketEntity(planId, spotInfoId, userId));
     }
 
     //플랜 버킷 관광지 삭제
@@ -364,15 +287,7 @@ public class PlanServiceImpl implements PlanService {
         if (optionalWishList.isPresent()) {
             wishListRepository.delete(optionalWishList.get());
         } else {
-            WishListEntity wishList = WishListEntity.builder()
-                    .user(UserEntity.builder()
-                            .userId(userId)
-                            .build())
-                    .spotInfo(SpotInfoEntity.builder()
-                            .spotInfoId(spotInfoId)
-                            .build())
-                    .build();
-            wishListRepository.save(wishList);
+            wishListRepository.save(WishListEntity.MakeWishListEntity(spotInfoId, userId));
         }
     }
 
@@ -380,14 +295,13 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public List<SpotSearchResDTO> getWishList(long userId, long planId) {
         List<WishListEntity> wishList = wishListRepository.findByUser_UserId(userId);
-
-        List<SpotSearchResDTO> spotSearchResDTOList = new ArrayList<>();
-
-        for (WishListEntity wishListEntity : wishList) {
-            spotSearchResDTOList.add(SpotSearchResDTO.WishEntityToDTO(wishListEntity, planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, wishListEntity.getSpotInfo().getSpotInfoId())));
-        }
-
-        return  spotSearchResDTOList;
+        return  wishList.stream()
+                .map(wishListEntity ->
+                SpotSearchResDTO.WishEntityToDTO
+                        (wishListEntity,
+                                planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, wishListEntity.getSpotInfo().getSpotInfoId()))
+                        )
+                .toList();
     }
 
     //플랜 디테일 저장
@@ -400,7 +314,6 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public Map<Integer, List<PlanDetailResDTO>> getAllPlanDetail(long planId) {
         Map<Integer, List<PlanDetailResDTO>> planDetailResDTOMap = new HashMap<>();
-
         //조회할 플랜을 가져옴
         PlanEntity plan = planRepository.findByPlanId(planId);
         //시작날짜, 끝날짜를 이용해서 몇일 여행인지 계산
@@ -410,13 +323,11 @@ public class PlanServiceImpl implements PlanService {
         for (int i = 0; i < day; i++) {
             // N일차 플랜의 id를 찾아옴
             long planDayId = planDayRepository.findByPlan_PlanIdAndDay(planId, plan.getStartDate().plusDays(i)).getPlanDayId();
-
             // 얻으려는 일차의 플랜을 step 순서로 정렬
             List<PlanDetailEntity> planDetailEntityList = planDetailRepository.findByPlanDay_PlanDayId(planDayId, Sort.by(Sort.Direction.ASC, "step"));
 
             List<PlanDetailResDTO> planDetailResDTOList = PlanDetailResDTO.EntityToDTO(planDetailEntityList);
             planDetailResDTOMap.put(i+1, planDetailResDTOList);
-
         }
         return planDetailResDTOMap;
     }
@@ -429,16 +340,8 @@ public class PlanServiceImpl implements PlanService {
         int order = -1;
         for (CoworkerEntity coworker : coworkerList) {
             order++;
-            UserEntity user = coworker.getUser();
             if(userId != coworker.getUser().getUserId()) continue;
-            PlanDetailMainDTO.PlanCoworker planCoworker = PlanDetailMainDTO.PlanCoworker.builder()
-                    .order(order)
-                    .planId(coworker.getPlan().getPlanId())
-                    .userId(user.getUserId())
-                    .nickname(user.getNickname())
-                    .profileImage(user.getProfileImage())
-                    .build();
-            return planCoworker;
+            return PlanDetailMainDTO.PlanCoworker.CoworkerToDTO(coworker, order);
         }
         throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
     }

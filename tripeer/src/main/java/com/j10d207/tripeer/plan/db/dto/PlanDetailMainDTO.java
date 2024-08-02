@@ -19,6 +19,7 @@ import java.util.List;
 public class PlanDetailMainDTO {
 
     @Getter
+    @Setter
     @Builder
     public static class CreateResultInfo {
         private long planId;
@@ -29,10 +30,9 @@ public class PlanDetailMainDTO {
         private LocalDate endDay;
         private LocalDate createDay;
 
-        public static CreateResultInfo VOToDTO (PlanCreateInfoVO createInfo, long planId) {
+        public static CreateResultInfo VOToDTO (PlanCreateInfoVO createInfo) {
 
             return CreateResultInfo.builder()
-                    .planId(planId)
                     .title(createInfo.getTitle())
                     .townList(createInfo.getTownList())
                     .vehicle(createInfo.getVehicle())
@@ -100,9 +100,4 @@ public class PlanDetailMainDTO {
         }
     }
 
-    @Getter
-    public static class TitleChange {
-        private long planId;
-        private String title;
-    }
 }

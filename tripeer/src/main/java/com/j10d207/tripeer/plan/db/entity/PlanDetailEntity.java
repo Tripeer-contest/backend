@@ -45,7 +45,6 @@ public class PlanDetailEntity {
 
     public static PlanDetailEntity VOToEntity (PlanDetailVO planDetailVO) {
         return PlanDetailEntity.builder()
-                .planDetailId(planDetailVO.getPlanDetailId())
                 .planDay(PlanDayEntity.builder()
                         .planDayId(planDetailVO.getPlanDayId())
                         .build())

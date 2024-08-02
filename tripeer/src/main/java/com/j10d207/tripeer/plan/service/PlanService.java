@@ -1,8 +1,10 @@
 package com.j10d207.tripeer.plan.service;
 
 import com.j10d207.tripeer.plan.db.dto.*;
+import com.j10d207.tripeer.plan.db.vo.CoworkerInvitedVO;
 import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
 import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
+import com.j10d207.tripeer.plan.db.vo.TitleChangeVO;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,9 +13,9 @@ import java.util.Map;
 public interface PlanService {
 
     //플랜 생성
-    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanCreateInfoVO createInfo, long userId);
+    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanDetailMainDTO.CreateResultInfo createResultInfo, long userId);
     //플랜 이름 변경
-    public void changeTitle(PlanDetailMainDTO.TitleChange titleChangeDTO, long userId);
+    public void changeTitle(TitleChangeVO titleChangeVO, long userId);
     //플랜 탈퇴
     public void planOut(long planId, long userId);
     //내 플랜 리스트 조회
@@ -21,7 +23,7 @@ public interface PlanService {
     //플랜 디테일 메인 조회
     public PlanDetailMainDTO.MainPageInfo getPlanDetailMain(long planId, long userId);
     //동행자 추가
-    public void joinPlan(PlanDetailMainDTO.PlanCoworker planCoworker, long userId);
+    public void joinPlan(CoworkerInvitedVO coworkerInvitedVO, long userId);
     //동행자 조회
     public List<PlanDetailMainDTO.PlanCoworker> getCoworker(long planId);
     //관광지 검색
