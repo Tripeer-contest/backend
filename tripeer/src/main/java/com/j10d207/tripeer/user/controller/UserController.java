@@ -9,6 +9,7 @@ import com.j10d207.tripeer.user.db.vo.JoinVO;
 import com.j10d207.tripeer.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -65,7 +66,7 @@ public class UserController {
 
     //내 정보 수정
     @PatchMapping("/myinfo")
-    public Response<?> myInfoModify(@AuthenticationPrincipal CustomOAuth2User user, @RequestBody InfoVO infoVO) {
+    public Response<?> myInfoModify(@AuthenticationPrincipal CustomOAuth2User user, @Valid @RequestBody InfoVO infoVO) {
         userService.modifyMyInfo(user.getUserId(), infoVO);
         return Response.of(HttpStatus.OK, "내 정보 수정 완료", null);
     }
