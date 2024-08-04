@@ -18,8 +18,8 @@ public class TownDTO {
     private double longitude;
 
     public static TownDTO EntityToDTO (PlanTownEntity planTown) {
+        // 도가 선택된경우 , ex. 서울특별시, 경상북도
         if (planTown.getTown() == null) {
-
             return TownDTO.builder()
                     .cityId(planTown.getCityOnly().getCityId())
                     .cityId(planTown.getCityOnly().getCityId())
@@ -30,6 +30,7 @@ public class TownDTO {
                     .longitude(planTown.getCityOnly().getLongitude())
                     .build();
 
+            // 더 좁은범위의 도시가 선택된경우, ex. 강서구, 무주군
         } else {
             return TownDTO.builder()
                     .cityId(planTown.getTown().getTownPK().getCity().getCityId())

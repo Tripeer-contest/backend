@@ -312,8 +312,8 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 디테일 전체 조회
     @Override
-    public Map<Integer, List<PlanDetailResDTO>> getAllPlanDetail(long planId) {
-        Map<Integer, List<PlanDetailResDTO>> planDetailResDTOMap = new HashMap<>();
+    public Map<Integer, List<PlanDetailMainDTO.PlanSpotDetail>> getAllPlanDetail(long planId) {
+        Map<Integer, List<PlanDetailMainDTO.PlanSpotDetail>> planSpotDetailMap = new HashMap<>();
         //조회할 플랜을 가져옴
         PlanEntity plan = planRepository.findByPlanId(planId);
         //시작날짜, 끝날짜를 이용해서 몇일 여행인지 계산
@@ -326,10 +326,10 @@ public class PlanServiceImpl implements PlanService {
             // 얻으려는 일차의 플랜을 step 순서로 정렬
             List<PlanDetailEntity> planDetailEntityList = planDetailRepository.findByPlanDay_PlanDayId(planDayId, Sort.by(Sort.Direction.ASC, "step"));
 
-            List<PlanDetailResDTO> planDetailResDTOList = PlanDetailResDTO.EntityToDTO(planDetailEntityList);
-            planDetailResDTOMap.put(i+1, planDetailResDTOList);
+            List<PlanDetailMainDTO.PlanSpotDetail> planSpotDetailList = planDetailEntityList.stream().map(PlanDetailMainDTO.PlanSpotDetail::EntityToDTO).toList();
+            planSpotDetailMap.put(i+1, planSpotDetailList);
         }
-        return planDetailResDTOMap;
+        return planSpotDetailMap;
     }
 
     //플랜 나의 정보 조회(기존 내정보 + 나의 coworker에서의 순서)

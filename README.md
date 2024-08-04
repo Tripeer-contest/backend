@@ -1,41 +1,38 @@
 [user 관련 변경사항 정리]
 
-1. UserDTO 압축
+1. DTO 압축
 
-JoinDTO, SocialInfoDTO, UserInfoDTO, UserSearchDTO
--> dto.UserDTO (inner Info, Search, Social)로 압축, vo.JoinVO, vo.InfoVO 추가
+PlanDetailMain -> 여행 계획 관련 data 모음
+
+TownDTO city -> 강원도 경상도 등등, town  도 안의 도시들
+
+Plan, SPOT, TOWN 세가지로 분류
+
+PublicRootDTO
+RootOptimizeDTO는 최단거리 계산 관련 -> 수정중
+
+PlanListResDTO는 History관련으로 History는 동천작성이 아니라서 일단 스킵
+
 
 2. VO class 처리
-Join (회원가입), Info(회원정보 수정) 모두 Entity를 만드는데 사용하므로 바로 VOToEntity 되어 service 변환 유지
+VO 종류도 inner 클래스를 사용해야 하나 의문,
+valid에서 변수 형식을 체크해주는건 방법은 있을만한데 왠지 안보임
 
 3. 정적 팩토리 메소드
 
-EntityToDTO / Make 구현 전체검색 0802 검색시 변경점 확인 가능하도록 표기
-주로 Service class 압축됨
+PlanDetailMainDTO.MyPlan에 보면 여러가지 정보를 파라미터로 해서 toDTO 하는데 리뷰 부탁합니다
 
 4. Valid
-JoinVO, InfoVO 선제 적용
-Exception 발동시 처리 내용 Custom 화 하였음
-exception.CustomExceptionHandler 안의 MethodArgumentNotValidException.class 제어부분 과
-exception.ErrorResponseEntity 안의 CustomValid 메소드를 새로 만들어서 handling 하도록 구현
 
-5. HttpServletRequest access token 관련
+user 와 비슷한 맥락
 
-request를 받아오는 부분 모두 [ @AuthenticationPrincipal CustomOAuth2User user ] 로 변경 완료
+5. 기타
 
-Context가 set 되는 순간들을 구성하는데 고민이 많았습니다.
-현재는 CustomOAuth2User 에 있는 userId 변수만 사용 ( EX. user.getUserId() )
-현재는
-a. 소셜 로그인을 통해 우리 사이트 회원 인증 시 CustomOAuth2UserService 의 return 값으로 Context가 set 됨
-b. 소셜 로그인 했는데 우리 사이트 회원이 아니면 CustomOAuth2UserService에서 role만 비회원으로 설정되고 userId는 0인 상태로 SET됨
+PlanServiceImpl 에서
 
-(★★★★★중요★★★★★)
-c. 로컬 단일 백엔드 환경에서는 소셜 로그인을 할 수 없으므로 개발용 메소드로 토큰을 받아오고 jwtFilter에서 검증 할 때마다, set 되게 하였음
-Authentication 구성을 위해서 Oath2Response 형식을 가진 클래스가 필요한데 소셜로그인이 안되는 환경이므로 TestResponse를 만들어서 일단 주입함.
+5-1. getSpotSearch 메소드에서 jpa where 조건문을 구체적으로 쓰기위해 Specification을 사용하는데 이부분을 ServiceImpl 에서 길게 작성하지 않는 방법이 통 떠오르지 않아 현상유지.
 
-c-1. 실 환경에서는 소셜로그인이 되어있기 때문에 문제 계속 set 안되어도 문제가 없지 않을까 ?
-c-2. 최초 로그인 이후에는 자체 Response를 아예 구성하거나 현재 testResponse 같이 그냥 값을 비워주는게 좋지 않을까? -> 파라미터 자리에 null 썻더니 null은 안됨, 빈 클래스가 있긴해야함
-
+5-2. (하단 3개 메소드) getShortTime, getOptimizingTime, MakeRootInfo는 최단거리 조정 관련이므로 tmap 도메인을 처리할때 같이 수정
 
 # Tripeer-backend
 

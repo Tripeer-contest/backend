@@ -124,8 +124,8 @@ public class PlanController {
 
     //플랜 디테일 전체 조회
     @GetMapping("/detail/{planId}")
-    public Response<Map<Integer, List<PlanDetailResDTO>>> getPlan(@PathVariable("planId") long planId) {
-        Map<Integer, List<PlanDetailResDTO>> result = planService.getAllPlanDetail(planId);
+    public Response<Map<Integer, List<PlanDetailMainDTO.PlanSpotDetail>>> getPlan(@PathVariable("planId") long planId) {
+        Map<Integer, List<PlanDetailMainDTO.PlanSpotDetail>> result = planService.getAllPlanDetail(planId);
         return Response.of(HttpStatus.OK, "플랜 디테일 전체 조회 완료", result);
     }
 
