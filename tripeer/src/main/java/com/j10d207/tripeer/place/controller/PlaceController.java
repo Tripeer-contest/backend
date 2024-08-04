@@ -8,7 +8,6 @@ import com.j10d207.tripeer.place.service.TownService;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,7 +32,7 @@ public class PlaceController {
     * 그 외의 경우 해당 city 조회
     * */
     @GetMapping("/city/{cityName}")
-    public Response<List<CityListDto>> searchCity(@PathVariable("cityName") String cityName) {
+    public Response<List<CityAndTownDTO.CityListDTO>> searchCity(@PathVariable("cityName") String cityName) {
         return Response.of(HttpStatus.OK, "도시 검색 결과", cityService.searchCity(cityName));
     }
 
@@ -44,8 +43,8 @@ public class PlaceController {
      * 그 외의 경우 해당 town 조회
      * */
     @GetMapping("/town")
-    public Response<List<TownListDto>> searchTown(@RequestParam("cityId") String cityId,
-                                                  @RequestParam("townName") String townName) {
+    public Response<List<CityAndTownDTO.TownListDTO>> searchTown(@RequestParam("cityId") String cityId,
+                                                                 @RequestParam("townName") String townName) {
         return Response.of(HttpStatus.OK, "타운 검색 결과", townService.searchTown(cityId, townName));
     }
 
@@ -54,7 +53,7 @@ public class PlaceController {
      * town 디테일 조회
      * */
     @GetMapping("/detail/{townName}")
-    public Response<TownListDto> townDetail(@PathVariable("townName") String townName) {
+    public Response<CityAndTownDTO.TownListDTO> townDetail(@PathVariable("townName") String townName) {
         return Response.of(HttpStatus.OK, "타운 디테일 조회", townService.townDetail(townName));
     }
 
@@ -64,10 +63,10 @@ public class PlaceController {
      * 의 숙소 조회
      * */
     @GetMapping("/stay")
-    public Response<SpotListDto> getStayList(@RequestParam("cityId") Integer cityId,
-                                             @RequestParam("townId") Integer townId,
-                                             @RequestParam("page") Integer page,
-                                             @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<SpotDTO.SpotListDTO> getStayList(@RequestParam("cityId") Integer cityId,
+                                                     @RequestParam("townId") Integer townId,
+                                                     @RequestParam("page") Integer page,
+                                                     @AuthenticationPrincipal CustomOAuth2User user) {
         return Response.of(HttpStatus.OK, "숙소 조회", spotService.getSpotByContentType(page,32, cityId, townId, user.getUserId()));
     }
 
@@ -77,10 +76,10 @@ public class PlaceController {
      * 의 식당 조회
      * */
     @GetMapping("/restaurant")
-    public Response<SpotListDto> getRestaurantList(@RequestParam("cityId") Integer cityId,
-                                                   @RequestParam("townId") Integer townId,
-                                                   @RequestParam("page") Integer page,
-                                                   @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<SpotDTO.SpotListDTO> getRestaurantList(@RequestParam("cityId") Integer cityId,
+                                                           @RequestParam("townId") Integer townId,
+                                                           @RequestParam("page") Integer page,
+                                                           @AuthenticationPrincipal CustomOAuth2User user) {
         return Response.of(HttpStatus.OK, "식당 조회", spotService.getSpotByContentType(page,39, cityId, townId, user.getUserId()));
     }
 
@@ -90,10 +89,10 @@ public class PlaceController {
      * 의 명소 조회
      * */
     @GetMapping("/mecca")
-    public Response<SpotListDto> getmeccaList(@RequestParam("cityId") Integer cityId,
-                                              @RequestParam("townId") Integer townId,
-                                              @RequestParam("page") Integer page,
-                                              @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<SpotDTO.SpotListDTO> getmeccaList(@RequestParam("cityId") Integer cityId,
+                                                      @RequestParam("townId") Integer townId,
+                                                      @RequestParam("page") Integer page,
+                                                      @AuthenticationPrincipal CustomOAuth2User user) {
         List<Integer> contentTypeIds = Arrays.asList(32, 39);
         return Response.of(HttpStatus.OK, "명소 조회", spotService.getSpotByContentType(page, contentTypeIds, cityId, townId, user.getUserId()));
     }
@@ -103,7 +102,7 @@ public class PlaceController {
      * 스팟 디테일 조회
      * */
     @GetMapping("/spot/detail/{spotId}")
-    public Response<SpotDetailDto> getSpotDetail(@PathVariable("spotId") Integer spotId) {
+    public Response<SpotDTO.SpotDetailDTO> getSpotDetail(@PathVariable("spotId") Integer spotId) {
 
         return Response.of(HttpStatus.OK, "스팟 디테일 조회", spotService.getSpotDetail(spotId));
     }
@@ -113,7 +112,7 @@ public class PlaceController {
      * 스팟 생성
      * */
     @PostMapping("/spot/create")
-    public Response<SpotAddResDto> createNewSpot(@RequestBody SpotAddVO spotAddVO, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<SpotDTO.SpotAddResDTO> createNewSpot(@RequestBody SpotAddVO spotAddVO, @AuthenticationPrincipal CustomOAuth2User user) {
 
         return Response.of(HttpStatus.OK, "새로운 스팟 생성", spotService.createNewSpot(spotAddVO, user.getUserId()));
     }
@@ -122,7 +121,7 @@ public class PlaceController {
     * 모든 도시, 타운 조회
     * */
     @GetMapping("/all")
-    public Response<CityAndTownDto> getAllCityAndTown() {
+    public Response<CityAndTownDTO> getAllCityAndTown() {
         return Response.of(HttpStatus.OK, "모든 도시, 타운 조회", townService.getAllCityAndTown());
     }
 

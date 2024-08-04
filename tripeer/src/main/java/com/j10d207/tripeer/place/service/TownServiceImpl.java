@@ -2,8 +2,7 @@ package com.j10d207.tripeer.place.service;
 
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
-import com.j10d207.tripeer.place.db.dto.CityAndTownDto;
-import com.j10d207.tripeer.place.db.dto.TownListDto;
+import com.j10d207.tripeer.place.db.dto.CityAndTownDTO;
 import com.j10d207.tripeer.place.db.entity.CityEntity;
 import com.j10d207.tripeer.place.db.entity.TownEntity;
 import com.j10d207.tripeer.place.db.repository.CityRepository;
@@ -31,25 +30,25 @@ public class TownServiceImpl implements TownService{
     * townName이 정확하다면 해당 town의 정보를 넘겨줌
     * */
     @Override
-    public List<TownListDto> searchTown(String cityId, String townName) {
+    public List<CityAndTownDTO.TownListDTO> searchTown(String cityId, String townName) {
         CityEntity cityEntity = cityRepository.findById(Integer.valueOf(cityId))
                 .orElseThrow(() -> new CustomException(ErrorCode.CITY_NOT_FOUND));
 
         if (Objects.equals(townName, "-1")) {
             List<TownEntity> townEntities = townRepository.findByTownPK_City(cityEntity);
-            List<TownListDto> townListDtos = townEntities
-                    .stream().map(TownListDto::convertToDto).collect(Collectors.toList());
+            List<CityAndTownDTO.TownListDTO> townListDTOList = townEntities
+                    .stream().map(CityAndTownDTO.TownListDTO::convertToDto).collect(Collectors.toList());
 
             //overriding해놓은 converToDto로 cityEntity또한 townListDtos에 추가
-            townListDtos.add(0, TownListDto.convertToDto(cityEntity));
-            return townListDtos;
+            townListDTOList.add(0, CityAndTownDTO.TownListDTO.convertToDto(cityEntity));
+            return townListDTOList;
         }
 
         // townName이 유효하게 들어왔을때는 singletonList를 생성하여 반환
         TownEntity townEntity = townRepository.findByTownNameAndTownPK_City_CityId(townName, Integer.parseInt(cityId))
                 .orElseThrow(() -> new CustomException(ErrorCode.TOWN_NOT_FOUND));
 
-        return Collections.singletonList(TownListDto.convertToDto(townEntity));
+        return Collections.singletonList(CityAndTownDTO.TownListDTO.convertToDto(townEntity));
     }
 
 
@@ -57,25 +56,25 @@ public class TownServiceImpl implements TownService{
      * 타운 detail정보 조회
      * */
     @Override
-    public TownListDto townDetail(String townName) {
+    public CityAndTownDTO.TownListDTO townDetail(String townName) {
         TownEntity townEntity = townRepository.findByTownName(townName)
                 .orElseThrow(() -> new CustomException(ErrorCode.TOWN_NOT_FOUND));
-        return TownListDto.convertToDto(townEntity);
+        return CityAndTownDTO.TownListDTO.convertToDto(townEntity);
     }
 
     @Override
-    public CityAndTownDto getAllCityAndTown() {
+    public CityAndTownDTO getAllCityAndTown() {
         List<TownEntity> towns = townRepository.findAll();
         List<CityEntity> citys = cityRepository.findAll();
 
-        List<TownListDto> townListDtos = towns.stream().map(TownListDto::convertToDto).collect(Collectors.toList());
-        List<TownListDto> cityListDtos = citys.stream().map(TownListDto::convertToDto).collect(Collectors.toList());
+        List<CityAndTownDTO.TownListDTO> townListDTOList = towns.stream().map(CityAndTownDTO.TownListDTO::convertToDto).collect(Collectors.toList());
+        List<CityAndTownDTO.TownListDTO> cityListDTOList = citys.stream().map(CityAndTownDTO.TownListDTO::convertToDto).collect(Collectors.toList());
 
-        townListDtos.addAll(cityListDtos);
+        townListDTOList.addAll(cityListDTOList);
 
 
-        return CityAndTownDto.builder()
-                .townListDtos(townListDtos)
+        return CityAndTownDTO.builder()
+                .townListDTOList(townListDTOList)
                 .build();
     }
 }

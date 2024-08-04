@@ -2,7 +2,6 @@ package com.j10d207.tripeer.place.service;
 
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
-import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.*;
 import com.j10d207.tripeer.place.db.repository.*;
@@ -10,7 +9,6 @@ import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.user.config.JWTUtil;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +25,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SpotServiceImpl implements SpotService{
 
-    private final JWTUtil jwtUtil;
     private final SpotInfoRepository spotInfoRepository;
     private final SpotDescriptionRepository spotDescriptionRepository;
     private final SpotDetailRepository spotDetailRepository;
@@ -36,17 +33,17 @@ public class SpotServiceImpl implements SpotService{
     private final PlanService planService;
     private final WishListRepository wishListRepository;
 
-    private List<SpotInfoDto> convertToDtoList(List<SpotInfoEntity> spotInfoEntities, long userId) {
-        List<SpotInfoDto> spotInfoDtos = new ArrayList<>();
+    private List<SpotDTO.SpotInfoDTO> convertToDtoList(List<SpotInfoEntity> spotInfoEntities, long userId) {
+        List<SpotDTO.SpotInfoDTO> spotInfoDTOList = new ArrayList<>();
         for (SpotInfoEntity spotInfoEntity : spotInfoEntities) {
             boolean isWishlist = wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoEntity.getSpotInfoId());
-            spotInfoDtos.add(SpotInfoDto.convertToDto(spotInfoEntity, isWishlist));
+            spotInfoDTOList.add(SpotDTO.SpotInfoDTO.convertToDto(spotInfoEntity, isWishlist));
         }
-        return spotInfoDtos;
+        return spotInfoDTOList;
     }
 
     @Override
-    public SpotListDto getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, long userId) {
+    public SpotDTO.SpotListDTO getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, long userId) {
         Pageable pageable = PageRequest.of(page,15);
 
         List<SpotInfoEntity> spotInfoEntities;
@@ -56,18 +53,18 @@ public class SpotServiceImpl implements SpotService{
             spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(ContentTypeId, cityId, townId, pageable);
         }
 
-        List<SpotInfoDto> spotInfoDtos = convertToDtoList(spotInfoEntities, userId);
+        List<SpotDTO.SpotInfoDTO> spotInfoDTOList = convertToDtoList(spotInfoEntities, userId);
 
-        boolean isLastPage = spotInfoDtos.size() < 15;
+        boolean isLastPage = spotInfoDTOList.size() < 15;
 
-        return SpotListDto.builder()
-                .spotInfoDtos(spotInfoDtos)
+        return SpotDTO.SpotListDTO.builder()
+                .spotInfoDTOList(spotInfoDTOList)
                 .last(isLastPage)
                 .build();
     }
 
     @Override
-    public SpotListDto getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, long userId) {
+    public SpotDTO.SpotListDTO getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, long userId) {
         Pageable pageable = PageRequest.of(page,15);
         List<SpotInfoEntity> spotInfoEntities;
         if (townId == -1) {
@@ -76,34 +73,22 @@ public class SpotServiceImpl implements SpotService{
             spotInfoEntities = spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(ContentTypeId, cityId, townId, pageable);
         }
 
-        List<SpotInfoDto> spotInfoDtos = convertToDtoList(spotInfoEntities, userId);
+        List<SpotDTO.SpotInfoDTO> spotInfoDTOList = convertToDtoList(spotInfoEntities, userId);
 
-        boolean isLastPage = spotInfoDtos.size() < 15;
+        boolean isLastPage = spotInfoDTOList.size() < 15;
 
-        return SpotListDto.builder()
-                .spotInfoDtos(spotInfoDtos)
+        return SpotDTO.SpotListDTO.builder()
+                .spotInfoDTOList(spotInfoDTOList)
                 .last(isLastPage)
                 .build();
     }
 
     @Override
-    public SpotDetailDto getSpotDetail(Integer spotId) {
+    public SpotDTO.SpotDetailDTO getSpotDetail(Integer spotId) {
         SpotInfoEntity spotInfoEntity = spotInfoRepository.findById(spotId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SPOT_NOT_FOUND));
 
-        return SpotDetailDto.convertToDto(spotDescriptionRepository.findBySpotInfo(spotInfoEntity));
-    }
-
-
-    @Override
-    @Transactional
-    public void createNewDescrip(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO) {
-        SpotDescriptionEntity build = SpotDescriptionEntity.builder()
-                .spotInfo(spotInfoEntity)
-                .overview(spotAddVO.getOverview())
-                .build();
-        spotDescriptionRepository.save(build);
-        createNewDetail(spotInfoEntity, spotAddVO);
+        return SpotDTO.SpotDetailDTO.convertToDto(spotDescriptionRepository.findBySpotInfo(spotInfoEntity));
     }
 
     @Override
@@ -134,16 +119,7 @@ public class SpotServiceImpl implements SpotService{
             }
         }
 
-        SpotDetailEntity spotDetail = SpotDetailEntity.builder()
-                .spotInfo(spotInfoEntity)
-                .cat1(cat1)
-                .cat2(cat2)
-                .cat3(cat3)
-                .createdTime("0000")
-                .modifiedTime("0000")
-                .build();
-
-        spotDetailRepository.save(spotDetail);
+        spotDetailRepository.save(SpotDetailEntity.MakeNewSpotDetailEntity(spotInfoEntity, cat1, cat2, cat3));
     }
 
 
@@ -199,7 +175,7 @@ public class SpotServiceImpl implements SpotService{
     
     @Override
     @Transactional
-    public SpotAddResDto createNewSpot(SpotAddVO spotAddVO, long userId) {
+    public SpotDTO.SpotAddResDTO createNewSpot(SpotAddVO spotAddVO, long userId) {
 
 //        1. city 찾기
         String fullAddr = spotAddVO.getAddr1();
@@ -217,15 +193,7 @@ public class SpotServiceImpl implements SpotService{
                     .townId(townRepository.findMaxTownId() + 1)
                     .build();
 
-            townEntity = TownEntity.builder()
-                    .townName(splitAddr[1])
-                    .longitude(spotAddVO.getLongitude())
-                    .latitude(spotAddVO.getLatitude())
-                    .description("discription")
-                    .townImg("https://tripeer207.s3.ap-northeast-2.amazonaws.com/front/static/default1.png")
-                    .townPK(townPK)
-                    .build();
-            townRepository.save(townEntity);
+            townRepository.save(TownEntity.MakeNewSpotTownEntity(spotAddVO, splitAddr[1], townPK));
         }
 
         StringBuilder newAddr = new StringBuilder(cityEntity.getCityName() + " " + townEntity.getTownName() + " ");
@@ -238,9 +206,7 @@ public class SpotServiceImpl implements SpotService{
             }
         }
 
-
         SpotInfoEntity spotInfo = SpotInfoEntity.MakeNewSpotEntity(spotAddVO, townEntity, newAddr.toString());
-
 
         SpotInfoEntity newSpotInfo = spotInfoRepository.save(spotInfo);
 
@@ -250,7 +216,18 @@ public class SpotServiceImpl implements SpotService{
             planService.addPlanSpot(spotAddVO.getPlanId(), newSpotInfo.getSpotInfoId(), userId);
         }
 
-        return SpotAddResDto.EntityToDTO(spotInfo, spotAddVO.isAddPlanCheck());
+        return SpotDTO.SpotAddResDTO.EntityToDTO(spotInfo, spotAddVO.isAddPlanCheck());
 
+    }
+
+    //    @Override
+    @Transactional
+    private void createNewDescrip(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO) {
+        SpotDescriptionEntity build = SpotDescriptionEntity.builder()
+                .spotInfo(spotInfoEntity)
+                .overview(spotAddVO.getOverview())
+                .build();
+        spotDescriptionRepository.save(build);
+        createNewDetail(spotInfoEntity, spotAddVO);
     }
 }

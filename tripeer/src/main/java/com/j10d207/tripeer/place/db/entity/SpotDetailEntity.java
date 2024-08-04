@@ -30,4 +30,15 @@ public class SpotDetailEntity {
     private String createdTime;
     private String modifiedTime;
     private String booktour;
+
+    public static SpotDetailEntity MakeNewSpotDetailEntity (SpotInfoEntity spotInfoEntity, String cat1, String cat2, String cat3) {
+        return SpotDetailEntity.builder()
+                .spotInfo(spotInfoEntity)
+                .cat1(cat1)
+                .cat2(cat2)
+                .cat3(cat3)
+                .createdTime("0000")
+                .modifiedTime("0000")
+                .build();
+    }
 }
