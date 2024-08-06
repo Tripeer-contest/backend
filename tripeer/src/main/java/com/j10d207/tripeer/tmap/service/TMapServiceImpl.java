@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.tmap.service;
 
+import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.j10d207.tripeer.exception.CustomException;
@@ -132,4 +133,6 @@ public class TMapServiceImpl implements TMapService {
 
         }
     }
+
+
 }

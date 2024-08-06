@@ -3,7 +3,7 @@ package com.j10d207.tripeer.tmap.service;
 import com.nimbusds.jose.shaded.gson.JsonArray;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
-import com.j10d207.tripeer.plan.db.dto.PublicRootDTO;
+import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 
 public interface ApiRequestService {

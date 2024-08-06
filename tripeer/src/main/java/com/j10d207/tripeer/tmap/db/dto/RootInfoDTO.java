@@ -1,7 +1,6 @@
 package com.j10d207.tripeer.tmap.db.dto;
 
 import com.nimbusds.jose.shaded.gson.JsonElement;
-import com.j10d207.tripeer.plan.db.dto.PublicRootDTO;
 import lombok.*;
 
 @Getter
@@ -24,5 +23,15 @@ public class RootInfoDTO {
 
     private int status;
     private StringBuilder tmi;
+
+    public String timeToString () {
+        StringBuilder timeString = new StringBuilder();
+        if(this.time/60 > 0) {
+            timeString.append(this.time/60).append("시간 ");
+        }
+        timeString.append(this.time%60).append("분");
+
+        return timeString.toString();
+    }
 
 }

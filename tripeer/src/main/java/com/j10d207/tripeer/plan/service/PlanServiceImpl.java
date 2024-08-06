@@ -3,6 +3,7 @@ package com.j10d207.tripeer.plan.service;
 import com.j10d207.tripeer.plan.db.vo.CoworkerInvitedVO;
 import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
 import com.j10d207.tripeer.plan.db.vo.TitleChangeVO;
+import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.j10d207.tripeer.user.db.dto.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
@@ -349,12 +350,14 @@ public class PlanServiceImpl implements PlanService {
 
     //목적지간 최단 루트 계산
     public RootOptimizeDTO getShortTime(RootOptimizeDTO rootOptimizeDTO) {
+        // 장소 갯수 카운트 AtoB 이므로 2개가 아니면 throw
         int infoSize = rootOptimizeDTO.getPlaceList().size();
         if( infoSize < 2) {
             throw new CustomException(ErrorCode.NOT_ENOUGH_INFO);
         } else if(infoSize > 2) {
             throw new CustomException(ErrorCode.TOO_MANY_INFO);
         }
+        // option 0이면 자차(택시) -> 카카오
         if (rootOptimizeDTO.getOption() == 0) {
             int resultTime = kakaoService.getDirections(rootOptimizeDTO.getPlaceList().getFirst().getLongitude(),
                     rootOptimizeDTO.getPlaceList().getFirst().getLatitude(),
@@ -388,52 +391,23 @@ public class PlanServiceImpl implements PlanService {
                     rootOptimizeDTO.getPlaceList().getLast().getLongitude(),
                     rootOptimizeDTO.getPlaceList().getLast().getLatitude(), baseInfo);
             List<String[]> timeList = new ArrayList<>();
-            StringBuilder time = new StringBuilder();
-            switch (result.getStatus()) {
-                case 0:
-                    if(result.getTime()/60 > 0) {
-                        time.append(result.getTime()/60).append("시간 ");
-                    }
-                    time.append(result.getTime()%60).append("분");
 
-                    timeList.add(new String[]{time.toString(), String.valueOf(rootOptimizeDTO.getOption()) });
-                    rootOptimizeDTO.setSpotTime(timeList);
+            if (result.getStatus() == 0) {
 
-                    JsonElement rootInfo = result.getRootInfo();
-                    if (result.getPublicRoot() != null ) {
-                        List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
-                        publicRootDTOList.add(result.getPublicRoot());
-                        rootOptimizeDTO.setPublicRootList(publicRootDTOList);
-                        return rootOptimizeDTO;
-                    } else {
-                        return MakeRootInfo(rootOptimizeDTO, rootInfo);
-                    }
-                    //11 -출발지/도착지 간 거리가 가까워서 탐색된 경로 없음
-                    //12 -출발지에서 검색된 정류장이 없어서 탐색된 경로 없음
-                    //13 -도착지에서 검색된 정류장이 없어서 탐색된 경로 없음
-                    //14 -출발지/도착지 간 탐색된 대중교통 경로가 없음
-                case 11:
-                case 411:
-                    time.append("출발지/도착지 간 거리가 가까워서 탐색된 경로가 없습니다.");
-                    timeList.add(new String[]{time.toString(), "2" });
-                    break;
-                case 12:
-                case 412:
-                    time.append("출발지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
-                    timeList.add(new String[]{time.toString(), "2" });
-                    break;
-                case 13:
-                case 413:
-                    time.append("도착지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
-                    timeList.add(new String[]{time.toString(), "2" });
-                    break;
-                case 14:
-                case 414:
-                    time.append("출발지/도착지 간 탐색된 대중교통 경로가 없어 탐색된 경로가 없습니다.");
-                    timeList.add(new String[]{time.toString(), "2" });
-                    break;
-                default:
-                    throw new CustomException(ErrorCode.ROOT_API_ERROR);
+                timeList.add(new String[]{result.timeToString(), String.valueOf(rootOptimizeDTO.getOption()) });
+                rootOptimizeDTO.setSpotTime(timeList);
+
+                JsonElement rootInfo = result.getRootInfo();
+                if (result.getPublicRoot() != null ) {
+                    List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
+                    publicRootDTOList.add(result.getPublicRoot());
+                    rootOptimizeDTO.setPublicRootList(publicRootDTOList);
+                    return rootOptimizeDTO;
+                } else {
+                    return MakeRootInfo(rootOptimizeDTO, rootInfo);
+                }
+            } else {
+                timeList = tMapApiErrorCodeFilter(result.getStatus());
             }
             rootOptimizeDTO.setOption(result.getStatus());
             rootOptimizeDTO.setSpotTime(timeList);
@@ -549,6 +523,59 @@ public class PlanServiceImpl implements PlanService {
         rootOptimizeDTO.setPublicRootList(rootList);
 
         return rootOptimizeDTO;
+    }
+
+    private List<String[]> tMapApiErrorCodeFilter (int code) {
+        List<String[]> timeList = new ArrayList<>();
+        StringBuilder time = new StringBuilder();
+        switch (code) {
+//            case 0:
+//                if(result.getTime()/60 > 0) {
+//                    time.append(result.getTime()/60).append("시간 ");
+//                }
+//                time.append(result.getTime()%60).append("분");
+//
+//                timeList.add(new String[]{time.toString(), String.valueOf(rootOptimizeDTO.getOption()) });
+//                rootOptimizeDTO.setSpotTime(timeList);
+//
+//                JsonElement rootInfo = result.getRootInfo();
+//                if (result.getPublicRoot() != null ) {
+//                    List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
+//                    publicRootDTOList.add(result.getPublicRoot());
+//                    rootOptimizeDTO.setPublicRootList(publicRootDTOList);
+//                    return rootOptimizeDTO;
+//                } else {
+//                    return MakeRootInfo(rootOptimizeDTO, rootInfo);
+//                }
+            //11 -출발지/도착지 간 거리가 가까워서 탐색된 경로 없음
+            //12 -출발지에서 검색된 정류장이 없어서 탐색된 경로 없음
+            //13 -도착지에서 검색된 정류장이 없어서 탐색된 경로 없음
+            //14 -출발지/도착지 간 탐색된 대중교통 경로가 없음
+            case 11:
+            case 411:
+                time.append("출발지/도착지 간 거리가 가까워서 탐색된 경로가 없습니다.");
+                timeList.add(new String[]{time.toString(), "2" });
+                break;
+            case 12:
+            case 412:
+                time.append("출발지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
+                timeList.add(new String[]{time.toString(), "2" });
+                break;
+            case 13:
+            case 413:
+                time.append("도착지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
+                timeList.add(new String[]{time.toString(), "2" });
+                break;
+            case 14:
+            case 414:
+                time.append("출발지/도착지 간 탐색된 대중교통 경로가 없어 탐색된 경로가 없습니다.");
+                timeList.add(new String[]{time.toString(), "2" });
+                break;
+            default:
+                throw new CustomException(ErrorCode.ROOT_API_ERROR);
+        }
+
+        return timeList;
     }
 
 }
