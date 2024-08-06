@@ -17,5 +17,5 @@ public interface SpotService {
 
 //    public void createNewDescrip(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO);
 
-    public void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO);
+//    public void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO);
 }

@@ -3,6 +3,7 @@ package com.j10d207.tripeer.place.db.dto;
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.SpotDescriptionEntity;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -87,6 +88,7 @@ public class SpotDTO {
     }
 
     @Getter
+    @AllArgsConstructor
     @Builder
     public static class SpotListDTO {
 

@@ -73,8 +73,6 @@ public class TownServiceImpl implements TownService{
         townListDTOList.addAll(cityListDTOList);
 
 
-        return CityAndTownDTO.builder()
-                .townListDTOList(townListDTOList)
-                .build();
+        return new CityAndTownDTO(townListDTOList);
     }
 }

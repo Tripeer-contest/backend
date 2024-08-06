@@ -1,38 +1,20 @@
-[user 관련 변경사항 정리]
+[Place 관련 변경사항 정리]
 
 1. DTO 압축
 
-PlanDetailMain -> 여행 계획 관련 data 모음
+CityAndTownDTO
+CityDTO
+TownDTO
 
-TownDTO city -> 강원도 경상도 등등, town  도 안의 도시들
-
-Plan, SPOT, TOWN 세가지로 분류
-
-PublicRootDTO
-RootOptimizeDTO는 최단거리 계산 관련 -> 수정중
-
-PlanListResDTO는 History관련으로 History는 동천작성이 아니라서 일단 스킵
-
+-> CityAndTownDTO 하나에 두개의 이너클래스로 압축
 
 2. VO class 처리
-VO 종류도 inner 클래스를 사용해야 하나 의문,
-valid에서 변수 형식을 체크해주는건 방법은 있을만한데 왠지 안보임
+Place 도메인의 경우 도시 조회가 주류이고 도시 생성 하나만 POST 되기 때문에 VO하나만 존재 valid 또한 한개만 적용
+VO class로 분리되면서 검증 어노테이션이 달리지 않은 변수 몇개가 있는데 QA 후 삭제가능(사용하지 않는 변수)
 
 3. 정적 팩토리 메소드
 
-PlanDetailMainDTO.MyPlan에 보면 여러가지 정보를 파라미터로 해서 toDTO 하는데 리뷰 부탁합니다
-
-4. Valid
-
-user 와 비슷한 맥락
-
-5. 기타
-
-PlanServiceImpl 에서
-
-5-1. getSpotSearch 메소드에서 jpa where 조건문을 구체적으로 쓰기위해 Specification을 사용하는데 이부분을 ServiceImpl 에서 길게 작성하지 않는 방법이 통 떠오르지 않아 현상유지.
-
-5-2. (하단 3개 메소드) getShortTime, getOptimizingTime, MakeRootInfo는 최단거리 조정 관련이므로 tmap 도메인을 처리할때 같이 수정
+특별 기조 없음
 
 # Tripeer-backend
 

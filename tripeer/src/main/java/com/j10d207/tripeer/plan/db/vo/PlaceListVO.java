@@ -8,9 +8,9 @@ import java.util.List;
 @Getter
 public class PlaceListVO {
 
-    @NotNull(message = "${${validatedValue} is null")
+    @NotNull(message = "${validatedValue} is null")
     private int option;
-    @NotNull (message = "${${validatedValue} is null")
+    @NotNull (message = "${validatedValue} is null")
     private List<place> placeList;
 
     public static class place {

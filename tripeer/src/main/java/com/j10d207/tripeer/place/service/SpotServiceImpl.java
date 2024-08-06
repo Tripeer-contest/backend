@@ -55,12 +55,7 @@ public class SpotServiceImpl implements SpotService{
 
         List<SpotDTO.SpotInfoDTO> spotInfoDTOList = convertToDtoList(spotInfoEntities, userId);
 
-        boolean isLastPage = spotInfoDTOList.size() < 15;
-
-        return SpotDTO.SpotListDTO.builder()
-                .spotInfoDTOList(spotInfoDTOList)
-                .last(isLastPage)
-                .build();
+        return new SpotDTO.SpotListDTO(spotInfoDTOList.size() < 15, spotInfoDTOList);
     }
 
     @Override
@@ -75,12 +70,7 @@ public class SpotServiceImpl implements SpotService{
 
         List<SpotDTO.SpotInfoDTO> spotInfoDTOList = convertToDtoList(spotInfoEntities, userId);
 
-        boolean isLastPage = spotInfoDTOList.size() < 15;
-
-        return SpotDTO.SpotListDTO.builder()
-                .spotInfoDTOList(spotInfoDTOList)
-                .last(isLastPage)
-                .build();
+        return new SpotDTO.SpotListDTO(spotInfoDTOList.size() < 15, spotInfoDTOList);
     }
 
     @Override
@@ -93,38 +83,46 @@ public class SpotServiceImpl implements SpotService{
 
     @Override
     @Transactional
-    public void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO) {
+    public SpotDTO.SpotAddResDTO createNewSpot(SpotAddVO spotAddVO, long userId) {
+//        1. city 찾기
+        String[] splitAddr = spotAddVO.getAddr1().split(" ");
+        CityEntity cityEntity = getCityEntity(splitAddr[0]);
+        TownEntity townEntity = null;
 
-        String cat1 = null;
-        String cat2 = null;
-        String cat3 = null;
-        switch (spotAddVO.getContentTypeId()) {
-            //숙소
-            case 32 -> {
-                cat1 = "B02";
-                cat2 = "B0201";
-                cat3 = "B02010100";
-            }
-            //식당
-            case 39 -> {
-                cat1 = "A05";
-                cat2 = "A0502";
-                cat3 = "A05020100";
-            }
-            //관광지
-            default -> {
-                cat1 = "A01";
-                cat2 = "A0101";
-                cat3 = "A01010100";
+        Optional<TownEntity> townEntityOptional = townRepository.findByTownNameAndTownPK_City_CityId(splitAddr[1], cityEntity.getCityId());
+        if (townEntityOptional.isPresent()) {
+            townEntity = townEntityOptional.get();
+        } else {
+            townRepository.save(TownEntity.MakeNewSpotTownEntity(spotAddVO, splitAddr[1], new TownPK(townRepository.findMaxTownId() + 1, cityEntity)));
+        }
+
+        SpotInfoEntity spotInfo = SpotInfoEntity.MakeNewSpotEntity(spotAddVO, townEntity, MakeNewAddr(cityEntity.getCityName(), townEntity.getTownName(), splitAddr).toString());
+        SpotInfoEntity newSpotInfo = spotInfoRepository.save(spotInfo);
+        createNewDescrip(newSpotInfo, spotAddVO);
+
+        if(spotAddVO.isAddPlanCheck()) {
+            planService.addPlanSpot(spotAddVO.getPlanId(), newSpotInfo.getSpotInfoId(), userId);
+        }
+
+        return SpotDTO.SpotAddResDTO.EntityToDTO(spotInfo, spotAddVO.isAddPlanCheck());
+    }
+
+    private StringBuilder MakeNewAddr (String cityName, String TownName, String[] splitAddr) {
+        StringBuilder newAddr = new StringBuilder(cityName + " " + TownName + " ");
+
+        for (int i = 2;  i < splitAddr.length; i+=1) {
+            if (i != splitAddr.length-1) {
+                newAddr.append(splitAddr[i]).append(" ");
+            } else {
+                newAddr.append(splitAddr[i]);
             }
         }
 
-        spotDetailRepository.save(SpotDetailEntity.MakeNewSpotDetailEntity(spotInfoEntity, cat1, cat2, cat3));
+        return newAddr;
     }
 
+    private CityEntity getCityEntity(String splitAddr) {
 
-    public CityEntity getCityEntity(String splitAddr) {
-        
         Optional<CityEntity> CityEntityOptional = cityRepository.findByCityNameContains(splitAddr);
         CityEntity cityEntity = null;
 
@@ -168,56 +166,8 @@ public class SpotServiceImpl implements SpotService{
                     break;
             }
         }
-        
+
         return cityEntity;
-    }
-    
-    
-    @Override
-    @Transactional
-    public SpotDTO.SpotAddResDTO createNewSpot(SpotAddVO spotAddVO, long userId) {
-
-//        1. city 찾기
-        String fullAddr = spotAddVO.getAddr1();
-
-        String[] splitAddr = fullAddr.split(" ");
-        CityEntity cityEntity = getCityEntity(splitAddr[0]);
-        TownEntity townEntity = null;
-
-        Optional<TownEntity> townEntityOptional = townRepository.findByTownNameAndTownPK_City_CityId(splitAddr[1], cityEntity.getCityId());
-        if (townEntityOptional.isPresent()) {
-            townEntity = townEntityOptional.get();
-        } else {
-            TownPK townPK = TownPK.builder()
-                    .city(cityEntity)
-                    .townId(townRepository.findMaxTownId() + 1)
-                    .build();
-
-            townRepository.save(TownEntity.MakeNewSpotTownEntity(spotAddVO, splitAddr[1], townPK));
-        }
-
-        StringBuilder newAddr = new StringBuilder(cityEntity.getCityName() + " " + townEntity.getTownName() + " ");
-
-        for (int i = 2;  i < splitAddr.length; i+=1) {
-            if (i != splitAddr.length-1) {
-                newAddr.append(splitAddr[i]).append(" ");
-            } else {
-                newAddr.append(splitAddr[i]);
-            }
-        }
-
-        SpotInfoEntity spotInfo = SpotInfoEntity.MakeNewSpotEntity(spotAddVO, townEntity, newAddr.toString());
-
-        SpotInfoEntity newSpotInfo = spotInfoRepository.save(spotInfo);
-
-        createNewDescrip(newSpotInfo, spotAddVO);
-
-        if(spotAddVO.isAddPlanCheck()) {
-            planService.addPlanSpot(spotAddVO.getPlanId(), newSpotInfo.getSpotInfoId(), userId);
-        }
-
-        return SpotDTO.SpotAddResDTO.EntityToDTO(spotInfo, spotAddVO.isAddPlanCheck());
-
     }
 
     //    @Override
@@ -229,5 +179,36 @@ public class SpotServiceImpl implements SpotService{
                 .build();
         spotDescriptionRepository.save(build);
         createNewDetail(spotInfoEntity, spotAddVO);
+    }
+
+    //    @Override
+    @Transactional
+    public void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO) {
+
+        String cat1 = null;
+        String cat2 = null;
+        String cat3 = null;
+        switch (spotAddVO.getContentTypeId()) {
+            //숙소
+            case 32 -> {
+                cat1 = "B02";
+                cat2 = "B0201";
+                cat3 = "B02010100";
+            }
+            //식당
+            case 39 -> {
+                cat1 = "A05";
+                cat2 = "A0502";
+                cat3 = "A05020100";
+            }
+            //관광지
+            default -> {
+                cat1 = "A01";
+                cat2 = "A0101";
+                cat3 = "A01010100";
+            }
+        }
+
+        spotDetailRepository.save(SpotDetailEntity.MakeNewSpotDetailEntity(spotInfoEntity, cat1, cat2, cat3));
     }
 }

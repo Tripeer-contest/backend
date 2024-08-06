@@ -8,6 +8,7 @@ import com.j10d207.tripeer.place.service.TownService;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -112,7 +113,7 @@ public class PlaceController {
      * 스팟 생성
      * */
     @PostMapping("/spot/create")
-    public Response<SpotDTO.SpotAddResDTO> createNewSpot(@RequestBody SpotAddVO spotAddVO, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<SpotDTO.SpotAddResDTO> createNewSpot(@RequestBody @Valid SpotAddVO spotAddVO, @AuthenticationPrincipal CustomOAuth2User user) {
 
         return Response.of(HttpStatus.OK, "새로운 스팟 생성", spotService.createNewSpot(spotAddVO, user.getUserId()));
     }
