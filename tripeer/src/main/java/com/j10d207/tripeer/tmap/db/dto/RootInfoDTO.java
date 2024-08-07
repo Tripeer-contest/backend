@@ -34,4 +34,11 @@ public class RootInfoDTO {
         return timeString.toString();
     }
 
+    public void setLocation(double SX, double SY, double EX, double EY) {
+        this.startLatitude = SX;
+        this.startLongitude = SY;
+        this.endLatitude = EX;
+        this.endLongitude = EY;
+    }
+
 }

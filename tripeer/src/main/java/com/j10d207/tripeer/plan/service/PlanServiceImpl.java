@@ -27,6 +27,7 @@ import com.j10d207.tripeer.user.db.entity.WishListEntity;
 import com.j10d207.tripeer.user.db.repository.CoworkerRepository;
 import com.j10d207.tripeer.user.db.repository.UserRepository;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -381,43 +382,11 @@ public class PlanServiceImpl implements PlanService {
             return rootOptimizeDTO;
         }
         else if (rootOptimizeDTO.getOption() == 1) {
-            RootInfoDTO baseInfo = RootInfoDTO.builder()
-                    .startTitle(rootOptimizeDTO.getPlaceList().getFirst().getTitle())
-                    .endTitle(rootOptimizeDTO.getPlaceList().getLast().getTitle())
-                    .build();
-
-            RootInfoDTO result = tMapService.getPublicTime(rootOptimizeDTO.getPlaceList().getFirst().getLongitude(),
-                    rootOptimizeDTO.getPlaceList().getFirst().getLatitude(),
-                    rootOptimizeDTO.getPlaceList().getLast().getLongitude(),
-                    rootOptimizeDTO.getPlaceList().getLast().getLatitude(), baseInfo);
-            List<String[]> timeList = new ArrayList<>();
-
-            if (result.getStatus() == 0) {
-
-                timeList.add(new String[]{result.timeToString(), String.valueOf(rootOptimizeDTO.getOption()) });
-                rootOptimizeDTO.setSpotTime(timeList);
-
-                JsonElement rootInfo = result.getRootInfo();
-                if (result.getPublicRoot() != null ) {
-                    List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
-                    publicRootDTOList.add(result.getPublicRoot());
-                    rootOptimizeDTO.setPublicRootList(publicRootDTOList);
-                    return rootOptimizeDTO;
-                } else {
-                    return MakeRootInfo(rootOptimizeDTO, rootInfo);
-                }
-            } else {
-                timeList = tMapApiErrorCodeFilter(result.getStatus());
-            }
-            rootOptimizeDTO.setOption(result.getStatus());
-            rootOptimizeDTO.setSpotTime(timeList);
-            rootOptimizeDTO.setOption(result.getStatus());
-            return rootOptimizeDTO;
+            return tMapService.useTMapPublic(rootOptimizeDTO);
         }
         else {
             throw new CustomException(ErrorCode.ROOT_API_ERROR);
         }
-
     }
 
     //플랜 최단거리 조정
@@ -426,78 +395,59 @@ public class PlanServiceImpl implements PlanService {
         if(rootOptimizeDTO.getPlaceList().size() < 3) {
             throw new CustomException(ErrorCode.NOT_ENOUGH_INFO);
         }
-        List<CoordinateDTO> coordinateDTOList = new ArrayList<>();
         // 전달 받은 정보를 기반으로 좌표 리스트 생성
-        List<RootOptimizeDTO.place> placeList = rootOptimizeDTO.getPlaceList();
-        for (RootOptimizeDTO.place place : placeList) {
-            CoordinateDTO coordinateDTO = CoordinateDTO.builder()
-                    .title(place.getTitle())
-                    .latitude(place.getLatitude())
-                    .longitude(place.getLongitude())
-                    .build();
-            coordinateDTOList.add(coordinateDTO);
-        }
+        List<CoordinateDTO> coordinateDTOList = rootOptimizeDTO.getPlaceList().stream().map(CoordinateDTO::PlaceToCoordinate).toList();
 
         FindRoot root = null;
-        RootOptimizeDTO result = new RootOptimizeDTO();
         // 자동차
         if ( rootOptimizeDTO.getOption() == 0 ) {
             root = kakaoService.getOptimizingTime(coordinateDTOList);
-            result.setOption(0);
         }
         // 대중교통
         else if ( rootOptimizeDTO.getOption() == 1 ) {
-            result.setOption(1);
             root = tMapService.getOptimizingTime(coordinateDTOList);
-        } else {
-            result.setOption(-1);
         }
+        if (root != null) {
+            return refactorResult(root, rootOptimizeDTO);
+        }
+        // root 가 null 경우 -1 set 지웠음 (모순이긴 해서)
+        return null;
+    }
 
+    private RootOptimizeDTO refactorResult (FindRoot root, RootOptimizeDTO rootOptimizeDTO) {
+        RootOptimizeDTO result = new RootOptimizeDTO();
+        result.setOption(rootOptimizeDTO.getOption());
 
         List<RootOptimizeDTO.place> newPlaceList = new ArrayList<>();
         List<String[]> newSpotTimeList = new ArrayList<>();
+        int j = 0;
+        for(Integer i : root.getResultNumbers()) {
 
-        if (root != null) {
-
-            int j = 0;
-            for(Integer i : root.getResultNumbers()) {
-                StringBuilder sb = new StringBuilder();
-                if( root.getRootTime()[j]/60 != 0 ) {
-                    sb.append(root.getRootTime()[j]/60).append("시간 ");
-                }
-                sb.append(root.getRootTime()[j++]%60).append("분");
-
-                int nowStatus = j == root.getResultNumbers().size() ? rootOptimizeDTO.getOption() :root.getTimeTable()[i][root.getResultNumbers().get(j)].getStatus();
-                if( nowStatus > 10 & nowStatus < 15) {
-                    newSpotTimeList.add(new String[]{sb.toString(), "0" });
-                } else {
-                    newSpotTimeList.add(new String[]{sb.toString(), String.valueOf(rootOptimizeDTO.getOption()) });
-                }
-                RootOptimizeDTO.place newPlace = rootOptimizeDTO.getPlaceList().get(i);
-//                if (result.getOption() == 1) {
-//                    newPlace.setMovingRoot(j == root.getResultNumbers().size() ? "null" : root.getTimeTable()[i][root.getResultNumbers().get(j)].getRootInfo().toString());
-//                }
-                JsonElement info = j == root.getResultNumbers().size() ? null : root.getTimeTable()[i][root.getResultNumbers().get(j)].getRootInfo();
-                if( j != root.getResultNumbers().size() ) {
-                    if (root.getTimeTable()[i][root.getResultNumbers().get(j)].getPublicRoot() != null) {
-                        List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
-                        publicRootDTOList.add(root.getTimeTable()[i][root.getResultNumbers().get(j)].getPublicRoot());
-                        rootOptimizeDTO.setPublicRootList(publicRootDTOList);
-                    } else {
-                        rootOptimizeDTO = MakeRootInfo(rootOptimizeDTO, info);
-                    }
-                }
-                newPlaceList.add(newPlace);
+            int nowStatus = j == root.getResultNumbers().size() ? rootOptimizeDTO.getOption() : root.getTimeTable()[i][root.getResultNumbers().get(j)].getStatus();
+            if( nowStatus > 10 & nowStatus < 15) {
+                newSpotTimeList.add(new String[]{root.rootTimeToString(j++), "0" });
+            } else {
+                newSpotTimeList.add(new String[]{root.rootTimeToString(j++), String.valueOf(rootOptimizeDTO.getOption()) });
             }
-            result.setPlaceList(newPlaceList);
-            result.setSpotTime(newSpotTimeList);
-            result.setPublicRootList(rootOptimizeDTO.getPublicRootList());
-
-            return result;
+            RootOptimizeDTO.place newPlace = rootOptimizeDTO.getPlaceList().get(i);
+            JsonElement info = j == root.getResultNumbers().size() ? null : root.getTimeTable()[i][root.getResultNumbers().get(j)].getRootInfo();
+            if( j != root.getResultNumbers().size() ) {
+                if (root.getTimeTable()[i][root.getResultNumbers().get(j)].getPublicRoot() != null) {
+                    List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
+                    publicRootDTOList.add(root.getTimeTable()[i][root.getResultNumbers().get(j)].getPublicRoot());
+                    rootOptimizeDTO.setPublicRootList(publicRootDTOList);
+                } else {
+                    rootOptimizeDTO = MakeRootInfo(rootOptimizeDTO, info);
+                }
+            }
+            newPlaceList.add(newPlace);
         }
+        result.setPlaceList(newPlaceList);
+        result.setSpotTime(newSpotTimeList);
+        result.setPublicRootList(rootOptimizeDTO.getPublicRootList());
 
+        return result;
 
-        return null;
     }
 
     private RootOptimizeDTO MakeRootInfo(RootOptimizeDTO rootOptimizeDTO, JsonElement rootInfo) {
@@ -523,59 +473,6 @@ public class PlanServiceImpl implements PlanService {
         rootOptimizeDTO.setPublicRootList(rootList);
 
         return rootOptimizeDTO;
-    }
-
-    private List<String[]> tMapApiErrorCodeFilter (int code) {
-        List<String[]> timeList = new ArrayList<>();
-        StringBuilder time = new StringBuilder();
-        switch (code) {
-//            case 0:
-//                if(result.getTime()/60 > 0) {
-//                    time.append(result.getTime()/60).append("시간 ");
-//                }
-//                time.append(result.getTime()%60).append("분");
-//
-//                timeList.add(new String[]{time.toString(), String.valueOf(rootOptimizeDTO.getOption()) });
-//                rootOptimizeDTO.setSpotTime(timeList);
-//
-//                JsonElement rootInfo = result.getRootInfo();
-//                if (result.getPublicRoot() != null ) {
-//                    List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
-//                    publicRootDTOList.add(result.getPublicRoot());
-//                    rootOptimizeDTO.setPublicRootList(publicRootDTOList);
-//                    return rootOptimizeDTO;
-//                } else {
-//                    return MakeRootInfo(rootOptimizeDTO, rootInfo);
-//                }
-            //11 -출발지/도착지 간 거리가 가까워서 탐색된 경로 없음
-            //12 -출발지에서 검색된 정류장이 없어서 탐색된 경로 없음
-            //13 -도착지에서 검색된 정류장이 없어서 탐색된 경로 없음
-            //14 -출발지/도착지 간 탐색된 대중교통 경로가 없음
-            case 11:
-            case 411:
-                time.append("출발지/도착지 간 거리가 가까워서 탐색된 경로가 없습니다.");
-                timeList.add(new String[]{time.toString(), "2" });
-                break;
-            case 12:
-            case 412:
-                time.append("출발지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
-                timeList.add(new String[]{time.toString(), "2" });
-                break;
-            case 13:
-            case 413:
-                time.append("도착지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
-                timeList.add(new String[]{time.toString(), "2" });
-                break;
-            case 14:
-            case 414:
-                time.append("출발지/도착지 간 탐색된 대중교통 경로가 없어 탐색된 경로가 없습니다.");
-                timeList.add(new String[]{time.toString(), "2" });
-                break;
-            default:
-                throw new CustomException(ErrorCode.ROOT_API_ERROR);
-        }
-
-        return timeList;
     }
 
 }

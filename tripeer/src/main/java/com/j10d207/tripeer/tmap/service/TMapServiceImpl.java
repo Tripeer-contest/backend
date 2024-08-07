@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.tmap.service;
 
+import com.j10d207.tripeer.plan.db.dto.RootOptimizeDTO;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,10 +75,7 @@ public class TMapServiceImpl implements TMapService {
     @Override
     public RootInfoDTO getPublicTime(double SX, double SY, double EX, double EY, RootInfoDTO rootInfoDTO) {
         Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
-        rootInfoDTO.setStartLatitude(SX);
-        rootInfoDTO.setStartLongitude(SY);
-        rootInfoDTO.setEndLatitude(EX);
-        rootInfoDTO.setEndLongitude(EY);
+        rootInfoDTO.setLocation(SX, SY, EX, EY);
         if(optionalPublicRoot.isPresent()){
             rootInfoDTO.setPublicRoot(apiRequestService.getRootDTO(optionalPublicRoot.get()));
             rootInfoDTO.setTime(rootInfoDTO.getPublicRoot().getTotalTime());
@@ -132,6 +131,118 @@ public class TMapServiceImpl implements TMapService {
             }
 
         }
+    }
+
+    @Override
+    public RootOptimizeDTO useTMapPublic (RootOptimizeDTO rootOptimizeDTO) {
+        RootInfoDTO baseInfo = RootInfoDTO.builder()
+                .startTitle(rootOptimizeDTO.getPlaceList().getFirst().getTitle())
+                .endTitle(rootOptimizeDTO.getPlaceList().getLast().getTitle())
+                .build();
+
+        RootInfoDTO result = getPublicTime(rootOptimizeDTO.getPlaceList().getFirst().getLongitude(),
+                rootOptimizeDTO.getPlaceList().getFirst().getLatitude(),
+                rootOptimizeDTO.getPlaceList().getLast().getLongitude(),
+                rootOptimizeDTO.getPlaceList().getLast().getLatitude(), baseInfo);
+
+        if (result.getStatus() == 0) {
+            return tMapApiSuccessCode(rootOptimizeDTO, result);
+        } else {
+            rootOptimizeDTO.setOption(result.getStatus());
+            rootOptimizeDTO.setSpotTime(tMapApiErrorCodeFilter(result.getStatus()));
+            return rootOptimizeDTO;
+        }
+    }
+
+    private List<String[]> tMapApiErrorCodeFilter (int code) {
+        List<String[]> timeList = new ArrayList<>();
+        StringBuilder time = new StringBuilder();
+        switch (code) {
+//            case 0:
+//                if(result.getTime()/60 > 0) {
+//                    time.append(result.getTime()/60).append("시간 ");
+//                }
+//                time.append(result.getTime()%60).append("분");
+//
+//                timeList.add(new String[]{time.toString(), String.valueOf(rootOptimizeDTO.getOption()) });
+//                rootOptimizeDTO.setSpotTime(timeList);
+//
+//                JsonElement rootInfo = result.getRootInfo();
+//                if (result.getPublicRoot() != null ) {
+//                    List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
+//                    publicRootDTOList.add(result.getPublicRoot());
+//                    rootOptimizeDTO.setPublicRootList(publicRootDTOList);
+//                    return rootOptimizeDTO;
+//                } else {
+//                    return MakeRootInfo(rootOptimizeDTO, rootInfo);
+//                }
+            //11 -출발지/도착지 간 거리가 가까워서 탐색된 경로 없음
+            //12 -출발지에서 검색된 정류장이 없어서 탐색된 경로 없음
+            //13 -도착지에서 검색된 정류장이 없어서 탐색된 경로 없음
+            //14 -출발지/도착지 간 탐색된 대중교통 경로가 없음
+            case 11:
+            case 411:
+                time.append("출발지/도착지 간 거리가 가까워서 탐색된 경로가 없습니다.");
+                timeList.add(new String[]{time.toString(), "2" });
+                break;
+            case 12:
+            case 412:
+                time.append("출발지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
+                timeList.add(new String[]{time.toString(), "2" });
+                break;
+            case 13:
+            case 413:
+                time.append("도착지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
+                timeList.add(new String[]{time.toString(), "2" });
+                break;
+            case 14:
+            case 414:
+                time.append("출발지/도착지 간 탐색된 대중교통 경로가 없어 탐색된 경로가 없습니다.");
+                timeList.add(new String[]{time.toString(), "2" });
+                break;
+            default:
+                throw new CustomException(ErrorCode.ROOT_API_ERROR);
+        }
+
+        return timeList;
+    }
+
+    private RootOptimizeDTO tMapApiSuccessCode(RootOptimizeDTO rootOptimizeDTO, RootInfoDTO rootInfoDTO) {
+        rootOptimizeDTO.setSpotTime(Collections.singletonList(new String[]{rootInfoDTO.timeToString(), String.valueOf(rootOptimizeDTO.getOption())}));
+
+        if (rootInfoDTO.getPublicRoot() != null ) {
+            List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
+            publicRootDTOList.add(rootInfoDTO.getPublicRoot());
+            rootOptimizeDTO.setPublicRootList(publicRootDTOList);
+            return rootOptimizeDTO;
+        } else {
+            return MakeRootInfo(rootOptimizeDTO, rootInfoDTO.getRootInfo());
+        }
+    }
+
+    private RootOptimizeDTO MakeRootInfo(RootOptimizeDTO rootOptimizeDTO, JsonElement rootInfo) {
+        if(rootInfo == null) {
+            List<PublicRootDTO> rootList = new ArrayList<>();
+            if(rootOptimizeDTO.getPublicRootList() != null) {
+                rootList = rootOptimizeDTO.getPublicRootList();
+            }
+            rootList.add(null);
+            rootOptimizeDTO.setPublicRootList(rootList);
+            return rootOptimizeDTO;
+        }
+        JsonObject infoObject = rootInfo.getAsJsonObject();
+
+        PublicRootDTO publicRoot = PublicRootDTO.JsonToDTO(infoObject);
+
+
+        List<PublicRootDTO> rootList = new ArrayList<>();
+        if(rootOptimizeDTO.getPublicRootList() != null) {
+            rootList = rootOptimizeDTO.getPublicRootList();
+        }
+        rootList.add(publicRoot);
+        rootOptimizeDTO.setPublicRootList(rootList);
+
+        return rootOptimizeDTO;
     }
 
 
