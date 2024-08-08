@@ -14,6 +14,9 @@ import java.util.List;
 @Setter
 @Builder
 @ToString
+/*
+반환받은 Json 정보를 정제한 값을들 담기 위한 DTO
+ */
 public class PublicRootDTO {
 
     //총 소요 시간(min)

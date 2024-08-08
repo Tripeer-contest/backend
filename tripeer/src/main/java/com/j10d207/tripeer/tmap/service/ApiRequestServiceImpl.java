@@ -41,12 +41,7 @@ public class ApiRequestServiceImpl implements ApiRequestService {
         headers.set("appKey", apikey);
         headers.set("Content-Type", "application/json");
         headers.set("Accept", "*/*");
-        RouteReqDTO route = RouteReqDTO.builder()
-                .startX(String.valueOf(SX))
-                .startY(String.valueOf(SY))
-                .endX(String.valueOf(EX))
-                .endY(String.valueOf(EY))
-                .build();
+        RouteReqDTO route = RouteReqDTO.doubleConvertString(SX, SY, EX, EY);
         HttpEntity<RouteReqDTO> request = new HttpEntity<>(route, headers);
         String result = restTemplate.postForObject("https://apis.openapi.sk.com/transit/routes", request, String.class);
         return JsonParser.parseString(result).getAsJsonObject();

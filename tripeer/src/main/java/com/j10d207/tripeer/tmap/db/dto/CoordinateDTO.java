@@ -6,6 +6,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
+/*
+최적화시 목적지들의 좌표 리스트를 담기 위한 DTO
+ */
 public class CoordinateDTO {
 
     private double latitude;

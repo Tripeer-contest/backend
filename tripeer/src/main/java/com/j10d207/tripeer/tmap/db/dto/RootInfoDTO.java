@@ -9,6 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+/*
+tmapAPI 요청 결과를 저장하기 위한 DTO
+ */
 public class RootInfoDTO {
 
     private int time;

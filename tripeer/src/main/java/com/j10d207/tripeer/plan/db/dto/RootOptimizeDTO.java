@@ -13,6 +13,9 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @RequiredArgsConstructor
+/*
+Response 의 역할을 하고있음, 이동 방법을 입력해서 Res 하거나 VO를 통해 받은 목적지 순서를 재배치해서 Res 해줌
+ */
 public class RootOptimizeDTO {
 
     private int option;
