@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -22,5 +23,10 @@ public class CustomExceptionHandler {
     protected ResponseEntity<ErrorResponseEntity> handleCustomValidException(MethodArgumentNotValidException e) {
         return ErrorResponseEntity.CustomValid(e);
 
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    protected ResponseEntity<ErrorResponseEntity> handleCustomExpiredJwtException(ExpiredJwtException e) {
+        return ErrorResponseEntity.CustomJwtExpired(e);
     }
 }

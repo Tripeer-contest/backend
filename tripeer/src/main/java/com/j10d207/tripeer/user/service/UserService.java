@@ -1,8 +1,8 @@
 package com.j10d207.tripeer.user.service;
 
-import com.j10d207.tripeer.user.db.dto.*;
-import com.j10d207.tripeer.user.db.vo.InfoVO;
-import com.j10d207.tripeer.user.db.vo.JoinVO;
+import com.j10d207.tripeer.user.dto.req.InfoReq;
+import com.j10d207.tripeer.user.dto.req.JoinReq;
+import com.j10d207.tripeer.user.dto.res.UserDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,11 +13,11 @@ import java.util.List;
 public interface UserService {
 
     //회원가입
-    public String memberSignup(JoinVO join, HttpServletResponse response);
+    public String memberSignup(JoinReq join, HttpServletResponse response);
     //프로필 사진 변경
     public String uploadProfileImage(MultipartFile file, long userId);
     //내 정보 수정
-    public void modifyMyInfo(long userId, InfoVO infoVO);
+    public void modifyMyInfo(long userId, InfoReq infoReq);
     //소셜 정보 획득
     public UserDTO.Social getSocialInfo();
     //닉네임 중복체크

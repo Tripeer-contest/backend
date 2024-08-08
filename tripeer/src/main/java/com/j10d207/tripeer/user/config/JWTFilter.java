@@ -1,13 +1,17 @@
 package com.j10d207.tripeer.user.config;
 
-import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
-import com.j10d207.tripeer.user.db.dto.TestResponse;
+import com.j10d207.tripeer.exception.CustomException;
+import com.j10d207.tripeer.exception.ErrorCode;
+import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
+import com.j10d207.tripeer.user.dto.res.TestResponse;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,88 +20,50 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
-    private final JWTUtil jwtUtil;
-
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         //request에서 access 헤더를 찾음
         String access = request.getHeader("Authorization");
-        //access 헤더 검증
-        if ( access == null ) {
-            System.out.println("비로그인 상태");
-            if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                setContext(0L, "ROLE_NONE");
-            }
-            filterChain.doFilter(request, response);
-            //조건이 해당되면 메소드 종료 (필수)
-            return;
-        }
-
-        String accessToken = jwtUtil.splitToken(access);
-        // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음
-        try {
-            jwtUtil.isExpired(accessToken);
+        int verifyResult;
+        try {   //만료검사가 같이됨
+            verifyResult = JWTUtil.verifyJWT(access);
         } catch (ExpiredJwtException e) {
-
-            //response body
-            PrintWriter writer = response.getWriter();
-            writer.print("access token expired");
-            //response status code
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            setErrorResponse(response);
             return;
         }
-
-        // 토큰이 access인지 확인 (발급시 페이로드에 명시)
-        String category = jwtUtil.getCategory(accessToken);
-        if (!category.equals("Authorization")) {
-
-            //response body
-            PrintWriter writer = response.getWriter();
-            writer.print("invalid access token");
-            //response status code
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+        switch (verifyResult) {
+            case 2 :    // context 가 없는 미로그인 상태
+            case 3 :    // context 가 있는 미로그인 상태
+                filterChain.doFilter(request, response);
+                return;
+            case 4 :    // JWT 토큰의 bearer 가 없는상태 (변조)
+                log.error("JWT 토큰 변조 우려 - Bearer 없음");
+            case 5 :    // JWT 토큰이 카테고리가 다른 상태(다른 토큰 or 변조)
+                setErrorResponse(response);
+                return;
+            case 1 :    // JWT 검증 성공
+                filterChain.doFilter(request, response);
+                return;
+            default :   // 나올일 없음
+                log.error("JWT Filter 처리 중 작성되지 않은 상태 발생");
+                setErrorResponse(response);
         }
-
-        System.out.println("로그인 상태");
-        //토큰에서 email과 role 획득
-        setContext(jwtUtil.getUserId(accessToken), jwtUtil.getRole(accessToken));
-        filterChain.doFilter(request, response);
     }
 
-    private void setContext(long userId, String role) {
-        TestResponse testResponse = new TestResponse();
-        CustomOAuth2User test = new CustomOAuth2User(testResponse, role, userId);
-
-        //스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(test, null, getAuthorities(role));
-        //세션에 사용자 등록
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-    }
-
-    private Collection<? extends GrantedAuthority> getAuthorities(String role) {
-
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-
-        collection.add(new GrantedAuthority() {
-
-            @Override
-            public String getAuthority() {
-
-                return role;
-            }
-        });
-
-        return collection;
+    private void setErrorResponse (HttpServletResponse response) throws IOException {
+        //response body
+        PrintWriter writer = response.getWriter();
+        writer.print("invalid access token");
+        //response status code
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 }
 

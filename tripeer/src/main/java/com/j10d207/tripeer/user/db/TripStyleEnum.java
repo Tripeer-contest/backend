@@ -21,7 +21,7 @@ public class TripStyleEnum {
     }
 
     // 상수 값을 이름으로 변환하는 메서드
-    public static String getNameByCode(int code) {
+    public static String getNameOfCode(int code) {
         for (TripStyleListEnum contentType : TripStyleListEnum.values()) {
             if (contentType.getCode() == code) {
                 return contentType.getName();

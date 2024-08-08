@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.user.db.vo;
+package com.j10d207.tripeer.user.dto.req;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
-public class InfoVO {
+public class InfoReq {
 
     @Email(message = "올바르지 않은 이메일 형식입니다. ${validatedValue}")
     private String email;
