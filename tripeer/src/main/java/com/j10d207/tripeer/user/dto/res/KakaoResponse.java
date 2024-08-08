@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.user.db.dto;
+package com.j10d207.tripeer.user.dto.res;
 
 
 import java.util.Map;

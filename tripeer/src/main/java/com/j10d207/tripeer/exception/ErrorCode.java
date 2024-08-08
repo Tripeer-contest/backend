@@ -21,6 +21,7 @@ public enum ErrorCode {
     TOKEN_EXPIRED_ERROR(HttpStatus.FORBIDDEN, "ACCOUNT-005", "만료되지 않은 access 또는 만료된 refresh 입니다"),
     DUPLICATE_USER(HttpStatus.BAD_REQUEST, "ACCOUNT-006", "이미 등록된 사용자입니다."),
     REQUEST_AUTHORIZATION(HttpStatus.FORBIDDEN, "ACCOUNT-007", "권한이 없는 요청입니다."),
+    EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "ACCOUNT-008", "토큰이 만료되었습니다."),
 
     // plan
     HAS_BUCKET(HttpStatus.BAD_REQUEST, "PLAN-001", "이미 등록된 장소입니다."),

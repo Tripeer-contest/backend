@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.user.db.dto;
+package com.j10d207.tripeer.user.dto.res;
 
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
@@ -9,8 +9,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 public class UserDTO {
@@ -30,7 +28,7 @@ public class UserDTO {
         private String style3;
         private int style3Num;
 
-        public static Info EntityToDTO(UserEntity userEntity) {
+        public static Info fromUserEntity(UserEntity userEntity) {
             return UserDTO.Info.builder()
                     .userId(userEntity.getUserId())
                     .nickname(userEntity.getNickname())
@@ -51,7 +49,7 @@ public class UserDTO {
         private String nickname;
         private String profileImage;
 
-        public static Search UserEntityToDTO(UserEntity userEntity) {
+        public static Search fromUserEntity(UserEntity userEntity) {
             return Search.builder()
                     .userId(userEntity.getUserId())
                     .nickname(userEntity.getNickname())
@@ -59,7 +57,7 @@ public class UserDTO {
                     .build();
         }
 
-        public static Search CoworkerEntityToDTO(CoworkerEntity coworkerEntity) {
+        public static Search fromCoworkerEntity(CoworkerEntity coworkerEntity) {
                  return Search.builder()
                         .userId(coworkerEntity.getUser().getUserId())
                         .nickname(coworkerEntity.getUser().getNickname())
@@ -75,7 +73,7 @@ public class UserDTO {
         private String birth;
         private String profileImage;
 
-        public static Social ContextToDTO () {
+        public static Social getContext() {
             SecurityContext context = SecurityContextHolder.getContext();
             Authentication authentication = context.getAuthentication();
             CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();

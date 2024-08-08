@@ -2,8 +2,7 @@ package com.j10d207.tripeer.plan.service;
 
 import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
 import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
-import com.j10d207.tripeer.user.db.dto.UserDTO;
-import com.nimbusds.jose.shaded.gson.JsonArray;
+import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.j10d207.tripeer.email.db.dto.EmailDTO;
@@ -11,7 +10,6 @@ import com.j10d207.tripeer.email.service.EmailService;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.kakao.service.KakaoService;
-import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.CityEntity;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.entity.TownEntity;
@@ -201,7 +199,7 @@ public class PlanServiceImpl implements PlanService {
             townDTOList.add(TownDTO.EntityToDTO(planTownEntity));
         }
 
-        return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, coworkerEntityList.stream().map(UserDTO.Search::CoworkerEntityToDTO).toList());
+        return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, coworkerEntityList.stream().map(UserDTO.Search::fromCoworkerEntity).toList());
     }
 
     //동행자 추가

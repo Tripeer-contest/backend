@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.user.db.vo;
+package com.j10d207.tripeer.user.dto.req;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class JoinVO {
+public class JoinReq {
 
     @NotBlank(message = "닉네임이 입력되지 않았거나 공백입니다. ${validatedValue}")
     private String nickname;
