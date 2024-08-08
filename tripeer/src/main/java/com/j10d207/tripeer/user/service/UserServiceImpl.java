@@ -86,6 +86,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public void modifyMyInfo(long userId, InfoVO infoVO) {
         UserEntity user = userRepository.findByUserId(userId);
+        //닉네임 중복체크 2중검증
         if(!user.getNickname().equals(infoVO.getNickname()) && userRepository.existsByNickname(infoVO.getNickname())){
             throw new CustomException(ErrorCode.DUPLICATE_USER);
         }
@@ -96,7 +97,7 @@ public class UserServiceImpl implements UserService{
     //소셜정보 불러오기
     @Override
     public UserDTO.Social getSocialInfo() {
-        // 회원 가입 창에서 일부 정보를 바로 불러오기 위해 사용, 코드 압축 가능성 있으나 프론트와 협업 필요하다 판단하여 간소화 유지 0802
+        // 회원 가입 창에서 일부 정보를 바로 불러오기 위해 사용, 코드 압축 가능성 있으나 프론트와 협업 필요하다 판단하여 간단하게 유지 0802
         return UserDTO.Social.ContextToDTO();
     }
 
