@@ -1,8 +1,8 @@
 package com.j10d207.tripeer.user.service;
 
-import com.j10d207.tripeer.user.db.dto.*;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.repository.UserRepository;
+import com.j10d207.tripeer.user.dto.res.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

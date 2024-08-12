@@ -25,7 +25,7 @@ import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootDetailRepository;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootRepository;
 import com.j10d207.tripeer.user.config.JWTUtil;
-import com.j10d207.tripeer.user.db.dto.UserDTO;
+import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.repository.CoworkerRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class HistoryServiceImpl implements HistoryService{
-    private final JWTUtil jwtUtil;
+
     private final CoworkerRepository coworkerRepository;
     private final PlanRepository planRepository;
     private final PlanTownRepository planTownRepository;
@@ -49,8 +49,6 @@ public class HistoryServiceImpl implements HistoryService{
     private final PlanDayRepository planDayRepository;
     private final SpotInfoRepository spotInfoRepository;
     private final GalleryRepository galleryRepository;
-    private final RouteRepository routeRepository;
-    private final RouteDetailRepository routeDetailRepository;
     private final PublicRootRepository publicRootRepository;
     private final PublicRootDetailRepository publicRootDetailRepository;
 
@@ -91,7 +89,7 @@ public class HistoryServiceImpl implements HistoryService{
 
             // 플랜의 멤버 리스트 넣기
             List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
-            planListResDTO.setMember(coworkerEntityList.stream().map(UserDTO.Search::CoworkerEntityToDTO).toList());
+            planListResDTO.setMember(coworkerEntityList.stream().map(UserDTO.Search::fromCoworkerEntity).toList());
 
             planListResDTO.setNewPlan(false);
             planListResDTOList.add(planListResDTO);
@@ -216,7 +214,7 @@ public class HistoryServiceImpl implements HistoryService{
         }
 
         List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
-        planListResDTO.setMember(coworkerEntityList.stream().map(UserDTO.Search::CoworkerEntityToDTO).toList());
+        planListResDTO.setMember(coworkerEntityList.stream().map(UserDTO.Search::fromCoworkerEntity).toList());
 
 
         List<HistoryDayDTO> diaryDayList = new ArrayList<>();

@@ -2,8 +2,7 @@ package com.j10d207.tripeer.plan.service;
 
 import com.j10d207.tripeer.plan.db.vo.CoworkerInvitedVO;
 import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
-import com.j10d207.tripeer.plan.db.vo.TitleChangeVO;
-import com.j10d207.tripeer.user.db.dto.UserDTO;
+import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.j10d207.tripeer.email.db.dto.EmailDTO;
@@ -154,7 +153,7 @@ public class PlanServiceImpl implements PlanService {
         //선택한 도시 목록 구성
         List<TownDTO> townDTOList = planTown.stream().map(TownDTO::EntityToDTO).toList();
 
-        return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, coworkerEntityList.stream().map(UserDTO.Search::CoworkerEntityToDTO).toList());
+        return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, coworkerEntityList.stream().map(UserDTO.Search::fromCoworkerEntity).toList());
     }
 
     //동행자 추가
