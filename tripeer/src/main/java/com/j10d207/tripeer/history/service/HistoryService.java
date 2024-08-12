@@ -4,7 +4,7 @@ import com.j10d207.tripeer.history.db.dto.CostReqDTO;
 import com.j10d207.tripeer.history.db.dto.CostResDTO;
 import com.j10d207.tripeer.history.db.dto.HistoryDetailResDTO;
 import com.j10d207.tripeer.history.db.dto.PlanSaveReqDTO;
-import com.j10d207.tripeer.plan.db.dto.PlanListResDTO;
+import com.j10d207.tripeer.plan.dto.res.PlanListResDTO;
 
 import java.util.List;
 

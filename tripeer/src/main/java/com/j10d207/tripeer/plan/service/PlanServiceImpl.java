@@ -1,7 +1,11 @@
 package com.j10d207.tripeer.plan.service;
 
-import com.j10d207.tripeer.plan.db.vo.CoworkerInvitedVO;
-import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
+import com.j10d207.tripeer.plan.dto.req.CoworkerInvitedReq;
+import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
+import com.j10d207.tripeer.plan.dto.req.TitleChangeReq;
+import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
+import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
+import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
@@ -89,11 +93,11 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 이름 변경
     @Override
-    public void changeTitle(TitleChangeVO titleChangeVO, long userId) {
-        PlanEntity plan = planRepository.findByPlanId(titleChangeVO.getPlanId());
+    public void changeTitle(TitleChangeReq titleChangeReq, long userId) {
+        PlanEntity plan = planRepository.findByPlanId(titleChangeReq.getPlanId());
 
-        if(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(titleChangeVO.getPlanId(), userId)) {
-            plan.setTitle(titleChangeVO.getTitle());
+        if(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(titleChangeReq.getPlanId(), userId)) {
+            plan.setTitle(titleChangeReq.getTitle());
             planRepository.save(plan);
         } else {
             // 토큰과 소유자가 일치하지 않음
@@ -158,19 +162,19 @@ public class PlanServiceImpl implements PlanService {
 
     //동행자 추가
     @Override
-    public void joinPlan(CoworkerInvitedVO coworkerInvitedVO, long userId) {
+    public void joinPlan(CoworkerInvitedReq coworkerInvitedReq, long userId) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        PlanEntity planEntity = planRepository.findById(coworkerInvitedVO.getPlanId())
+        PlanEntity planEntity = planRepository.findById(coworkerInvitedReq.getPlanId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
-        UserEntity user = UserEntity.builder().userId(coworkerInvitedVO.getUserId()).build();
+        UserEntity user = UserEntity.builder().userId(coworkerInvitedReq.getUserId()).build();
 
-        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerInvitedVO.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
+        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerInvitedReq.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
             throw new CustomException(ErrorCode.TOO_MANY_PLAN);
         }
 
-        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedVO.getPlanId(), coworkerInvitedVO.getUserId())) {
-            CoworkerEntity coworkerEntity = CoworkerEntity.MakeCoworkerEntity(user, PlanEntity.builder().planId(coworkerInvitedVO.getPlanId()).build());
+        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedReq.getPlanId(), coworkerInvitedReq.getUserId())) {
+            CoworkerEntity coworkerEntity = CoworkerEntity.MakeCoworkerEntity(user, PlanEntity.builder().planId(coworkerInvitedReq.getPlanId()).build());
             coworkerRepository.save(coworkerEntity);
 
             emailService.sendEmail(EmailDTO.MakeInvitedEmail(planEntity.getTitle(), userEntity.getNickname(), user.getUserId()));
@@ -305,8 +309,8 @@ public class PlanServiceImpl implements PlanService {
 
     //플랜 디테일 저장
     @Override
-    public void addPlanDetail(PlanDetailVO planDetailVO) {
-        planDetailRepository.save(PlanDetailEntity.VOToEntity(planDetailVO));
+    public void addPlanDetail(PlanDetailReq planDetailReq) {
+        planDetailRepository.save(PlanDetailEntity.VOToEntity(planDetailReq));
     }
 
     //플랜 디테일 전체 조회

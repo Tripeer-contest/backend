@@ -1,6 +1,6 @@
 package com.j10d207.tripeer.history.db.dto;
 
-import com.j10d207.tripeer.plan.db.dto.PlanListResDTO;
+import com.j10d207.tripeer.plan.dto.res.PlanListResDTO;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -1,6 +1,6 @@
 package com.j10d207.tripeer.plan.db.entity;
 
-import com.j10d207.tripeer.plan.db.dto.PlanDetailMainDTO;
+import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

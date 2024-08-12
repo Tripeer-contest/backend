@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.plan.db.vo;
+package com.j10d207.tripeer.plan.dto.req;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.time.LocalTime;
 
 @Getter
-public class PlanDetailVO {
+public class PlanDetailReq {
 
     @NotNull (message = "${${validatedValue} is null")
     private long planDayId;

@@ -1,6 +1,7 @@
-package com.j10d207.tripeer.plan.db.dto;
+package com.j10d207.tripeer.plan.dto.res;
 
-import com.j10d207.tripeer.plan.db.vo.PlaceListVO;
+import com.j10d207.tripeer.plan.db.dto.PublicRootDTO;
+import com.j10d207.tripeer.plan.dto.req.PlaceListReq;
 import lombok.*;
 import org.springframework.beans.BeanUtils;
 
@@ -42,10 +43,10 @@ public class RootOptimizeDTO {
         private String movingRoot;
     }
 
-    public static RootOptimizeDTO PlaceListVOTODTO(PlaceListVO placeListVO) {
+    public static RootOptimizeDTO PlaceListVOTODTO(PlaceListReq placeListReq) {
         return RootOptimizeDTO.builder()
-                .option(placeListVO.getOption())
-                .placeList(placeListVO.getPlaceList().stream().map(place -> {
+                .option(placeListReq.getOption())
+                .placeList(placeListReq.getPlaceList().stream().map(place -> {
                     RootOptimizeDTO.place newPlaceList = new place();
                     BeanUtils.copyProperties(place, newPlaceList);
                     return newPlaceList;

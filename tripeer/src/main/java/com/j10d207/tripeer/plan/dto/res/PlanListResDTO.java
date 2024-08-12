@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.plan.db.dto;
+package com.j10d207.tripeer.plan.dto.res;
 
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import lombok.Getter;

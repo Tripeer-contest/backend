@@ -1,10 +1,11 @@
-package com.j10d207.tripeer.plan.db.dto;
+package com.j10d207.tripeer.plan.dto.res;
 
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
+import com.j10d207.tripeer.plan.db.dto.TownDTO;
 import com.j10d207.tripeer.plan.db.entity.PlanDetailEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanTownEntity;
-import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
+import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import lombok.AllArgsConstructor;
@@ -39,7 +40,7 @@ public class PlanDetailMainDTO {
         private LocalDate endDay;
         private LocalDate createDay;
 
-        public static CreateResultInfo VOToDTO (PlanCreateInfoVO createInfo) {
+        public static CreateResultInfo VOToDTO (PlanCreateInfoReq createInfo) {
 
             return CreateResultInfo.builder()
                     .title(createInfo.getTitle())

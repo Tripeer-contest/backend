@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.plan.db.dto;
+package com.j10d207.tripeer.plan.dto.res;
 
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;

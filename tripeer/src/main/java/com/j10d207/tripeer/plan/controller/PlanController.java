@@ -1,10 +1,13 @@
 package com.j10d207.tripeer.plan.controller;
 
-import com.j10d207.tripeer.plan.db.dto.*;
-import com.j10d207.tripeer.plan.db.vo.*;
+import com.j10d207.tripeer.plan.dto.req.*;
+import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
+import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
+import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +27,7 @@ public class PlanController {
     private final PlanService planService;
     //플랜 생성
     @PostMapping
-    public Response<PlanDetailMainDTO.CreateResultInfo> createPlan(@RequestBody @Valid PlanCreateInfoVO createInfo, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<PlanDetailMainDTO.CreateResultInfo> createPlan(@RequestBody @Valid PlanCreateInfoReq createInfo, @AuthenticationPrincipal CustomOAuth2User user) {
         PlanDetailMainDTO.CreateResultInfo planResponseDTO = PlanDetailMainDTO.CreateResultInfo.VOToDTO(createInfo);
         PlanDetailMainDTO.CreateResultInfo result = planService.createPlan(planResponseDTO, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 생성 완료", result);
@@ -32,8 +35,8 @@ public class PlanController {
 
     //플랜 이름 변경
     @PatchMapping("/title")
-    public Response<Boolean> changeTitle(@RequestBody @Valid TitleChangeVO titleChangeVO, @AuthenticationPrincipal CustomOAuth2User user) {
-        planService.changeTitle(titleChangeVO, user.getUserId());
+    public Response<Boolean> changeTitle(@RequestBody @Valid TitleChangeReq titleChangeReq, @AuthenticationPrincipal CustomOAuth2User user) {
+        planService.changeTitle(titleChangeReq, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 이름 변경 완료", true);
     }
 
@@ -60,8 +63,8 @@ public class PlanController {
 
     //동행자 추가
     @PostMapping("/member")
-    public Response<?> joinPlan(@RequestBody @Valid CoworkerInvitedVO coworkerInvitedVO, @AuthenticationPrincipal CustomOAuth2User user) {
-        planService.joinPlan(coworkerInvitedVO, user.getUserId());
+    public Response<?> joinPlan(@RequestBody @Valid CoworkerInvitedReq coworkerInvitedReq, @AuthenticationPrincipal CustomOAuth2User user) {
+        planService.joinPlan(coworkerInvitedReq, user.getUserId());
         return Response.of(HttpStatus.OK, "초대 완료", null);
     }
 
@@ -116,8 +119,8 @@ public class PlanController {
 
     //플랜 디테일 저장
     @PostMapping("/detail")
-    public Response<?> addPlanDetail(@RequestBody @Valid PlanDetailVO planDetailVO) {
-        planService.addPlanDetail(planDetailVO);
+    public Response<?> addPlanDetail(@RequestBody @Valid PlanDetailReq planDetailReq) {
+        planService.addPlanDetail(planDetailReq);
         return Response.of(HttpStatus.OK, "플랜 디테일 저장 완료", null);
     }
 
@@ -130,15 +133,15 @@ public class PlanController {
 
     //목적지간 최단 루트 계산
     @PostMapping("/optimizing/short")
-    public Response<RootOptimizeDTO> getShortTime(@RequestBody @Valid PlaceListVO placeListVO) {
-        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.PlaceListVOTODTO(placeListVO);
+    public Response<RootOptimizeDTO> getShortTime(@RequestBody @Valid PlaceListReq placeListReq) {
+        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.PlaceListVOTODTO(placeListReq);
         return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime(rootOptimizeDTO));
     }
 
     //플랜 최단거리 조정
     @PostMapping("/optimizing")
-    public Response<RootOptimizeDTO> getOptimizedPlan(@RequestBody @Valid PlaceListVO placeListVO) throws IOException {
-        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.PlaceListVOTODTO(placeListVO);
+    public Response<RootOptimizeDTO> getOptimizedPlan(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
+        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.PlaceListVOTODTO(placeListReq);
         RootOptimizeDTO result = planService.getOptimizingTime(rootOptimizeDTO);
         return Response.of(HttpStatus.OK, "목적지 리스트 최적화 완료", result);
     }
