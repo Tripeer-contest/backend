@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +20,7 @@ import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.history.db.entity.GalleryEntity;
 import com.j10d207.tripeer.history.db.repository.GalleryRepository;
-import com.j10d207.tripeer.history.dto.response.GalleryDTO;
+import com.j10d207.tripeer.history.dto.res.GalleryRes;
 import com.j10d207.tripeer.plan.db.entity.PlanDayEntity;
 import com.j10d207.tripeer.plan.db.repository.PlanDayRepository;
 import com.j10d207.tripeer.user.config.JWTUtil;
@@ -49,7 +50,7 @@ public class GalleryServiceImpl implements GalleryService {
 	}
 
 	@Override
-	public List<GalleryDTO> uploadsImageAndMovie(List<MultipartFile> files, String token, long planDayId) {
+	public List<GalleryRes> uploadsImageAndMovie(List<MultipartFile> files, String token, long planDayId) {
 
 		PlanDayEntity planDay = planDayRepository.findByPlanDayId(planDayId);
 
@@ -63,7 +64,7 @@ public class GalleryServiceImpl implements GalleryService {
 		String dateString = planDay.getDay().format(formatter);
 
 		// 업로드한 파일의 업로드 경로를 담을 리스트
-		List<GalleryDTO> createInfo = new ArrayList<>();
+		List<GalleryRes> createInfo = new ArrayList<>();
 
 		for (MultipartFile file : files) {
 
@@ -98,35 +99,22 @@ public class GalleryServiceImpl implements GalleryService {
 				.build();
 			galleryRepository.save(gallery);
 
-			GalleryDTO galleryDTO = GalleryDTO.builder()
+			GalleryRes galleryRes = GalleryRes.builder()
 				.galleryId(gallery.getGalleryId())
 				.userNickname(user.getNickname())
 				.userImg(user.getProfileImage())
 				.img(url)
 				.build();
-			createInfo.add(galleryDTO);
+			createInfo.add(galleryRes);
 		}
 		return createInfo;
 	}
 
-	public List<GalleryDTO> getGalleryList(long planDayId) {
-		List<GalleryDTO> galleryList = new ArrayList<>();
+	public List<GalleryRes> getGalleryList(long planDayId) {
 		PlanDayEntity planDay = planDayRepository.findByPlanDayId(planDayId);
-		List<GalleryEntity> galleryEntityList = galleryRepository.findAllByPlanDay(planDay);
-		for (GalleryEntity galleryEntity : galleryEntityList) {
-			String url = galleryEntity.getUrl();
-			String[] splitUrl = url.split("/");
-			long userId = Long.parseLong(splitUrl[4]);
-			UserEntity user = userRepository.findByUserId(userId);
-			GalleryDTO galleryDTO = GalleryDTO.builder()
-				.galleryId(galleryEntity.getGalleryId())
-				.img(url)
-				.userImg(user.getProfileImage())
-				.userNickname(user.getNickname())
-				.build();
-			galleryList.add(galleryDTO);
-		}
-		return galleryList;
+		List<GalleryEntity> galleryEntityList = Optional.ofNullable(galleryRepository.findAllByPlanDay(planDay))
+			.orElseThrow(() -> new CustomException(ErrorCode.GALLERY_NOT_FOUND));
+		return galleryEntityList.stream().map(GalleryRes::from).toList();
 	}
 
 	public String deleteGalleryList(List<Long> galleryIdList) {

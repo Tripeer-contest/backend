@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.history.dto.request;
+package com.j10d207.tripeer.history.dto.req;
 
 import java.util.List;
 
@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class GalleryIdListDTO {
+public class GalleryIdListReq {
 	List<Long> galleryIdList;
 }

@@ -1,22 +1,22 @@
 package com.j10d207.tripeer.history.service;
 
-import com.j10d207.tripeer.history.dto.request.CostReqDTO;
-import com.j10d207.tripeer.history.dto.response.CostResDTO;
-import com.j10d207.tripeer.history.dto.response.HistoryDetailResDTO;
-import com.j10d207.tripeer.history.dto.request.PlanSaveReqDTO;
-import com.j10d207.tripeer.plan.db.dto.PlanListResDTO;
-
 import java.util.List;
+
+import com.j10d207.tripeer.history.dto.req.CostReq;
+import com.j10d207.tripeer.history.dto.req.PlanSaveReq;
+import com.j10d207.tripeer.history.dto.res.CostRes;
+import com.j10d207.tripeer.history.dto.res.HistoryDetailRes;
+import com.j10d207.tripeer.history.dto.res.PlanInfoRes;
 
 public interface HistoryService {
 
-    public List<PlanListResDTO> historyList(String token);
+	public List<PlanInfoRes> historyList(String token);
 
-    public CostResDTO postCost(CostReqDTO costReqDTO);
+	public CostRes postCost(CostReq costReq);
 
-    public String savePlanDetail(PlanSaveReqDTO planSaveReqDTO);
+	public String savePlanDetail(PlanSaveReq planSaveReq);
 
-    public HistoryDetailResDTO getHistoryDetail(long planId);
+	public HistoryDetailRes getHistoryDetail(long planId);
 
-    public String revokeHistoryDetail(long planId);
+	public String revokeHistoryDetail(long planId);
 }
