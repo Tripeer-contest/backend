@@ -1,5 +1,9 @@
 package com.j10d207.tripeer.user.config;
 
+import com.j10d207.tripeer.exception.CustomException;
+import com.j10d207.tripeer.exception.ErrorCode;
+import com.j10d207.tripeer.user.dto.res.JWTDto;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -8,59 +12,62 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class JWTUtil {
 
-    private SecretKey secretKey;
+    private static SecretKey secretKey;
 
     public JWTUtil(@Value("${spring.jwt.secret}")String secret) {
-
-        secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        if(secret != null) {
+            secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        }
     }
 
-    public String getName(String token) {
-
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("name", String.class);
+    public Claims getPayload(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
     }
 
-    public String getRole(String token) {
 
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
-    }
-
-    public long getUserId(String token) {
-
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
-    }
-
-    public String getCategory(String token) {
-
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
-    }
-
-    public Boolean isExpired(String token) {
-
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
-    }
-
-    public String createJwt(String category, String name, String role, long userId, Long expiredMs) {
+    public String createJWT(JWTDto jwtDto, Long expiredMs) {
 
         return Jwts.builder()
-                .claim("category", category)
-                .claim("name", name)
-                .claim("role", role)
-                .claim("userId", userId)
+                .claim("category", jwtDto.getCategory())
+                .claim("name", jwtDto.getName())
+                .claim("role", jwtDto.getRole())
+                .claim("userId", jwtDto.getUserId())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
                 .compact();
     }
 
-    public String splitToken(String token) {
-        String[] result = token.split(" ");
-        return  result[1];
+    public Optional<JWTDto> verifyJWT(String token) {
+        if ( token != null && !token.split(" ")[0].startsWith("Bearer")) {
+            throw new CustomException(ErrorCode.EXPIRED_JWT);
+        }
+        if ( token == null ) {
+            return Optional.empty();
+        }
+
+        String[] tokenFrags = token.split(" ");
+        if( tokenFrags.length < 2 ) {
+            throw new CustomException(ErrorCode.EXPIRED_JWT);
+        }
+
+        Claims payload = getPayload(tokenFrags[1]);
+
+        // 토큰이 access인지 확인 (발급시 페이로드에 명시)
+        String category = payload.get("category", String.class);
+        if (!category.equals("Authorization")) {
+            throw new CustomException(ErrorCode.EXPIRED_JWT);
+        }
+
+        JWTDto result = JWTDto.ofToken(payload);
+        return Optional.of(result);
     }
+
 
 
 }

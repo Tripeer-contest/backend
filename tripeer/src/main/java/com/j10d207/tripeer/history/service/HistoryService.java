@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface HistoryService {
 
-    public List<PlanListResDTO> historyList(String token);
+    public List<PlanListResDTO> historyList(long userId);
 
     public CostResDTO postCost(CostReqDTO costReqDTO);
 

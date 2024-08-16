@@ -6,10 +6,11 @@ import com.j10d207.tripeer.history.service.GalleryService;
 import com.j10d207.tripeer.history.service.HistoryService;
 import com.j10d207.tripeer.plan.db.dto.PlanListResDTO;
 import com.j10d207.tripeer.response.Response;
-import jakarta.servlet.http.HttpServletRequest;
+import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,9 +28,9 @@ public class HistoryController {
 
 
     @GetMapping
-    public Response<List<PlanListResDTO>> getPlanList(HttpServletRequest request) {
+    public Response<List<PlanListResDTO>> getPlanList(@AuthenticationPrincipal CustomOAuth2User user) {
         try {
-            List<PlanListResDTO> planList = historyService.historyList(request.getHeader("Authorization"));
+            List<PlanListResDTO> planList = historyService.historyList(user.getUserId());
             return Response.of(HttpStatus.OK, "내 다이어리 리스트 조회", planList);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -38,10 +39,10 @@ public class HistoryController {
 
     @PostMapping("/gallery/upload/{planDayId}")
     public Response<List<GalleryDTO>> uploadsImageAndMovie(
-                                        HttpServletRequest request,
+                                        @AuthenticationPrincipal CustomOAuth2User user,
                                         @PathVariable("planDayId") long planDayId,
                                         @RequestPart(value = "images") List<MultipartFile> multipartFiles) {
-        List<GalleryDTO> galleryList = galleryService.uploadsImageAndMovie(multipartFiles, request.getHeader("Authorization"), planDayId);
+        List<GalleryDTO> galleryList = galleryService.uploadsImageAndMovie(multipartFiles, user.getUserId(), planDayId);
         return Response.of(HttpStatus.OK, "업로드 성공", galleryList);
     }
 

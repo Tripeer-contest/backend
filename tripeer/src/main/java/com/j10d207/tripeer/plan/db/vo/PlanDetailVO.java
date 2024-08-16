@@ -1,11 +1,11 @@
-package com.j10d207.tripeer.plan.db.dto;
+package com.j10d207.tripeer.plan.db.vo;
 
 import lombok.Getter;
 
 import java.time.LocalTime;
 
 @Getter
-public class PlanDetailReqDTO {
+public class PlanDetailVO {
 
     private long planDetailId;
     private long planDayId;
@@ -15,5 +15,4 @@ public class PlanDetailReqDTO {
     private LocalTime spotTime;
     private String description;
     private int cost;
-
 }

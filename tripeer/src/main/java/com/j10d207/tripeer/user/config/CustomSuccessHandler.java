@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.user.config;
 
-import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
+import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
+import com.j10d207.tripeer.user.dto.res.JWTDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,10 +53,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String name = customUserDetails.getName();
         long userId = customUserDetails.getUserId();
-
         //토큰 생성
-        String access = jwtUtil.createJwt("Authorization", name, role, userId, accessTime);
-        String refresh = jwtUtil.createJwt("Authorization-re", name, role, userId, refreshTime);
+        String access = jwtUtil.createJWT(new JWTDto("Authorization", name, role, userId), accessTime);
+        String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", name, role, userId), refreshTime);
 
         response.addCookie(createCookie("Authorization", access));
         response.addCookie(createCookie("Authorization-re", refresh));

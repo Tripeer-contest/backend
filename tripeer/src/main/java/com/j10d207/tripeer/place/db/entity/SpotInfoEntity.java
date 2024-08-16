@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.place.db.entity;
 
+import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,5 +37,19 @@ public class SpotInfoEntity {
     private double longitude;
     //받은 DB에 있었는데 뭔지 모르겠습니다.
     private String mlevel;
+
+    public static SpotInfoEntity MakeNewSpotEntity (SpotAddVO spotAddVO, TownEntity town, String newAddr) {
+        return  SpotInfoEntity.builder()
+                .town(town)
+                .contentTypeId(spotAddVO.getContentTypeId())
+                .title(spotAddVO.getTitle())
+                .addr1(newAddr)
+                .tel(spotAddVO.getTel())
+                .firstImage(spotAddVO.getFirstImage())
+                .firstImage2(spotAddVO.getSecondImage())
+                .latitude(spotAddVO.getLatitude())
+                .longitude(spotAddVO.getLongitude())
+                .build();
+    }
 
 }

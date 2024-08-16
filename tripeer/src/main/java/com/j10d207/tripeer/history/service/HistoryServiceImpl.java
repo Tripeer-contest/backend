@@ -25,7 +25,7 @@ import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootDetailRepository;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootRepository;
 import com.j10d207.tripeer.user.config.JWTUtil;
-import com.j10d207.tripeer.user.db.dto.UserSearchDTO;
+import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.repository.CoworkerRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class HistoryServiceImpl implements HistoryService{
-    private final JWTUtil jwtUtil;
+
     private final CoworkerRepository coworkerRepository;
     private final PlanRepository planRepository;
     private final PlanTownRepository planTownRepository;
@@ -49,16 +49,12 @@ public class HistoryServiceImpl implements HistoryService{
     private final PlanDayRepository planDayRepository;
     private final SpotInfoRepository spotInfoRepository;
     private final GalleryRepository galleryRepository;
-    private final RouteRepository routeRepository;
-    private final RouteDetailRepository routeDetailRepository;
     private final PublicRootRepository publicRootRepository;
     private final PublicRootDetailRepository publicRootDetailRepository;
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public List<PlanListResDTO> historyList (String token) {
-        String access = jwtUtil.splitToken(token);
-        long userId = jwtUtil.getUserId(access);
+    public List<PlanListResDTO> historyList (long userId) {
         List<PlanListResDTO> planListResDTOList = new ArrayList<>();
         List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserId(userId);
         for (CoworkerEntity coworker : coworkerList) {
@@ -92,17 +88,8 @@ public class HistoryServiceImpl implements HistoryService{
             planListResDTO.setEndDay(plan.getEndDate());
 
             // 플랜의 멤버 리스트 넣기
-            List<UserSearchDTO> memberList = new ArrayList<>();
             List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
-            for (CoworkerEntity coworkerEntity : coworkerEntityList) {
-                UserSearchDTO userSearchDTO = UserSearchDTO.builder()
-                        .userId(coworkerEntity.getUser().getUserId())
-                        .nickname(coworkerEntity.getUser().getNickname())
-                        .profileImage(coworkerEntity.getUser().getProfileImage())
-                        .build();
-                memberList.add(userSearchDTO);
-            }
-            planListResDTO.setMember(memberList);
+            planListResDTO.setMember(coworkerEntityList.stream().map(UserDTO.Search::fromCoworkerEntity).toList());
 
             planListResDTO.setNewPlan(false);
             planListResDTOList.add(planListResDTO);
@@ -226,17 +213,9 @@ public class HistoryServiceImpl implements HistoryService{
             planListResDTO.setImg(planTown.getFirst().getTown().getTownImg());
         }
 
-        List<UserSearchDTO> memberList = new ArrayList<>();
         List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
-        for (CoworkerEntity coworkerEntity : coworkerEntityList) {
-            UserSearchDTO userSearchDTO = UserSearchDTO.builder()
-                    .userId(coworkerEntity.getUser().getUserId())
-                    .nickname(coworkerEntity.getUser().getNickname())
-                    .profileImage(coworkerEntity.getUser().getProfileImage())
-                    .build();
-            memberList.add(userSearchDTO);
-        }
-        planListResDTO.setMember(memberList);
+        planListResDTO.setMember(coworkerEntityList.stream().map(UserDTO.Search::fromCoworkerEntity).toList());
+
 
         List<HistoryDayDTO> diaryDayList = new ArrayList<>();
         List<PlanDayEntity> planDayList = planDayRepository.findAllByPlan_PlanIdOrderByDayAsc(planId);
