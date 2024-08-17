@@ -29,7 +29,6 @@ import com.j10d207.tripeer.plan.db.repository.PlanDetailRepository;
 import com.j10d207.tripeer.plan.db.repository.PlanRepository;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootRepository;
-import com.j10d207.tripeer.user.config.JWTUtil;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.repository.CoworkerRepository;
 
@@ -40,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class HistoryServiceImpl implements HistoryService {
-	private final JWTUtil jwtUtil;
 	private final CoworkerRepository coworkerRepository;
 	private final PlanRepository planRepository;
 	private final PlanDetailRepository planDetailRepository;
@@ -50,9 +48,7 @@ public class HistoryServiceImpl implements HistoryService {
 
 	ObjectMapper objectMapper = new ObjectMapper();
 
-	public List<PlanInfoRes> historyList(String token) {
-		String access = jwtUtil.splitToken(token);
-		long userId = jwtUtil.getUserId(access);
+	public List<PlanInfoRes> historyList(long userId) {
 		List<PlanInfoRes> planListResDTOList = new ArrayList<>();
 		List<CoworkerEntity> coworkerList = Optional.ofNullable(coworkerRepository.findByUser_UserId(userId))
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_HAS_COWORKER));

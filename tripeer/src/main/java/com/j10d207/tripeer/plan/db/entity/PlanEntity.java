@@ -1,15 +1,19 @@
 package com.j10d207.tripeer.plan.db.entity;
 
+import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
+import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -48,4 +52,15 @@ public class PlanEntity {
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PLAN_ID")
 	private List<CoworkerEntity> coworkerList;
+
+    public static PlanEntity VOToEntity (PlanCreateInfoVO createInfo) {
+        return PlanEntity.builder()
+                .title(createInfo.getTitle())
+                .vehicle(createInfo.getVehicle())
+                .startDate(createInfo.getStartDay())
+                .endDate(createInfo.getEndDay())
+                .createDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
+                .build();
+    }
+
 }

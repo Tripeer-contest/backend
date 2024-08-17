@@ -6,6 +6,7 @@ import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.*;
 import com.j10d207.tripeer.place.db.repository.*;
+import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.user.config.JWTUtil;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
@@ -45,10 +46,8 @@ public class SpotServiceImpl implements SpotService{
     }
 
     @Override
-    public SpotListDto getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, String token) {
+    public SpotListDto getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, long userId) {
         Pageable pageable = PageRequest.of(page,15);
-        String access = jwtUtil.splitToken(token);
-        long userId = jwtUtil.getUserId(access);
 
         List<SpotInfoEntity> spotInfoEntities;
         if (townId == -1) {
@@ -68,11 +67,8 @@ public class SpotServiceImpl implements SpotService{
     }
 
     @Override
-    public SpotListDto getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, String token) {
+    public SpotListDto getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, long userId) {
         Pageable pageable = PageRequest.of(page,15);
-        String access = jwtUtil.splitToken(token);
-        long userId = jwtUtil.getUserId(access);
-
         List<SpotInfoEntity> spotInfoEntities;
         if (townId == -1) {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityId(ContentTypeId, cityId, pageable);
@@ -101,23 +97,23 @@ public class SpotServiceImpl implements SpotService{
 
     @Override
     @Transactional
-    public void createNewDescrip(SpotInfoEntity spotInfoEntity, SpotAddReqDto spotAddReqDto) {
+    public void createNewDescrip(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO) {
         SpotDescriptionEntity build = SpotDescriptionEntity.builder()
                 .spotInfo(spotInfoEntity)
-                .overview(spotAddReqDto.getOverview())
+                .overview(spotAddVO.getOverview())
                 .build();
         spotDescriptionRepository.save(build);
-        createNewDetail(spotInfoEntity, spotAddReqDto);
+        createNewDetail(spotInfoEntity, spotAddVO);
     }
 
     @Override
     @Transactional
-    public void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddReqDto spotAddReqDto) {
+    public void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddVO spotAddVO) {
 
         String cat1 = null;
         String cat2 = null;
         String cat3 = null;
-        switch (spotAddReqDto.getContentTypeId()) {
+        switch (spotAddVO.getContentTypeId()) {
             //숙소
             case 32 -> {
                 cat1 = "B02";
@@ -203,10 +199,10 @@ public class SpotServiceImpl implements SpotService{
     
     @Override
     @Transactional
-    public SpotAddResDto createNewSpot(SpotAddReqDto spotAddReqDTO, HttpServletRequest request) {
+    public SpotAddResDto createNewSpot(SpotAddVO spotAddVO, long userId) {
 
 //        1. city 찾기
-        String fullAddr = spotAddReqDTO.getAddr1();
+        String fullAddr = spotAddVO.getAddr1();
 
         String[] splitAddr = fullAddr.split(" ");
         CityEntity cityEntity = getCityEntity(splitAddr[0]);
@@ -223,8 +219,8 @@ public class SpotServiceImpl implements SpotService{
 
             townEntity = TownEntity.builder()
                     .townName(splitAddr[1])
-                    .longitude(spotAddReqDTO.getLongitude())
-                    .latitude(spotAddReqDTO.getLatitude())
+                    .longitude(spotAddVO.getLongitude())
+                    .latitude(spotAddVO.getLatitude())
                     .description("discription")
                     .townImg("https://tripeer207.s3.ap-northeast-2.amazonaws.com/front/static/default1.png")
                     .townPK(townPK)
@@ -243,37 +239,18 @@ public class SpotServiceImpl implements SpotService{
         }
 
 
-        SpotInfoEntity spotInfo = SpotInfoEntity.builder()
-                .town(townEntity)
-                .contentTypeId(spotAddReqDTO.getContentTypeId())
-                .title(spotAddReqDTO.getTitle())
-                .addr1(newAddr.toString())
-                .tel(spotAddReqDTO.getTel())
-                .firstImage(spotAddReqDTO.getFirstImage())
-                .firstImage2(spotAddReqDTO.getSecondImage())
-                .latitude(spotAddReqDTO.getLatitude())
-                .longitude(spotAddReqDTO.getLongitude())
-                .build();
+        SpotInfoEntity spotInfo = SpotInfoEntity.MakeNewSpotEntity(spotAddVO, townEntity, newAddr.toString());
 
 
         SpotInfoEntity newSpotInfo = spotInfoRepository.save(spotInfo);
 
-        createNewDescrip(newSpotInfo, spotAddReqDTO);
+        createNewDescrip(newSpotInfo, spotAddVO);
 
-        if(spotAddReqDTO.isAddPlanCheck()) {
-            planService.addPlanSpot(spotAddReqDTO.getPlanId(), newSpotInfo.getSpotInfoId(), request.getHeader("Authorization"));
+        if(spotAddVO.isAddPlanCheck()) {
+            planService.addPlanSpot(spotAddVO.getPlanId(), newSpotInfo.getSpotInfoId(), userId);
         }
 
-        return SpotAddResDto.builder()
-                .spotInfoId(spotInfo.getSpotInfoId())
-                .title(spotInfo.getTitle())
-                .contentType(ContentTypeEnum.getNameByCode(spotInfo.getContentTypeId()))
-                .addr(spotInfo.getAddr1())
-                .latitude(spotInfo.getLatitude())
-                .longitude(spotInfo.getLongitude())
-                .img(spotInfo.getFirstImage())
-                .spot(spotAddReqDTO.isAddPlanCheck())
-                .wishlist(false)
-                .build();
+        return SpotAddResDto.EntityToDTO(spotInfo, spotAddVO.isAddPlanCheck());
+
     }
 }

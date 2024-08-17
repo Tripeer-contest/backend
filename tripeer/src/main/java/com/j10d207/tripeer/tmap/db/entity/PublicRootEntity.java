@@ -2,6 +2,7 @@ package com.j10d207.tripeer.tmap.db.entity;
 
 import java.util.List;
 
+import com.nimbusds.jose.shaded.gson.JsonElement;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -40,5 +41,21 @@ public class PublicRootEntity {
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PUBLIC_ROOT_ID")
 	private List<PublicRootDetailEntity> publicRootDetailList;
+
+    public static PublicRootEntity JsonToEntity (JsonElement rootInfo, double SX, double SY, double EX, double EY, int time) {
+        return  PublicRootEntity.builder()
+                .startLat(SX)
+                .startLon(SY)
+                .endLat(EX)
+                .endLon(EY)
+                .totalTime(time)
+                .totalDistance(rootInfo.getAsJsonObject().get("totalDistance").getAsInt())
+                .totalWalkTime(rootInfo.getAsJsonObject().get("totalWalkTime").getAsInt())
+                .totalWalkDistance(rootInfo.getAsJsonObject().get("totalWalkDistance").getAsInt())
+                .pathType(rootInfo.getAsJsonObject().get("pathType").getAsInt())
+                .totalFare(rootInfo.getAsJsonObject().getAsJsonObject("fare").getAsJsonObject("regular").get("totalFare").getAsInt())
+                .build();
+    }
+
 
 }

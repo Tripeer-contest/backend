@@ -2,6 +2,7 @@ package com.j10d207.tripeer.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -20,6 +21,7 @@ public enum ErrorCode {
     TOKEN_EXPIRED_ERROR(HttpStatus.FORBIDDEN, "ACCOUNT-005", "만료되지 않은 access 또는 만료된 refresh 입니다"),
     DUPLICATE_USER(HttpStatus.BAD_REQUEST, "ACCOUNT-006", "이미 등록된 사용자입니다."),
     REQUEST_AUTHORIZATION(HttpStatus.FORBIDDEN, "ACCOUNT-007", "권한이 없는 요청입니다."),
+    EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "ACCOUNT-008", "토큰이 만료되었습니다."),
 
     // plan
     HAS_BUCKET(HttpStatus.BAD_REQUEST, "PLAN-001", "이미 등록된 장소입니다."),
@@ -56,8 +58,10 @@ public enum ErrorCode {
     INVALID_EMAIL(HttpStatus.NOT_FOUND, "EMAIL-002", "유효하지 않은 이메일 주소입니다."),
 
     //Weather
-    WEATHER_NOT_FOUND(HttpStatus.NOT_FOUND, "WEATHER-001", "날씨 정보를 불러 올 수 없습니다.");
+    WEATHER_NOT_FOUND(HttpStatus.NOT_FOUND, "WEATHER-001", "날씨 정보를 불러 올 수 없습니다."),
 
+    //Valid
+    INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-001", "Invalid argument");
 
     private final HttpStatus httpStatus;	// HttpStatus
     private final String code;				// ACCOUNT-001

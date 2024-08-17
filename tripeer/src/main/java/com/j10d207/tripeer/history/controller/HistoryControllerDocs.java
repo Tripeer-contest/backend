@@ -2,6 +2,7 @@ package com.j10d207.tripeer.history.controller;
 
 import java.util.List;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -16,6 +17,7 @@ import com.j10d207.tripeer.history.dto.res.GalleryRes;
 import com.j10d207.tripeer.history.dto.res.HistoryDetailRes;
 import com.j10d207.tripeer.history.dto.res.PlanInfoRes;
 import com.j10d207.tripeer.response.Response;
+import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 
 @Tag(name = "지난 여행 관련 Controller", description = "플랜 저장 이후부터의 지난 여행을 관리")
 public interface HistoryControllerDocs {
@@ -34,7 +35,7 @@ public interface HistoryControllerDocs {
 		@ApiResponse(responseCode = "204", description = "여행 리스트 조회는 성공했으나 비었을 경우",
 			content = @Content(schema = @Schema(implementation = Response.class)))
 	})
-	Response<List<PlanInfoRes>> getPlanList(HttpServletRequest request);
+	Response<List<PlanInfoRes>> getPlanList(@AuthenticationPrincipal CustomOAuth2User user);
 
 	@Operation(summary = "지난 여행 디테일 조회 요청", description = "planId 로 해당 지난여행의 디테일을 조회할 수 있다.")
 	@ApiResponses(value = {
@@ -54,8 +55,8 @@ public interface HistoryControllerDocs {
 		@ApiResponse(responseCode = "503", description = "S3 Upload 에 실패했을 때",
 			content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class)))
 	})
-	Response<List<GalleryRes>> uploadsImageAndMovie(
-		HttpServletRequest request,
+	public Response<List<GalleryRes>> uploadsImageAndMovie(
+		@AuthenticationPrincipal CustomOAuth2User user,
 		@PathVariable("planDayId") long planDayId,
 		@RequestPart(value = "images") List<MultipartFile> multipartFiles);
 

@@ -26,6 +26,7 @@ public class GalleryEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	// PK
 	private long galleryId;
+	private long userId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "UESR_ID")
