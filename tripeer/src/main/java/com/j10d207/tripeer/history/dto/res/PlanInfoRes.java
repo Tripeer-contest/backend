@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.j10d207.tripeer.plan.db.entity.PlanEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanTownEntity;
-import com.j10d207.tripeer.user.db.dto.UserSearchDTO;
+import com.j10d207.tripeer.user.dto.res.UserDTO;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +23,7 @@ public class PlanInfoRes {
 	private List<String> townList;
 	private LocalDate startDay;
 	private LocalDate endDay;
-	private List<UserSearchDTO> member;
+	private List<UserDTO.Search> member;
 	private boolean newPlan;
 
 	public static PlanInfoRes from(PlanEntity planEntity) {
@@ -49,7 +49,7 @@ public class PlanInfoRes {
 			.townList(townNameList)
 			.startDay(planEntity.getStartDate())
 			.endDay(planEntity.getEndDate())
-			.member(planEntity.getCoworkerList().stream().map(UserSearchDTO::from).toList())
+			.member(planEntity.getCoworkerList().stream().map(UserDTO.Search::fromCoworkerEntity).toList())
 			.newPlan(false)
 			.build();
 	}

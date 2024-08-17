@@ -2,12 +2,10 @@ package com.j10d207.tripeer.history.service;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -49,20 +47,13 @@ public class HistoryServiceImpl implements HistoryService {
 	ObjectMapper objectMapper = new ObjectMapper();
 
 	public List<PlanInfoRes> historyList(long userId) {
-		List<PlanInfoRes> planListResDTOList = new ArrayList<>();
 		List<CoworkerEntity> coworkerList = Optional.ofNullable(coworkerRepository.findByUser_UserId(userId))
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_HAS_COWORKER));
-		for (CoworkerEntity coworker : coworkerList) {
-			PlanEntity plan = coworker.getPlan();
-			// 저장된 계획만 걸러서
-			if (!plan.getVehicle().equals("history")) {
-				continue;
-			}
-			planListResDTOList.add(PlanInfoRes.from(plan));
-
-		}
-		Collections.sort(planListResDTOList, (o1, o2) -> o2.getStartDay().compareTo(o1.getStartDay()));
-		return planListResDTOList;
+		return coworkerList.stream()
+			.map(CoworkerEntity::getPlan)
+			.filter(plan -> plan.getVehicle().equals("history"))
+			.map(PlanInfoRes::from)
+			.toList();
 	}
 
 	public CostRes postCost(@RequestBody CostReq costReq) {
@@ -168,11 +159,9 @@ public class HistoryServiceImpl implements HistoryService {
 		PlanEntity plan = Optional.ofNullable(planRepository.findByPlanId(planId))
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
 		List<PlanDayEntity> planDayEntityList = planDayRepository.findAllByPlan_PlanIdOrderByDayAsc(planId);
-		for (PlanDayEntity planDayEntity : planDayEntityList) {
-			List<PlanDetailEntity> planDetailEntityList = planDetailRepository.findByPlanDay_PlanDayId(
-				planDayEntity.getPlanDayId(), Sort.by(Sort.Direction.ASC, "step"));
-			planDetailRepository.deleteAll(planDetailEntityList);
-		}
+		planDayEntityList.stream()
+			.map(PlanDayEntity::getPlanDetailList)  // PlanDayEntity에서 PlanDetailEntity 리스트를 가져옴
+			.forEach(planDetailRepository::deleteAll);  // 가져온 각각의 PlanDetailEntity 리스트를 삭제
 		plan.setVehicle("private");
 		planRepository.save(plan);
 		return "성공";

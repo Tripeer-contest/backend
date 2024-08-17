@@ -99,12 +99,8 @@ public class HistoryController implements HistoryControllerDocs {
 
 	@GetMapping("/{planId}")
 	public Response<HistoryDetailRes> getPlanDetail(@PathVariable("planId") long planId) {
-		try {
-			HistoryDetailRes res = historyService.getHistoryDetail(planId);
-			return Response.of(HttpStatus.OK, "다이어리 디테일 조회 성공", res);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		HistoryDetailRes res = historyService.getHistoryDetail(planId);
+		return Response.of(HttpStatus.OK, "다이어리 디테일 조회 성공", res);
 	}
 
 	@PutMapping("/revoke/{planId}")

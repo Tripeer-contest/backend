@@ -26,10 +26,9 @@ public class GalleryEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	// PK
 	private long galleryId;
-	private long userId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "UESR_ID")
+	@JoinColumn(name = "USER_ID")
 	private UserEntity user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -37,4 +36,10 @@ public class GalleryEntity {
 	private PlanDayEntity planDay;
 
 	private String url;
+
+	public GalleryEntity(String url, PlanDayEntity planDay, UserEntity user) {
+		this.url = url;
+		this.planDay = planDay;
+		this.user = user;
+	}
 }

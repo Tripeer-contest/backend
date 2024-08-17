@@ -1,6 +1,5 @@
 package com.j10d207.tripeer.history.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -16,6 +15,8 @@ import com.j10d207.tripeer.plan.db.repository.PlanDayRepository;
 import com.j10d207.tripeer.s3.dto.FileInfoDto;
 import com.j10d207.tripeer.s3.dto.S3Option;
 import com.j10d207.tripeer.s3.service.S3Service;
+import com.j10d207.tripeer.user.db.entity.UserEntity;
+import com.j10d207.tripeer.user.db.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,30 +29,22 @@ public class GalleryServiceImpl implements GalleryService {
 	private final GalleryRepository galleryRepository;
 	private final PlanDayRepository planDayRepository;
 	private final S3Service s3Service;
+	private final UserRepository userRepository;
 
 	@Override
 	public List<GalleryRes> uploadsImageAndMovie(List<MultipartFile> files, long userId, long planDayId) {
-
 		PlanDayEntity planDay = planDayRepository.findByPlanDayId(planDayId);
-
-		// 업로드한 파일의 업로드 경로를 담을 리스트
-		List<GalleryEntity> createInfo = new ArrayList<>();
-
-		for (MultipartFile file : files) {
-			//저장된 Url
-			FileInfoDto fileInfoDto = FileInfoDto.ofGalleryFile(file, userId, planDay.getDay(), S3Option.galleryUpload);
-			String url = s3Service.fileUpload(fileInfoDto);
-
-			//DB에 업로드 정보 저장
-			GalleryEntity gallery = GalleryEntity.builder()
-				.url(url)
-				.planDay(planDay)
-				.userId(userId)
-				.build();
-			galleryRepository.save(gallery);
-			createInfo.add(gallery);
-		}
-		return createInfo.stream().map(GalleryRes::from).toList();
+		UserEntity user = userRepository.findByUserId(userId);
+		return files.stream()
+			.map(file -> {
+				FileInfoDto fileInfoDto = FileInfoDto.ofGalleryFile(
+					file, userId, planDay.getDay(), S3Option.galleryUpload);
+				String url = s3Service.fileUpload(fileInfoDto);
+				GalleryEntity newGallery = new GalleryEntity(url, planDay, user);
+				galleryRepository.save(newGallery);
+				return GalleryRes.from(newGallery);
+			})
+			.toList();
 	}
 
 	public List<GalleryRes> getGalleryList(long planDayId) {
@@ -61,12 +54,15 @@ public class GalleryServiceImpl implements GalleryService {
 	}
 
 	public String deleteGalleryList(List<Long> galleryIdList) {
-		for (Long galleryId : galleryIdList) {
-			GalleryEntity galleryEntity = galleryRepository.findById(galleryId)
-				.orElseThrow(() -> new CustomException(ErrorCode.GALLERY_NOT_FOUND));
-			s3Service.deleteFile(galleryEntity.getUrl(), S3Option.galleryDelete);
-			galleryRepository.delete(galleryEntity);
-		}
+		galleryIdList.stream()
+			.map(galleryId -> galleryRepository.findById(galleryId)
+				.orElseThrow(() -> new CustomException(ErrorCode.GALLERY_NOT_FOUND)))
+			.forEach(galleryEntity -> {
+				// s3에서 삭제
+				s3Service.deleteGallery(galleryEntity.getUrl().substring(50));
+				// mysql 에서 삭제
+				galleryRepository.delete(galleryEntity);
+			});
 		return "갤러리 삭제 성공";
 	}
 }

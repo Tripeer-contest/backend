@@ -3,7 +3,6 @@ package com.j10d207.tripeer.history.dto.res;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.j10d207.tripeer.history.db.entity.GalleryEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanDayEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanDetailEntity;
 
@@ -26,14 +25,13 @@ public class HistoryDayRes {
 
 	public static HistoryDayRes from(PlanDayEntity planDayEntity) {
 		List<PlanDetailEntity> planDetailEntityList = planDayEntity.getPlanDetailList();
-		HistoryDayRes.builder()
+		return HistoryDayRes.builder()
 			.planDayId(planDayEntity.getPlanDayId())
 			.date(planDayEntity.getDay().toString())
-			.galleryImgList(planDayEntity.getGalleryList().subList(0, 4).stream().map(GalleryEntity::getUrl).toList())
+			.galleryImgList(new ArrayList<>())
 			.timeList(planDetailEntityList.stream().map(HistoryDayRes::makeTimeList).toList())
 			.routeList(planDetailEntityList.stream().map(RouteRes::from).toList())
 			.build();
-		return HistoryDayRes.builder().build();
 	}
 
 	//타임리스트를 만드는 함수
