@@ -164,6 +164,13 @@ public class HistoryServiceImpl implements HistoryService {
 			.forEach(planDetailRepository::deleteAll);  // 가져온 각각의 PlanDetailEntity 리스트를 삭제
 		plan.setVehicle("private");
 		planRepository.save(plan);
-		return "성공";
+		return "복구 성공";
+	}
+
+	public String deleteHistoryDetail(long planId, long userId) {
+		CoworkerEntity coworker = coworkerRepository.findByPlan_PlanIdAndUser_UserId(planId, userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
+		coworkerRepository.delete(coworker);
+		return "삭제 성공";
 	}
 }

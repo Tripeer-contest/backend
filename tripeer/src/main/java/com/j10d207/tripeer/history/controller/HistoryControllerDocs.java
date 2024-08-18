@@ -105,4 +105,16 @@ public interface HistoryControllerDocs {
 			content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class))),
 	})
 	Response<String> revokePlanDetail(@PathVariable("planId") long planId);
+
+	@Operation(summary = "다이어리 삭제", description = "저장한 플랜을 다이어리에서 삭제할 수 있다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "204", description = "다이어리 삭제 성공"),
+		@ApiResponse(responseCode = "403", description = "해당 여행의 유저가 아닙니다.",
+			content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class))),
+		@ApiResponse(responseCode = "404", description = "해당 다이러리가 없습니다.",
+			content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class))),
+	})
+	Response<String> deletePlanDetail(
+		@AuthenticationPrincipal CustomOAuth2User user,
+		@PathVariable("planId") long planId);
 }

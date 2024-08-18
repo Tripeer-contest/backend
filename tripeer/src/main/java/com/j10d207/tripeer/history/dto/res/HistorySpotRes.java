@@ -12,8 +12,10 @@ public class HistorySpotRes {
 	private long planDetailId;
 	private String title;
 	private String contentType;
-	private String address;
 	private String image;
+	private String address;
+	private Double latitude;
+	private Double longitude;
 	private int day;
 	private int step;
 	private int cost;
@@ -22,10 +24,11 @@ public class HistorySpotRes {
 		return HistorySpotRes.builder()
 			.planDetailId(planDetailEntity.getPlanDetailId())
 			.title(planDetailEntity.getSpotInfo().getTitle())
-			.planDetailId(planDetailEntity.getSpotInfo().getSpotInfoId())
 			.contentType(ContentTypeEnum.getNameByCode(planDetailEntity.getSpotInfo().getContentTypeId()))
-			.address(planDetailEntity.getSpotInfo().getAddr1())
 			.image(planDetailEntity.getSpotInfo().getFirstImage())
+			.address(planDetailEntity.getSpotInfo().getAddr1())
+			.latitude(planDetailEntity.getSpotInfo().getLatitude())
+			.longitude(planDetailEntity.getSpotInfo().getLongitude())
 			.day(planDetailEntity.getDay())
 			.step(planDetailEntity.getStep())
 			.cost(planDetailEntity.getCost())

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -101,6 +102,14 @@ public class HistoryController implements HistoryControllerDocs {
 	public Response<HistoryDetailRes> getPlanDetail(@PathVariable("planId") long planId) {
 		HistoryDetailRes res = historyService.getHistoryDetail(planId);
 		return Response.of(HttpStatus.OK, "다이어리 디테일 조회 성공", res);
+	}
+
+	@DeleteMapping("/{planId}")
+	public Response<String> deletePlanDetail(
+		@AuthenticationPrincipal CustomOAuth2User user,
+		@PathVariable("planId") long planId) {
+		String res = historyService.deleteHistoryDetail(planId, user.getUserId());
+		return Response.of(HttpStatus.NO_CONTENT, "다이어리 삭제 성공", res);
 	}
 
 	@PutMapping("/revoke/{planId}")
