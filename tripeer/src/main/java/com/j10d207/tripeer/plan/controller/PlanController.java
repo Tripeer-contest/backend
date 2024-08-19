@@ -7,7 +7,6 @@ import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

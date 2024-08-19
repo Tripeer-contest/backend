@@ -1,6 +1,8 @@
 package com.j10d207.tripeer.user.service;
 
-import com.j10d207.tripeer.common.S3Component;
+import com.j10d207.tripeer.s3.dto.S3Option;
+import com.j10d207.tripeer.s3.dto.FileInfoDto;
+import com.j10d207.tripeer.s3.service.S3Service;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
 import com.j10d207.tripeer.exception.CustomException;
@@ -8,6 +10,7 @@ import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.user.config.JWTUtil;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.repository.UserRepository;
+import com.j10d207.tripeer.user.dto.res.JWTDto;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +36,7 @@ public class UserServiceImpl implements UserService{
     private long refreshTime;
 //    private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
-    private final S3Component s3Component;
+    private final S3Service s3Service;
 
     //회원 가입
     @Override
@@ -43,8 +46,8 @@ public class UserServiceImpl implements UserService{
         UserEntity user = userRepository.save(UserEntity.fromJoinReq(join));
 
         //회원 가입 후 즉시 로그인을 위한 토큰 발급
-        String access = "Bearer " + JWTUtil.createJWT("Authorization", join.getNickname(), "ROLE_USER", user.getUserId(), accessTime);
-        String refresh = JWTUtil.createJWT("Authorization-re", join.getNickname(), "ROLE_USER", user.getUserId(), refreshTime);
+        String access = "Bearer " + jwtUtil.createJWT(new JWTDto("Authorization", join.getNickname(), "ROLE_USER", user.getUserId()), accessTime);
+        String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", join.getNickname(), "ROLE_USER", user.getUserId()), refreshTime);
 
         //access 토큰 헤더에 넣기
         response.setHeader("Authorization", access);
@@ -55,17 +58,15 @@ public class UserServiceImpl implements UserService{
     //프로필 사진 변경
     @Override
     public String uploadProfileImage(MultipartFile file, long userId){
-        // 허용할 MIME 타입들 설정 (이미지만 허용하는 경우)
-        List<String> allowedMimeTypes = List.of("image/jpg", "image/jpeg", "image/png");
-
         UserEntity user = userRepository.findByUserId(userId);
 
         String userPreviousUrl = user.getProfileImage();
         String uploadURL;
+        FileInfoDto fileInfoDto = FileInfoDto.ofProfileImage(file, userId, S3Option.profileUpload);
         if (userPreviousUrl.contains("tripeer207.s3")) {
-            uploadURL = s3Component.changeFile(userPreviousUrl, file, allowedMimeTypes, 1, userId, null);
+            uploadURL = s3Service.changeFile(userPreviousUrl, fileInfoDto);
         } else {
-            uploadURL = s3Component.fileUpload(file, allowedMimeTypes, 1, userId, null);
+            uploadURL = s3Service.fileUpload(fileInfoDto);
         }
         user.setProfileImage(uploadURL);
         userRepository.save(user);
@@ -123,10 +124,14 @@ public class UserServiceImpl implements UserService{
             }
         }
         // refresh 만료 확인 만료확인의 try/catch를 isExpired 메소드 안으로 넣어버림 0802
-        JWTUtil.getPayload(refresh).getExpiration().before(new Date());
+        jwtUtil.getPayload(refresh).getExpiration().before(new Date());
         // 기존 access 토크의 만료 확인 과정 제거
         // refresh 미만료 + access 만료 일때만 재발급을 해줬는데 access 만료를 궂이 확인할 필요성이 없다고 판단.0802
-        String newAccess = JWTUtil.createJWT("Authorization", JWTUtil.getPayload(refresh).get("name", String.class), JWTUtil.getPayload(refresh).get("role", String.class), JWTUtil.getPayload(refresh).get("userId", Long.class), accessTime);
+        String newAccess = jwtUtil.createJWT(new JWTDto("Authorization",
+                        jwtUtil.getPayload(refresh).get("name", String.class),
+                        jwtUtil.getPayload(refresh).get("role", String.class),
+                        jwtUtil.getPayload(refresh).get("userId", Long.class)),
+                accessTime);
         response.setHeader("Authorization", "Bearer " + newAccess);
     }
 
@@ -144,8 +149,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public String getSuper(HttpServletResponse response, long userId) {
         UserEntity user = userRepository.findByUserId(userId);
-        String result = JWTUtil.createJWT("Authorization", user.getNickname(), user.getRole(), userId, (long) 60*60*24*1000);
-        String refresh = JWTUtil.createJWT("Authorization-re", user.getNickname(), user.getRole(), userId, refreshTime);
+        String result = jwtUtil.createJWT(new JWTDto("Authorization", user.getNickname(), user.getRole(), userId), (long) 60*60*24*1000);
+        String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", user.getNickname(), user.getRole(), userId), refreshTime);
 
         response.addCookie(createCookie("Authorization-re", refresh));
         response.setHeader("Authorization", "Bearer " + result);
@@ -156,8 +161,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public String getSuper2(HttpServletResponse response, long userId) {
         UserEntity user = userRepository.findByUserId(userId);
-        String result = JWTUtil.createJWT("Authorization", user.getNickname(), user.getRole(), userId, (long) 90*1000);
-        String refresh = JWTUtil.createJWT("Authorization-re", user.getNickname(), user.getRole(), userId, (long) 180*1000);
+        String result = jwtUtil.createJWT(new JWTDto("Authorization", user.getNickname(), user.getRole(), userId), (long) 90*1000);
+        String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", user.getNickname(), user.getRole(), userId), (long) 180*1000);
 
         response.addCookie(createCookie("Authorization-re", refresh));
         response.setHeader("Authorization", "Bearer " + result);

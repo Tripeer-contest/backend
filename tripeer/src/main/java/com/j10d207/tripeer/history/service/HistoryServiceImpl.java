@@ -22,6 +22,7 @@ import com.j10d207.tripeer.tmap.db.entity.PublicRootDetailEntity;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootDetailRepository;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootRepository;
+import com.j10d207.tripeer.user.config.JWTUtil;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.repository.CoworkerRepository;

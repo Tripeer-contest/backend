@@ -29,6 +29,7 @@ public class SecurityConfig {
 
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
 //    private final AuthenticationConfiguration authenticationConfiguration;
+    private final JWTUtil jwtUtil;
 
     //OAuth 로그인
     private final CustomOAuth2UserService customOAuth2UserService;
