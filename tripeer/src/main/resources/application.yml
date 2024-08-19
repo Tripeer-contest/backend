@@ -106,3 +106,5 @@ cloud:
   application:
     name: tripeer
 
+admin:
+  login: ENC(3At+j0WU3QGuxpq9ZOruxzROL2cCHGCd)

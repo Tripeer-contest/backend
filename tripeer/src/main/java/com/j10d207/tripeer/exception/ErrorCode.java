@@ -60,6 +60,9 @@ public enum ErrorCode {
     //Weather
     WEATHER_NOT_FOUND(HttpStatus.NOT_FOUND, "WEATHER-001", "날씨 정보를 불러 올 수 없습니다."),
 
+    //admin
+    INVALID_ADMIN(HttpStatus.UNAUTHORIZED, "ADMIN-001", "허용되지 않은 접근입니다."),
+
     //Valid
     INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-001", "Invalid argument");
 

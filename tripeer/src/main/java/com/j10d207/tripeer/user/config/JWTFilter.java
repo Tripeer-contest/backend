@@ -70,7 +70,7 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
 
-    private static void setContext(long userId, String role) {
+    private void setContext(long userId, String role) {
         TestResponse testResponse = new TestResponse();
         CustomOAuth2User test = new CustomOAuth2User(testResponse, role, userId);
 
@@ -80,7 +80,7 @@ public class JWTFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
-    private static Collection<? extends GrantedAuthority> getAuthorities(String role) {
+    private Collection<? extends GrantedAuthority> getAuthorities(String role) {
 
         Collection<GrantedAuthority> collection = new ArrayList<>();
 
