@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService{
     private long accessTime;
     @Value("${spring.jwt.refresh}")
     private long refreshTime;
-//    private final JWTUtil jwtUtil;
+    private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
     private final S3Service s3Service;
 

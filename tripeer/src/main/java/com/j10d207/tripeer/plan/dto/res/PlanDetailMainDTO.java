@@ -5,7 +5,7 @@ import com.j10d207.tripeer.plan.db.dto.TownDTO;
 import com.j10d207.tripeer.plan.db.entity.PlanDetailEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanTownEntity;
-import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
+import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import lombok.AllArgsConstructor;
@@ -40,7 +40,7 @@ public class PlanDetailMainDTO {
         private LocalDate endDay;
         private LocalDate createDay;
 
-        public static CreateResultInfo VOToDTO (PlanCreateInfoReq createInfo) {
+        public static CreateResultInfo fromPlanCreateInfoReq (PlanCreateInfoReq createInfo) {
 
             return CreateResultInfo.builder()
                     .title(createInfo.getTitle())
@@ -69,7 +69,7 @@ public class PlanDetailMainDTO {
         private List<UserDTO.Search> member;
         private boolean newPlan;
 
-        public static MyPlan EntityToDTO (PlanEntity plan, String img, List<PlanTownEntity> planTown, List<CoworkerEntity> memberList) {
+        public static MyPlan valueOfPlanPlanTownCoworkerEntity(PlanEntity plan, String img, List<PlanTownEntity> planTown, List<CoworkerEntity> memberList) {
             return MyPlan.builder()
                     .planId(plan.getPlanId())
                     .title(plan.getTitle())
@@ -108,7 +108,7 @@ public class PlanDetailMainDTO {
         private String profileImage;
         private String nickname;
 
-        public static PlanCoworker CoworkerToDTO (CoworkerEntity coworkerEntity, int order) {
+        public static PlanCoworker fromCoworkerEntity (CoworkerEntity coworkerEntity, int order) {
             return PlanCoworker.builder()
                     .order(order)
                     .planId(coworkerEntity.getPlan().getPlanId())

@@ -7,6 +7,7 @@ import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ public class PlanController {
     //플랜 생성
     @PostMapping
     public Response<PlanDetailMainDTO.CreateResultInfo> createPlan(@RequestBody @Valid PlanCreateInfoReq createInfo, @AuthenticationPrincipal CustomOAuth2User user) {
-        PlanDetailMainDTO.CreateResultInfo planResponseDTO = PlanDetailMainDTO.CreateResultInfo.VOToDTO(createInfo);
+        PlanDetailMainDTO.CreateResultInfo planResponseDTO = PlanDetailMainDTO.CreateResultInfo.fromPlanCreateInfoReq(createInfo);
         PlanDetailMainDTO.CreateResultInfo result = planService.createPlan(planResponseDTO, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 생성 완료", result);
     }

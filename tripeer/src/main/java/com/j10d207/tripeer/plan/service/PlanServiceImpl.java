@@ -1,7 +1,11 @@
 package com.j10d207.tripeer.plan.service;
 
-import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
-import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
+import com.j10d207.tripeer.plan.dto.req.CoworkerInvitedReq;
+import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
+import com.j10d207.tripeer.plan.dto.req.TitleChangeReq;
+import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
+import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
+import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
@@ -10,7 +14,6 @@ import com.j10d207.tripeer.email.service.EmailService;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.kakao.service.KakaoService;
-import com.j10d207.tripeer.place.db.entity.CityEntity;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.repository.SpotInfoRepository;
 import com.j10d207.tripeer.plan.db.dto.*;
@@ -133,7 +136,7 @@ public class PlanServiceImpl implements PlanService {
             PlanEntity plan = planRepository.findByPlanId(coworker.getPlan().getPlanId());
             // 플랜에서 선택한 타운 리스트 가져오기
             List<PlanTownEntity> planTown = planTownRepository.findByPlan_PlanId(plan.getPlanId());
-            PlanDetailMainDTO.MyPlan myPlan = PlanDetailMainDTO.MyPlan.EntityToDTO(plan, PlanTownEntity.getFirstImg(planTown), planTown, coworkerRepository.findByPlan_PlanId(plan.getPlanId())); // 플랜의 멤버 리스트 넣기
+            PlanDetailMainDTO.MyPlan myPlan = PlanDetailMainDTO.MyPlan.valueOfPlanPlanTownCoworkerEntity(plan, PlanTownEntity.getFirstImg(planTown), planTown, coworkerRepository.findByPlan_PlanId(plan.getPlanId())); // 플랜의 멤버 리스트 넣기
             myPlans.add(myPlan);
         }
 
@@ -187,7 +190,7 @@ public class PlanServiceImpl implements PlanService {
         List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanId(planId);
         //DTO로 변환
         AtomicInteger order = new AtomicInteger();
-        return coworkerList.stream().map(test -> PlanDetailMainDTO.PlanCoworker.CoworkerToDTO(test, order.getAndIncrement())).toList();
+        return coworkerList.stream().map(test -> PlanDetailMainDTO.PlanCoworker.fromCoworkerEntity(test, order.getAndIncrement())).toList();
     }
 
 
@@ -341,7 +344,7 @@ public class PlanServiceImpl implements PlanService {
         for (CoworkerEntity coworker : coworkerList) {
             order++;
             if(userId != coworker.getUser().getUserId()) continue;
-            return PlanDetailMainDTO.PlanCoworker.CoworkerToDTO(coworker, order);
+            return PlanDetailMainDTO.PlanCoworker.fromCoworkerEntity(coworker, order);
         }
         throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
     }
