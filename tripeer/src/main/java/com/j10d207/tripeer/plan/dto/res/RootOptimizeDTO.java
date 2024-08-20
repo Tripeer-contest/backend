@@ -43,7 +43,7 @@ public class RootOptimizeDTO {
         private String movingRoot;
     }
 
-    public static RootOptimizeDTO PlaceListVOTODTO(PlaceListReq placeListReq) {
+    public static RootOptimizeDTO ofPlaceListReq(PlaceListReq placeListReq) {
         return RootOptimizeDTO.builder()
                 .option(placeListReq.getOption())
                 .placeList(placeListReq.getPlaceList().stream().map(place -> {

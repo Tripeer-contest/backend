@@ -30,7 +30,7 @@ public class PlanDayEntity {
     private LocalTime startTime;
     private String vehicle;
 
-    public static PlanDayEntity MakeDayEntity(PlanDetailMainDTO.CreateResultInfo createResultInfo, PlanEntity planEntity, int i) {
+    public static PlanDayEntity CreateEntity (PlanDetailMainDTO.CreateResultInfo createResultInfo, PlanEntity planEntity, int i) {
         return PlanDayEntity.builder()
                 .plan(planEntity)
                 .day(createResultInfo.getStartDay().plusDays(i))

@@ -29,7 +29,7 @@ public class PlanEntity {
     private LocalDate endDate;
     private LocalDate createDate;
 
-    public static PlanEntity DTOToEntity (PlanDetailMainDTO.CreateResultInfo CreateResultInfo) {
+    public static PlanEntity fromDto(PlanDetailMainDTO.CreateResultInfo CreateResultInfo) {
         return PlanEntity.builder()
                 .title(CreateResultInfo.getTitle())
                 .vehicle(CreateResultInfo.getVehicle())

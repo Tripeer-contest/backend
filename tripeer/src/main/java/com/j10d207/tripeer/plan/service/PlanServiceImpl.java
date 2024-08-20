@@ -69,10 +69,18 @@ public class PlanServiceImpl implements PlanService {
     private final EmailService emailService;
 
     //플랜 생성
+    /*
+    플랜 생성 요청이 들어오면
+    1. 플랜 엔티티 생성
+    2. 생성한 유저를 플랜의 coworker(참가자)에 추가
+    3. 플랜의 여행지 목록 생성
+    4. 요청된 일자만큼 플랜 데이 생성
+    5. 이메일 전송
+     */
     @Override
     public PlanDetailMainDTO.CreateResultInfo createPlan(PlanDetailMainDTO.CreateResultInfo createResultInfo, long userId) {
         //플랜 생성 + 플랜번호 등록
-        PlanEntity plan = planRepository.save(PlanEntity.DTOToEntity(createResultInfo));
+        PlanEntity plan = planRepository.save(PlanEntity.fromDto(createResultInfo));
         createResultInfo.setPlanId(plan.getPlanId());
         //생성된 플랜을 가지기
         UserEntity user = userRepository.findByUserId(userId);
@@ -80,11 +88,11 @@ public class PlanServiceImpl implements PlanService {
 
         for (TownDTO townDTO : createResultInfo.getTownList()) {
             //request 기반으로 townEntity 받아오기
-            planTownRepository.save(PlanTownEntity.TownDTOToEntity(townDTO, plan));
+            planTownRepository.save(PlanTownEntity.ofDtoAndPlanEntity(townDTO, plan));
         }
         int day = (int) ChronoUnit.DAYS.between(createResultInfo.getStartDay(), createResultInfo.getEndDay()) + 1;
         for (int i = 0; i < day; i++) {
-            planDayRepository.save(PlanDayEntity.MakeDayEntity(createResultInfo, plan, i));
+            planDayRepository.save(PlanDayEntity.CreateEntity(createResultInfo, plan, i));
         }
         // 이메일 전송 스케쥴링
         planSchedulerService.schedulePlanTasks(plan);
@@ -144,6 +152,10 @@ public class PlanServiceImpl implements PlanService {
     }
 
     //플랜 디테일 메인 조회
+    /*
+    생성된 Plan 에 접속하면 보이는 첫페이지에 필요한 정보 로딩
+    동행자 목록, 선택한 도시들 목록이 로딩되어 전달
+     */
     @Override
     public PlanDetailMainDTO.MainPageInfo getPlanDetailMain(long planId, long userId) {
         PlanEntity plan = planRepository.findByPlanId(planId);
@@ -155,12 +167,15 @@ public class PlanServiceImpl implements PlanService {
         List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
 
         //선택한 도시 목록 구성
-        List<TownDTO> townDTOList = planTown.stream().map(TownDTO::EntityToDTO).toList();
+        List<TownDTO> townDTOList = planTown.stream().map(TownDTO::fromPlanTownEntity).toList();
 
         return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, coworkerEntityList.stream().map(UserDTO.Search::fromCoworkerEntity).toList());
     }
 
     //동행자 추가
+    /*
+    요청된 유저가 존재하는지 2중검증 후 등록이 완료되면 이메일 전송
+     */
     @Override
     public void joinPlan(CoworkerInvitedReq coworkerInvitedReq, long userId) {
         UserEntity userEntity = userRepository.findById(userId)
@@ -195,6 +210,10 @@ public class PlanServiceImpl implements PlanService {
 
 
     //관광지 검색
+    /*
+    원본 JPA 내용
+    SELECT * FROM spot_info where (제목이나 도시에 키워드 들어가있음) and (해당 플랜의 여행지중 하나) and (현재 선택된 관광지 유형)
+     */
     @Override
     public List<SpotSearchResDTO> getSpotSearch(long planId, String keyword, int page, int sortType, long userId) {
         Specification<SpotInfoEntity> spotInfoSpec = Specification.where(null);
@@ -261,7 +280,7 @@ public class PlanServiceImpl implements PlanService {
         if(!(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planId, userId))) {
             throw new CustomException(ErrorCode.USER_NOT_CORRESPOND);
         }
-        planBucketRepository.save(PlanBucketEntity.MakePlanBucketEntity(planId, spotInfoId, userId));
+        planBucketRepository.save(PlanBucketEntity.CreateEntityOfId(planId, spotInfoId, userId));
     }
 
     //플랜 버킷 관광지 삭제
@@ -300,7 +319,7 @@ public class PlanServiceImpl implements PlanService {
         List<WishListEntity> wishList = wishListRepository.findByUser_UserId(userId);
         return  wishList.stream()
                 .map(wishListEntity ->
-                SpotSearchResDTO.WishEntityToDTO
+                SpotSearchResDTO.fromWishListEntity
                         (wishListEntity,
                                 planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, wishListEntity.getSpotInfo().getSpotInfoId()))
                         )
@@ -310,7 +329,7 @@ public class PlanServiceImpl implements PlanService {
     //플랜 디테일 저장
     @Override
     public void addPlanDetail(PlanDetailReq planDetailReq) {
-        planDetailRepository.save(PlanDetailEntity.VOToEntity(planDetailReq));
+        planDetailRepository.save(PlanDetailEntity.fromReq(planDetailReq));
     }
 
     //플랜 디테일 전체 조회
@@ -335,7 +354,7 @@ public class PlanServiceImpl implements PlanService {
         return planSpotDetailMap;
     }
 
-    //플랜 나의 정보 조회(기존 내정보 + 나의 coworker에서의 순서)
+    //플랜 나의 정보 조회(기존 내정보 + 나의 coworker 에서의 순서)
     @Override
     public PlanDetailMainDTO.PlanCoworker getPlanMyinfo(long planId, long userId) {
         //요청된 플랜의 동행자 목록 조회
@@ -349,6 +368,9 @@ public class PlanServiceImpl implements PlanService {
         throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
     }
 
+    /*
+    하단 메소드는 TMap Branch 를 통해 따로 PR 리뷰 요청 예정
+     */
 
     //목적지간 최단 루트 계산
     public RootOptimizeDTO getShortTime(RootOptimizeDTO rootOptimizeDTO) {
@@ -541,7 +563,7 @@ public class PlanServiceImpl implements PlanService {
         }
         JsonObject infoObject = rootInfo.getAsJsonObject();
 
-        PublicRootDTO publicRoot = PublicRootDTO.JsonToDTO(infoObject);
+        PublicRootDTO publicRoot = PublicRootDTO.fromJson(infoObject);
 
 
         List<PublicRootDTO> rootList = new ArrayList<>();

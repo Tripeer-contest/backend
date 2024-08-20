@@ -1,6 +1,5 @@
 package com.j10d207.tripeer.plan.db.dto;
 
-import com.j10d207.tripeer.place.db.entity.TownEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanTownEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +16,7 @@ public class TownDTO {
     private double latitude;
     private double longitude;
 
-    public static TownDTO EntityToDTO (PlanTownEntity planTown) {
+    public static TownDTO fromPlanTownEntity(PlanTownEntity planTown) {
         // 도가 선택된경우 , ex. 서울특별시, 경상북도
         if (planTown.getTown() == null) {
             return TownDTO.builder()

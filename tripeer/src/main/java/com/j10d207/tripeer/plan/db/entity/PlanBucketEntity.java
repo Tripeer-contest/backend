@@ -32,7 +32,7 @@ public class PlanBucketEntity {
     @JoinColumn(name = "USER_ID")
     private UserEntity user;
 
-    public static PlanBucketEntity MakePlanBucketEntity (long planId, int spotInfoId, long userId) {
+    public static PlanBucketEntity CreateEntityOfId(long planId, int spotInfoId, long userId) {
         return PlanBucketEntity.builder()
                 .plan(PlanEntity.builder()
                         .planId(planId)

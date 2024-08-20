@@ -49,7 +49,7 @@ public class PlanTownEntity {
         return townNameList;
     }
 
-    public static PlanTownEntity TownDTOToEntity (TownDTO townDTO, PlanEntity planEntity)
+    public static PlanTownEntity ofDtoAndPlanEntity(TownDTO townDTO, PlanEntity planEntity)
     {
         PlanTownEntity planTown;
         if(townDTO.getTownId() == -1) {

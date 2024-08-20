@@ -27,7 +27,8 @@ public class PlanController {
     private final PlanService planService;
     //플랜 생성
     @PostMapping
-    public Response<PlanDetailMainDTO.CreateResultInfo> createPlan(@RequestBody @Valid PlanCreateInfoReq createInfo, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<PlanDetailMainDTO.CreateResultInfo> createPlan(@RequestBody @Valid PlanCreateInfoReq createInfo,
+                                                                   @AuthenticationPrincipal CustomOAuth2User user) {
         PlanDetailMainDTO.CreateResultInfo planResponseDTO = PlanDetailMainDTO.CreateResultInfo.fromPlanCreateInfoReq(createInfo);
         PlanDetailMainDTO.CreateResultInfo result = planService.createPlan(planResponseDTO, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 생성 완료", result);
@@ -35,14 +36,16 @@ public class PlanController {
 
     //플랜 이름 변경
     @PatchMapping("/title")
-    public Response<Boolean> changeTitle(@RequestBody @Valid TitleChangeReq titleChangeReq, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<Boolean> changeTitle(@RequestBody @Valid TitleChangeReq titleChangeReq,
+                                         @AuthenticationPrincipal CustomOAuth2User user) {
         planService.changeTitle(titleChangeReq, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 이름 변경 완료", true);
     }
 
     //플랜 탈퇴
     @DeleteMapping("/{planId}")
-    public Response<?> planOut(@PathVariable("planId") long planId, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<?> planOut(@PathVariable("planId") long planId,
+                               @AuthenticationPrincipal CustomOAuth2User user) {
         planService.planOut(planId, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 탈퇴 완료", null);
     }
@@ -56,21 +59,24 @@ public class PlanController {
 
     //플랜 디테일 메인 조회
     @GetMapping("/main/{planId}")
-    public Response<PlanDetailMainDTO.MainPageInfo> getPlanDetailMain(@PathVariable("planId") long planId, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<PlanDetailMainDTO.MainPageInfo> getPlanDetailMain(@PathVariable("planId") long planId,
+                                                                      @AuthenticationPrincipal CustomOAuth2User user) {
         PlanDetailMainDTO.MainPageInfo result = planService.getPlanDetailMain(planId, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜 메인 조회", result);
     }
 
     //동행자 추가
     @PostMapping("/member")
-    public Response<?> joinPlan(@RequestBody @Valid CoworkerInvitedReq coworkerInvitedReq, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<?> joinPlan(@RequestBody @Valid CoworkerInvitedReq coworkerInvitedReq,
+                                @AuthenticationPrincipal CustomOAuth2User user) {
         planService.joinPlan(coworkerInvitedReq, user.getUserId());
         return Response.of(HttpStatus.OK, "초대 완료", null);
     }
 
     //플랜에서 나의 정보 조회(기존 내정보 + 나의 coworker에서의 순서)
     @GetMapping("/myinfo/{planId}")
-    public Response<PlanDetailMainDTO.PlanCoworker> getCoworker(@PathVariable("planId") long planId, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<PlanDetailMainDTO.PlanCoworker> getCoworker(@PathVariable("planId") long planId,
+                                                                @AuthenticationPrincipal CustomOAuth2User user) {
         PlanDetailMainDTO.PlanCoworker planCoworker = planService.getPlanMyinfo(planId, user.getUserId());
         return Response.of(HttpStatus.OK, "조회 완료", planCoworker);
     }
@@ -84,35 +90,45 @@ public class PlanController {
 
     //관광지 검색
     @GetMapping("/spot")
-    public Response<List<SpotSearchResDTO>> getSpots(@RequestParam("planId") long planId, @RequestParam("keyword") String keyword, @RequestParam("page") int page, @RequestParam("sortType") int sortType, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<List<SpotSearchResDTO>> getSpots(@RequestParam("planId") long planId,
+                                                     @RequestParam("keyword") String keyword,
+                                                     @RequestParam("page") int page,
+                                                     @RequestParam("sortType") int sortType,
+                                                     @AuthenticationPrincipal CustomOAuth2User user) {
         List<SpotSearchResDTO> searchResList = planService.getSpotSearch(planId, keyword, page, sortType, user.getUserId());
         return Response.of(HttpStatus.OK, "검색 완료", searchResList);
     }
 
     //플랜버킷 관광지 추가
     @PostMapping("/bucket")
-    public Response<?> addPlanSpot(@RequestParam("planId") long planId, @RequestParam("spotInfoId") int spotInfoId, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<?> addPlanSpot(@RequestParam("planId") long planId,
+                                   @RequestParam("spotInfoId") int spotInfoId,
+                                   @AuthenticationPrincipal CustomOAuth2User user) {
         planService.addPlanSpot(planId, spotInfoId, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜버킷 관광지 추가 완료", null);
     }
 
     //플랜버킷 관광지 삭제
     @DeleteMapping("/bucket")
-    public Response<?> delPlanSpot(@RequestParam("planId") long planId, @RequestParam("spotInfoId") int spotInfoId, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<?> delPlanSpot(@RequestParam("planId") long planId,
+                                   @RequestParam("spotInfoId") int spotInfoId,
+                                   @AuthenticationPrincipal CustomOAuth2User user) {
         planService.delPlanSpot(planId, spotInfoId, user.getUserId());
         return Response.of(HttpStatus.OK, "플랜버킷 관광지 삭제 완료", null);
     }
 
     //즐겨찾기 추가
     @PostMapping("/wishlist/{spotInfoId}")
-    public Response<?> addWishList(@PathVariable("spotInfoId") int spotInfoId, @AuthenticationPrincipal CustomOAuth2User user) {
+    public Response<?> addWishList(@PathVariable("spotInfoId") int spotInfoId,
+                                   @AuthenticationPrincipal CustomOAuth2User user) {
         planService.addWishList(spotInfoId, user.getUserId());
         return Response.of(HttpStatus.OK, "즐겨찾기 추가 완료", null);
     }
 
     //즐겨찾기 조회
     @GetMapping("wishlist/{planId}")
-    public Response<List<SpotSearchResDTO>> getWishList(@AuthenticationPrincipal CustomOAuth2User user, @PathVariable("planId") long planId) {
+    public Response<List<SpotSearchResDTO>> getWishList(@AuthenticationPrincipal CustomOAuth2User user,
+                                                        @PathVariable("planId") long planId) {
         List<SpotSearchResDTO> searchResDTOList = planService.getWishList(user.getUserId(), planId);
         return Response.of(HttpStatus.OK, "즐겨찾기 리스트 조회 완료", searchResDTOList);
     }
@@ -134,14 +150,14 @@ public class PlanController {
     //목적지간 최단 루트 계산
     @PostMapping("/optimizing/short")
     public Response<RootOptimizeDTO> getShortTime(@RequestBody @Valid PlaceListReq placeListReq) {
-        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.PlaceListVOTODTO(placeListReq);
+        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.ofPlaceListReq(placeListReq);
         return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime(rootOptimizeDTO));
     }
 
     //플랜 최단거리 조정
     @PostMapping("/optimizing")
     public Response<RootOptimizeDTO> getOptimizedPlan(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
-        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.PlaceListVOTODTO(placeListReq);
+        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.ofPlaceListReq(placeListReq);
         RootOptimizeDTO result = planService.getOptimizingTime(rootOptimizeDTO);
         return Response.of(HttpStatus.OK, "목적지 리스트 최적화 완료", result);
     }

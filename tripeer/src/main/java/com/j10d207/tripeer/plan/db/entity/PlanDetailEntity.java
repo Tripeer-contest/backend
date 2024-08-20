@@ -43,7 +43,7 @@ public class PlanDetailEntity {
     @JoinColumn(name = "PUBLIC_ROOT_ID")
     private PublicRootEntity publicRoot;
 
-    public static PlanDetailEntity VOToEntity (PlanDetailReq planDetailReq) {
+    public static PlanDetailEntity fromReq(PlanDetailReq planDetailReq) {
         return PlanDetailEntity.builder()
                 .planDay(PlanDayEntity.builder()
                         .planDayId(planDetailReq.getPlanDayId())

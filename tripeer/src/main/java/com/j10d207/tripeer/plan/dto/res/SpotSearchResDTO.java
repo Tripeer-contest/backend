@@ -22,7 +22,7 @@ public class SpotSearchResDTO {
     private boolean isWishlist;
     private boolean isSpot;
 
-    public static SpotSearchResDTO WishEntityToDTO (WishListEntity wishList, boolean isSpot) {
+    public static SpotSearchResDTO fromWishListEntity(WishListEntity wishList, boolean isSpot) {
 
         return SpotSearchResDTO.builder()
                 .spotInfoId(wishList.getSpotInfo().getSpotInfoId())
