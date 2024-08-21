@@ -55,10 +55,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         long userId = customUserDetails.getUserId();
         //토큰 생성
         String access = jwtUtil.createJWT(new JWTDto("Authorization", name, role, userId), accessTime);
-        String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", name, role, userId), refreshTime);
+        String refresh = jwtUtil.createJWT(new JWTDto("AuthorizationRe", name, role, userId), refreshTime);
 
         response.addCookie(createCookie("Authorization", access));
-        response.addCookie(createCookie("Authorization-re", refresh));
+        response.addCookie(createCookie("AuthorizationRe", refresh));
         response.setStatus(HttpStatus.OK.value());
         // 04.14 - 로그인 완료 후 이동페이지
         response.sendRedirect("https://tripeer.co.kr/redirect");

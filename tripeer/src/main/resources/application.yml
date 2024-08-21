@@ -64,7 +64,7 @@ spring:
 
     #JWT Time 300min, 600min
   jwt:
-    access: 18000000
+    access: 600000
     refresh: 36000000
     secret: ENC(+TMgIEAtgPTpRvh8SSGMLDPoaEzVbkBA8RFQBsNplM5IAmNxrATCqM9itNRpS5BX)
 

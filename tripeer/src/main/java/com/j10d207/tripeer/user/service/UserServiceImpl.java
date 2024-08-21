@@ -46,11 +46,11 @@ public class UserServiceImpl implements UserService{
         UserEntity user = userRepository.save(UserEntity.fromJoinReq(join));
 
         //회원 가입 후 즉시 로그인을 위한 토큰 발급
-        String access = "Bearer " + jwtUtil.createJWT(new JWTDto("Authorization", join.getNickname(), "ROLE_USER", user.getUserId()), accessTime);
+        String access = jwtUtil.createJWT(new JWTDto("Authorization", join.getNickname(), "ROLE_USER", user.getUserId()), accessTime);
         String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", join.getNickname(), "ROLE_USER", user.getUserId()), refreshTime);
 
         //access 토큰 헤더에 넣기
-        response.setHeader("Authorization", access);
+        response.addCookie(createCookie("Authorization", access));
         response.addCookie(createCookie("Authorization-re", refresh));
         return access;
     }
@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService{
         // refresh 토큰 가져오기
         String refresh = null;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("Authorization-re")) {
+            if (cookie.getName().equals("AuthorizationRe")) {
                 refresh = cookie.getValue();
             }
         }
@@ -132,7 +132,7 @@ public class UserServiceImpl implements UserService{
                         jwtUtil.getPayload(refresh).get("role", String.class),
                         jwtUtil.getPayload(refresh).get("userId", Long.class)),
                 accessTime);
-        response.setHeader("Authorization", "Bearer " + newAccess);
+        response.addCookie(createCookie("Authorization", newAccess));
     }
 
 
@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService{
         String result = jwtUtil.createJWT(new JWTDto("Authorization", user.getNickname(), user.getRole(), userId), (long) 60*60*24*1000);
         String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", user.getNickname(), user.getRole(), userId), refreshTime);
 
-        response.addCookie(createCookie("Authorization-re", refresh));
+        response.addCookie(createCookie("AuthorizationRe", refresh));
         response.setHeader("Authorization", "Bearer " + result);
 
         return "Bearer " + result;
@@ -164,7 +164,7 @@ public class UserServiceImpl implements UserService{
         String result = jwtUtil.createJWT(new JWTDto("Authorization", user.getNickname(), user.getRole(), userId), (long) 90*1000);
         String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", user.getNickname(), user.getRole(), userId), (long) 180*1000);
 
-        response.addCookie(createCookie("Authorization-re", refresh));
+        response.addCookie(createCookie("AuthorizationRe", refresh));
         response.setHeader("Authorization", "Bearer " + result);
 
         return "Bearer " + result;
@@ -177,7 +177,7 @@ public class UserServiceImpl implements UserService{
         cookie.setMaxAge(24*60*60);
         cookie.setSecure(true);
         cookie.setPath("/");
-        if(key.equals("Authorization-re")) {
+        if(key.equals("AuthorizationRe")) {
             cookie.setHttpOnly(true);
         }
 
