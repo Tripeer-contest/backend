@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -42,8 +44,8 @@ public class AdminServiceImpl implements AdminService {
         String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", user.getNickname(), user.getRole(), user.getUserId()), refreshTime);
 
         response.addCookie(createCookie("Authorization-re", refresh));
-        response.setHeader("AccessTime", accessTime + "");
-        response.setHeader("RefreshTime", refreshTime + "");
+        response.setHeader("AccessTime", new Date(System.currentTimeMillis() + accessTime).toString());
+        response.setHeader("RefreshTime", new Date(System.currentTimeMillis() + refreshTime).toString());
         response.setHeader("Authorization", "Bearer " + result);
 
         return "Bearer " + result;

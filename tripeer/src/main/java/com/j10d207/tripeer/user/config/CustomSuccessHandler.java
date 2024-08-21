@@ -47,7 +47,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if (role.equals("ROLE_VALIDATE")) {
             response.setStatus(205);
             //회원가입 페이지
-            response.sendRedirect("https://k10d207.p.ssafy.io/register");
+            response.sendRedirect("https://tripeer.co.kr/register");
             return;
         }
 
@@ -61,7 +61,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(createCookie("Authorization-re", refresh));
         response.setStatus(HttpStatus.OK.value());
         // 04.14 - 로그인 완료 후 이동페이지
-        response.sendRedirect("https://k10d207.p.ssafy.io/redirect");
+        response.sendRedirect("https://tripeer.co.kr/redirect");
     }
 
     private Cookie createCookie(String key, String value) {
