@@ -41,13 +41,25 @@ public class AdminServiceImpl implements AdminService {
         UserEntity user = userRepository.findByProviderId(adminLoginReq.getId());
 
         String result = jwtUtil.createJWT(new JWTDto("Authorization", user.getNickname(), user.getRole(), user.getUserId()), accessTime);
-        String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", user.getNickname(), user.getRole(), user.getUserId()), refreshTime);
+        String refresh = jwtUtil.createJWT(new JWTDto("AuthorizationRe", user.getNickname(), user.getRole(), user.getUserId()), refreshTime);
 
-        response.setHeader("AuthorizationRe", "Bearer " + refresh);
+        response.addCookie(createCookie("AuthorizationRe", refresh));
         response.setHeader("AccessTime", new Date(System.currentTimeMillis() + accessTime).toString());
         response.setHeader("RefreshTime", new Date(System.currentTimeMillis() + refreshTime).toString());
-        response.setHeader("Authorization", "Bearer " + result);
-
+        response.addCookie(createCookie("Authorization", result));
         return "Bearer " + result;
+    }
+
+    private Cookie createCookie(String key, String value) {
+
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        if(key.equals("AuthorizationRe")) {
+            cookie.setHttpOnly(true);
+        }
+
+        return cookie;
     }
 }
