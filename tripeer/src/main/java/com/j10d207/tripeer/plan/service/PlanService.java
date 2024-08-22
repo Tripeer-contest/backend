@@ -30,8 +30,6 @@ public interface PlanService {
     public void addPlanSpot(long planId, int spotInfoId, long userId);
     //플랜버킷 관광지 삭제
     public void delPlanSpot(long planId, int spotInfoId, long userId);
-    //즐겨찾기 추가
-    public void addWishList(int spotInfoId, long userId);
     //즐겨찾기 조회
     public List<SpotSearchResDTO> getWishList(long userId, long planId);
     //플린 디테일 저장

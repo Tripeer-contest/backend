@@ -26,6 +26,10 @@ public interface UserService {
     public List<UserDTO.Search> userSearch(String nickname);
     //내 정보 불러오기
     public UserDTO.Info getMyInfo(long userId);
+    //내 찜목록 전체 불러오기
+    public List<UserDTO.Wishlist> getMyWishlist(long userId);
+    //즐겨찾기 추가
+    public void addWishList(int spotInfoId, long userId);
     //access 토큰 재발급
     public void tokenRefresh(String token, Cookie[] cookies, HttpServletResponse response);
 

@@ -125,14 +125,4 @@ public class PlaceController {
         return Response.of(HttpStatus.OK, "모든 도시, 타운 조회", townService.getAllCityAndTown());
     }
 
-    //즐겨찾기 추가
-    @PostMapping("/wishList/{spotInfoId}")
-    public Response<?> addWishList(@PathVariable("spotInfoId") int spotInfoId, @AuthenticationPrincipal CustomOAuth2User user) {
-        try {
-            planService.addWishList(spotInfoId, user.getUserId());
-            return Response.of(HttpStatus.OK, "즐겨찾기 추가 완료", null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

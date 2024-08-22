@@ -65,6 +65,20 @@ public class UserController {
         return Response.of(HttpStatus.OK, "내 정보 불러오기 완료", userService.getMyInfo(user.getUserId()));
     }
 
+    //내 찜목록 전체 불러오기
+    @GetMapping("/mypage/wishlist")
+    public Response<List<UserDTO.Wishlist>> myWishlist(@AuthenticationPrincipal CustomOAuth2User user) {
+        return Response.of(HttpStatus.OK, "내 찜목록 불러오기 완료", userService.getMyWishlist(user.getUserId()));
+    }
+
+    //즐겨찾기 추가
+    @PostMapping("/wishlist/{spotInfoId}")
+    public Response<?> addWishList(@PathVariable("spotInfoId") int spotInfoId,
+                                   @AuthenticationPrincipal CustomOAuth2User user) {
+        userService.addWishList(spotInfoId, user.getUserId());
+        return Response.of(HttpStatus.OK, "즐겨찾기 추가 완료", null);
+    }
+
     //내 정보 수정
     @PatchMapping("/myinfo")
     public Response<?> myInfoModify(@AuthenticationPrincipal CustomOAuth2User user, @Valid @RequestBody InfoReq infoReq) {

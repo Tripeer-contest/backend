@@ -355,25 +355,6 @@ public class PlanServiceImpl implements PlanService {
         }
     }
 
-    //즐겨찾기 추가
-    @Override
-    public void addWishList(int spotInfoId, long userId) {
-        Optional<WishListEntity> optionalWishList = wishListRepository.findBySpotInfo_SpotInfoIdAndUser_UserId(spotInfoId, userId);
-        if (optionalWishList.isPresent()) {
-            wishListRepository.delete(optionalWishList.get());
-        } else {
-            WishListEntity wishList = WishListEntity.builder()
-                    .user(UserEntity.builder()
-                            .userId(userId)
-                            .build())
-                    .spotInfo(SpotInfoEntity.builder()
-                            .spotInfoId(spotInfoId)
-                            .build())
-                    .build();
-            wishListRepository.save(wishList);
-        }
-    }
-
     //즐겨찾기 조회
     @Override
     public List<SpotSearchResDTO> getWishList(long userId, long planId) {
