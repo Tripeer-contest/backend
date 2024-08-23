@@ -3,6 +3,8 @@ package com.j10d207.tripeer.user.service;
 import com.j10d207.tripeer.s3.dto.S3Option;
 import com.j10d207.tripeer.s3.dto.FileInfoDto;
 import com.j10d207.tripeer.s3.service.S3Service;
+import com.j10d207.tripeer.user.db.entity.WishListEntity;
+import com.j10d207.tripeer.user.db.repository.WishListRepository;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
 import com.j10d207.tripeer.exception.CustomException;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -36,6 +39,7 @@ public class UserServiceImpl implements UserService{
     private long refreshTime;
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
+    private final WishListRepository wishListRepository;
     private final S3Service s3Service;
 
     //회원 가입
@@ -46,11 +50,11 @@ public class UserServiceImpl implements UserService{
         UserEntity user = userRepository.save(UserEntity.fromJoinReq(join));
 
         //회원 가입 후 즉시 로그인을 위한 토큰 발급
-        String access = "Bearer " + jwtUtil.createJWT(new JWTDto("Authorization", join.getNickname(), "ROLE_USER", user.getUserId()), accessTime);
+        String access = jwtUtil.createJWT(new JWTDto("Authorization", join.getNickname(), "ROLE_USER", user.getUserId()), accessTime);
         String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", join.getNickname(), "ROLE_USER", user.getUserId()), refreshTime);
 
         //access 토큰 헤더에 넣기
-        response.setHeader("Authorization", access);
+        response.addCookie(createCookie("Authorization", access));
         response.addCookie(createCookie("Authorization-re", refresh));
         return access;
     }
@@ -113,13 +117,30 @@ public class UserServiceImpl implements UserService{
         return UserDTO.Info.fromUserEntity(user);
     }
 
+    //마이 페이지에서 찜목록 불러오기
+    @Override
+    public List<UserDTO.Wishlist> getMyWishlist(long userId) {
+        List<WishListEntity> wishListEntityList = wishListRepository.findByUser_UserId(userId);
+        return wishListEntityList.stream().map(UserDTO.Wishlist::fromEntity).toList();
+    }
+
+    //찜목록 추가 or 삭제
+    public void addWishList(int spotInfoId, long userId) {
+        Optional<WishListEntity> optionalWishList = wishListRepository.findBySpotInfo_SpotInfoIdAndUser_UserId(spotInfoId, userId);
+        if (optionalWishList.isPresent()) {
+            wishListRepository.delete(optionalWishList.get());
+        } else {
+            wishListRepository.save(WishListEntity.CreateWishListEntity(spotInfoId, userId));
+        }
+    }
+
     // access 토큰 재발급
     @Override
     public void tokenRefresh(String token, Cookie[] cookies, HttpServletResponse response) {
         // refresh 토큰 가져오기
         String refresh = null;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("Authorization-re")) {
+            if (cookie.getName().equals("AuthorizationRe")) {
                 refresh = cookie.getValue();
             }
         }
@@ -132,7 +153,7 @@ public class UserServiceImpl implements UserService{
                         jwtUtil.getPayload(refresh).get("role", String.class),
                         jwtUtil.getPayload(refresh).get("userId", Long.class)),
                 accessTime);
-        response.setHeader("Authorization", "Bearer " + newAccess);
+        response.addCookie(createCookie("Authorization", newAccess));
     }
 
 
@@ -152,7 +173,7 @@ public class UserServiceImpl implements UserService{
         String result = jwtUtil.createJWT(new JWTDto("Authorization", user.getNickname(), user.getRole(), userId), (long) 60*60*24*1000);
         String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", user.getNickname(), user.getRole(), userId), refreshTime);
 
-        response.addCookie(createCookie("Authorization-re", refresh));
+        response.addCookie(createCookie("AuthorizationRe", refresh));
         response.setHeader("Authorization", "Bearer " + result);
 
         return "Bearer " + result;
@@ -164,7 +185,7 @@ public class UserServiceImpl implements UserService{
         String result = jwtUtil.createJWT(new JWTDto("Authorization", user.getNickname(), user.getRole(), userId), (long) 90*1000);
         String refresh = jwtUtil.createJWT(new JWTDto("Authorization-re", user.getNickname(), user.getRole(), userId), (long) 180*1000);
 
-        response.addCookie(createCookie("Authorization-re", refresh));
+        response.addCookie(createCookie("AuthorizationRe", refresh));
         response.setHeader("Authorization", "Bearer " + result);
 
         return "Bearer " + result;
@@ -177,7 +198,7 @@ public class UserServiceImpl implements UserService{
         cookie.setMaxAge(24*60*60);
         cookie.setSecure(true);
         cookie.setPath("/");
-        if(key.equals("Authorization-re")) {
+        if(key.equals("AuthorizationRe")) {
             cookie.setHttpOnly(true);
         }
 

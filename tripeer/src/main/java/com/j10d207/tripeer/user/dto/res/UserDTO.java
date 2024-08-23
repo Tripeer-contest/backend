@@ -1,7 +1,9 @@
 package com.j10d207.tripeer.user.dto.res;
 
+import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
+import com.j10d207.tripeer.user.db.entity.WishListEntity;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.core.Authentication;
@@ -38,6 +40,36 @@ public class UserDTO {
                     .style1(userEntity.getStyle1())
                     .style2(userEntity.getStyle2())
                     .style3(userEntity.getStyle3())
+                    .build();
+        }
+    }
+
+    @Getter
+    @Builder
+    public static class Wishlist {
+        private long wishlistId;
+        private long cityId;
+        private long townId;
+        private long spotInfoId;
+        private String title;
+        private String contentType;
+        private String addr;
+        private Double latitude;
+        private Double longitude;
+        private String img;
+
+        public static Wishlist fromEntity(WishListEntity wishListEntity) {
+            return Wishlist.builder()
+                    .wishlistId(wishListEntity.getWishlistId())
+                    .cityId(wishListEntity.getSpotInfo().getTown().getTownPK().getCity().getCityId())
+                    .townId(wishListEntity.getSpotInfo().getTown().getTownPK().getTownId())
+                    .spotInfoId(wishListEntity.getSpotInfo().getSpotInfoId())
+                    .title(wishListEntity.getSpotInfo().getTitle())
+                    .contentType(ContentTypeEnum.getMajorNameByCode(wishListEntity.getSpotInfo().getContentTypeId()))
+                    .addr(wishListEntity.getSpotInfo().getAddr1())
+                    .latitude(wishListEntity.getSpotInfo().getLatitude())
+                    .longitude(wishListEntity.getSpotInfo().getLongitude())
+                    .img(wishListEntity.getSpotInfo().getFirstImage())
                     .build();
         }
     }

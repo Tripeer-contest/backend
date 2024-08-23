@@ -117,14 +117,6 @@ public class PlanController {
         return Response.of(HttpStatus.OK, "플랜버킷 관광지 삭제 완료", null);
     }
 
-    //즐겨찾기 추가
-    @PostMapping("/wishlist/{spotInfoId}")
-    public Response<?> addWishList(@PathVariable("spotInfoId") int spotInfoId,
-                                   @AuthenticationPrincipal CustomOAuth2User user) {
-        planService.addWishList(spotInfoId, user.getUserId());
-        return Response.of(HttpStatus.OK, "즐겨찾기 추가 완료", null);
-    }
-
     //즐겨찾기 조회
     @GetMapping("wishlist/{planId}")
     public Response<List<SpotSearchResDTO>> getWishList(@AuthenticationPrincipal CustomOAuth2User user,

@@ -9,7 +9,7 @@ spring:
       max-request-size: -1
 
   datasource:
-    url: ENC(O+6cd1DEPib/iu/hkn5SAWTMEKzAmV6xq+cqOjhR4rRka0UVt6VGVSL0uLG2i2c61l/2FP5EApg=)
+    url: ENC(lOFswiNgkkKFVYcwvYjD6SjBxBjdd98SV7GocEaulhDjhhQbtUO9uoSQB5O9uCg8ClK5mzgXiWg=)
     username: ENC(9m9o70ex2187SXtUNb1JQA==)
     password: ENC(Wstc5/so3a0smxXFvZP5pvCfQhdj10v007R2AGIcNY8=)
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -41,7 +41,7 @@ spring:
         registration:
           kakao:
             client-name: kakao
-            client-id : ENC(IaY6SQ0O/qVmqqwYfxphw2mNp3r82EjyJv62hGoqZfuFTM8rR7LUSqFWbxYS6x48)
+            client-id: ENC(IaY6SQ0O/qVmqqwYfxphw2mNp3r82EjyJv62hGoqZfuFTM8rR7LUSqFWbxYS6x48)
             client-secret: ENC(lQlOiocOvFAtDivr/RySShuAQozGv1F6o1J6tf7uYxTeXxpl9BRgPUbvbDq69cix)
             redirect-uri: https://tripeer.co.kr/api/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
@@ -64,7 +64,7 @@ spring:
 
     #JWT Time 300min, 600min
   jwt:
-    access: 18000000
+    access: 600000
     refresh: 36000000
     secret: ENC(+TMgIEAtgPTpRvh8SSGMLDPoaEzVbkBA8RFQBsNplM5IAmNxrATCqM9itNRpS5BX)
 
@@ -106,3 +106,5 @@ cloud:
   application:
     name: tripeer
 
+admin:
+  login: ENC(3At+j0WU3QGuxpq9ZOruxzROL2cCHGCd)

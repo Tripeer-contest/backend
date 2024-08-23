@@ -15,7 +15,7 @@ public class ContentTypeEnum {
         SPORTS(28, "레포츠"),
         ACCOMMODATION(32, "숙박"),
         SHOPPING(38, "쇼핑"),
-        RESTAURANT(39, "음식점");
+        RESTAURANT(39, "맛집");
 
         private final int code;
         private final String name;
@@ -26,6 +26,18 @@ public class ContentTypeEnum {
         for (ContentTypeListEnum contentType : ContentTypeListEnum.values()) {
             if (contentType.getCode() == code) {
                 return contentType.getName();
+            }
+        }
+        return null; // 매칭되는 값이 없을 경우 null 반환
+    }
+
+    // 상수 값을 대분류 이름으로 변환하는 메서드
+    public static String getMajorNameByCode(int code) {
+        for (ContentTypeListEnum contentType : ContentTypeListEnum.values()) {
+            if (contentType.getCode() == code && (code == 32 || code == 39)) {
+                return contentType.getName();
+            } else if (contentType.getCode() == code) {
+                return "명소";
             }
         }
         return null; // 매칭되는 값이 없을 경우 null 반환
