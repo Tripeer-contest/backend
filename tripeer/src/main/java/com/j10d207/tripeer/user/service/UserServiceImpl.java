@@ -3,6 +3,8 @@ package com.j10d207.tripeer.user.service;
 import com.j10d207.tripeer.s3.dto.S3Option;
 import com.j10d207.tripeer.s3.dto.FileInfoDto;
 import com.j10d207.tripeer.s3.service.S3Service;
+import com.j10d207.tripeer.user.db.entity.WishListEntity;
+import com.j10d207.tripeer.user.db.repository.WishListRepository;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
 import com.j10d207.tripeer.exception.CustomException;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -36,6 +39,7 @@ public class UserServiceImpl implements UserService{
     private long refreshTime;
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
+    private final WishListRepository wishListRepository;
     private final S3Service s3Service;
 
     //회원 가입
@@ -111,6 +115,23 @@ public class UserServiceImpl implements UserService{
     public UserDTO.Info getMyInfo(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
         return UserDTO.Info.fromUserEntity(user);
+    }
+
+    //마이 페이지에서 찜목록 불러오기
+    @Override
+    public List<UserDTO.Wishlist> getMyWishlist(long userId) {
+        List<WishListEntity> wishListEntityList = wishListRepository.findByUser_UserId(userId);
+        return wishListEntityList.stream().map(UserDTO.Wishlist::fromEntity).toList();
+    }
+
+    //찜목록 추가 or 삭제
+    public void addWishList(int spotInfoId, long userId) {
+        Optional<WishListEntity> optionalWishList = wishListRepository.findBySpotInfo_SpotInfoIdAndUser_UserId(spotInfoId, userId);
+        if (optionalWishList.isPresent()) {
+            wishListRepository.delete(optionalWishList.get());
+        } else {
+            wishListRepository.save(WishListEntity.CreateWishListEntity(spotInfoId, userId));
+        }
     }
 
     // access 토큰 재발급
