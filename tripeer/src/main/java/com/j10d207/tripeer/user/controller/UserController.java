@@ -73,7 +73,7 @@ public class UserController {
     }
 
     //즐겨찾기 추가
-    @PostMapping("/wishlist/{spotInfoId}")
+    @PostMapping("/wishlist")
     public Response<?> addWishList(@RequestBody WishlistReq wishlistReq,
                                    @AuthenticationPrincipal CustomOAuth2User user) {
         userService.addWishList(wishlistReq, user.getUserId());

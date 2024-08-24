@@ -126,7 +126,12 @@ public class UserServiceImpl implements UserService{
         List<WishListEntity> wishListEntityList = wishListRepository.findByUser_UserId(userId);
         List<UserDTO.Wishlist> wishlistList = wishListEntityList.stream().map(UserDTO.Wishlist::ofEntity).toList();
         for ( UserDTO.Wishlist wishlist : wishlistList) {
-            wishlist.setStarPointAvg(Math.round(spotReviewRepository.findAverageStarPointBySpotInfoId(wishlist.getSpotInfoId())*10)/10.0);
+            Optional<Double> starPoint = spotReviewRepository.findAverageStarPointBySpotInfoId(wishlist.getSpotInfoId());
+            if(starPoint.isPresent()) {
+                wishlist.setStarPointAvg(Math.round(starPoint.get()*10)/10.0);
+            } else {
+                wishlist.setStarPointAvg(0);
+            }
         }
         return wishlistList;
     }
@@ -134,7 +139,7 @@ public class UserServiceImpl implements UserService{
     //찜목록 추가 or 삭제
     public void addWishList(WishlistReq wishlistReq, long userId) {
         Optional<WishListEntity> optionalWishList = wishListRepository.findBySpotInfo_SpotInfoIdAndUser_UserId(wishlistReq.getSpotInfoId(), userId);
-        if (optionalWishList.isPresent() && wishlistReq.isLike()) {
+        if (optionalWishList.isPresent() && wishlistReq.isLike() ) {
             wishListRepository.delete(optionalWishList.get());
         } else {
             wishListRepository.save(WishListEntity.CreateWishListEntity(wishlistReq.getSpotInfoId(), userId));
