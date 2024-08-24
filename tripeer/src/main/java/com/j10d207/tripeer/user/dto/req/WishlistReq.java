@@ -6,5 +6,5 @@ import lombok.Getter;
 public class WishlistReq {
 
     private int spotInfoId;
-    private boolean isLike;
+    private boolean like;
 }
