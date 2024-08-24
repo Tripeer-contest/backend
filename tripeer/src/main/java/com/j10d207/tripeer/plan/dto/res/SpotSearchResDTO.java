@@ -37,7 +37,7 @@ public class SpotSearchResDTO {
                 .build();
     }
 
-    public static SpotSearchResDTO SpotInfoEntityToDTO (SpotInfoEntity spotInfo, boolean isWishlist, boolean isSpot) {
+    public static SpotSearchResDTO fromSpotInfoEntity(SpotInfoEntity spotInfo, boolean isWishlist, boolean isSpot) {
         String img;
         if (spotInfo.getFirstImage().contains("default")) {
             img = spotInfo.getFirstImage();

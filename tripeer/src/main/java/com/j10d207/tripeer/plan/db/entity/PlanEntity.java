@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.plan.db.entity;
 
 import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
+import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +10,8 @@ import jakarta.persistence.Id;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
+
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;

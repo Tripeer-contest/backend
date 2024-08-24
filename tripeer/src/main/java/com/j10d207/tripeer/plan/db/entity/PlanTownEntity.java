@@ -36,7 +36,7 @@ public class PlanTownEntity {
     private CityEntity cityOnly;
 
 
-    public static List<String> ConvertToNameList (List<PlanTownEntity> planTown) {
+    public static List<String> convertToNameList(List<PlanTownEntity> planTown) {
         List<String> townNameList = new ArrayList<>();
         for(PlanTownEntity planTownEntity : planTown) {
             if(planTownEntity.getTown() == null) {

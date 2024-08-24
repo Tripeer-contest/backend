@@ -74,7 +74,7 @@ public class PlanDetailMainDTO {
                     .planId(plan.getPlanId())
                     .title(plan.getTitle())
                     .img(img)
-                    .townList(PlanTownEntity.ConvertToNameList(planTown))
+                    .townList(PlanTownEntity.convertToNameList(planTown))
                     .startDay(plan.getStartDate())
                     .endDay(plan.getEndDate())
                     .member(memberList.stream().map(UserDTO.Search::fromCoworkerEntity).toList())
@@ -136,7 +136,7 @@ public class PlanDetailMainDTO {
         private String movingRoot;
         private int cost;
 
-        public static PlanSpotDetail EntityToDTO (PlanDetailEntity planDetailEntity) {
+        public static PlanSpotDetail fromEntity(PlanDetailEntity planDetailEntity) {
                 return PlanSpotDetail.builder()
                         .planDetailId(planDetailEntity.getPlanDetailId())
                         .title(planDetailEntity.getSpotInfo().getTitle())

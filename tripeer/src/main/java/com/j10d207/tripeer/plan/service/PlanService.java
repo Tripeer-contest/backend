@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.plan.service;
 
 import com.j10d207.tripeer.plan.dto.req.CoworkerInvitedReq;
+import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
 import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
 import com.j10d207.tripeer.plan.dto.req.TitleChangeReq;
 import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
@@ -14,7 +15,7 @@ import java.util.Map;
 public interface PlanService {
 
     //플랜 생성
-    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanDetailMainDTO.CreateResultInfo createResultInfo, long userId);
+    public PlanDetailMainDTO.CreateResultInfo createPlan(PlanCreateInfoReq planCreateInfoReq, long userId);
     //플랜 이름 변경
     public void changeTitle(TitleChangeReq titleChangeReq, long userId);
     //플랜 탈퇴
