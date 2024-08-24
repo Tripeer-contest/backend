@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class StarPointDto {
+public class ReviewDto {
 
     private long spotStarPointId;
     private long userId;

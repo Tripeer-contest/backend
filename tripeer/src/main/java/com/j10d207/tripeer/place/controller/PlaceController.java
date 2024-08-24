@@ -1,8 +1,10 @@
 package com.j10d207.tripeer.place.controller;
 
 import com.j10d207.tripeer.place.db.dto.*;
+import com.j10d207.tripeer.place.db.vo.ReviewVO;
 import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import com.j10d207.tripeer.place.service.CityService;
+import com.j10d207.tripeer.place.service.ReviewService;
 import com.j10d207.tripeer.place.service.SpotService;
 import com.j10d207.tripeer.place.service.TownService;
 import com.j10d207.tripeer.plan.service.PlanService;
@@ -25,6 +27,7 @@ public class PlaceController {
     private final TownService townService;
     private final SpotService spotService;
     private final PlanService planService;
+    private final ReviewService reviewService;
 
     /*
     * city 검색
@@ -123,6 +126,15 @@ public class PlaceController {
     @GetMapping("/all")
     public Response<CityAndTownDto> getAllCityAndTown() {
         return Response.of(HttpStatus.OK, "모든 도시, 타운 조회", townService.getAllCityAndTown());
+    }
+
+    /*
+    리뷰 작성하기 + 별점
+     */
+    @PostMapping("review/write")
+    public Response<?> createReview(@AuthenticationPrincipal CustomOAuth2User user, @RequestBody ReviewVO reviewVO) {
+        reviewService.saveReview(user.getUserId(), reviewVO);
+        return Response.of(HttpStatus.OK, "리뷰 작성 완료", null);
     }
 
 }

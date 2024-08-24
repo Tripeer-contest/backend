@@ -1,11 +1,12 @@
 package com.j10d207.tripeer.place.db.vo;
 
-import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 
+import lombok.Getter;
 
-public class StarPointVO {
+@Getter
+public class ReviewVO {
 
-    private long spotStarPointId;
+    private long spotReviewId;
     private int spotInfoId;
 
     private double starPoint;
