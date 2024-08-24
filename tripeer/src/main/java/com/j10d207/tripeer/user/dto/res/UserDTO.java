@@ -6,6 +6,7 @@ import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.entity.WishListEntity;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,6 +46,7 @@ public class UserDTO {
     }
 
     @Getter
+    @Setter
     @Builder
     public static class Wishlist {
         private long wishlistId;
@@ -52,13 +54,15 @@ public class UserDTO {
         private long townId;
         private long spotInfoId;
         private String title;
+        private double starPointAvg;
         private String contentType;
         private String addr;
         private Double latitude;
         private Double longitude;
         private String img;
+        private boolean isLike;
 
-        public static Wishlist fromEntity(WishListEntity wishListEntity) {
+        public static Wishlist ofEntity(WishListEntity wishListEntity) {
             return Wishlist.builder()
                     .wishlistId(wishListEntity.getWishlistId())
                     .cityId(wishListEntity.getSpotInfo().getTown().getTownPK().getCity().getCityId())
@@ -70,6 +74,7 @@ public class UserDTO {
                     .latitude(wishListEntity.getSpotInfo().getLatitude())
                     .longitude(wishListEntity.getSpotInfo().getLongitude())
                     .img(wishListEntity.getSpotInfo().getFirstImage())
+                    .isLike(true)
                     .build();
         }
     }
