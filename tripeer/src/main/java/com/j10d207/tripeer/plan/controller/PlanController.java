@@ -76,7 +76,7 @@ public class PlanController {
     @GetMapping("/myinfo/{planId}")
     public Response<PlanDetailMainDTO.PlanCoworker> getCoworker(@PathVariable("planId") long planId,
                                                                 @AuthenticationPrincipal CustomOAuth2User user) {
-        PlanDetailMainDTO.PlanCoworker planCoworker = planService.getPlanMyinfo(planId, user.getUserId());
+        PlanDetailMainDTO.PlanCoworker planCoworker = planService.getPlanMyInfo(planId, user.getUserId());
         return Response.of(HttpStatus.OK, "조회 완료", planCoworker);
     }
 

@@ -45,6 +45,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -95,9 +96,9 @@ public class PlanServiceImpl implements PlanService {
 
         int day = (int) ChronoUnit.DAYS.between(createResultInfo.getStartDay(), createResultInfo.getEndDay()) + 1;
         List<PlanDayEntity> planDayEntityList = new ArrayList<>();
-        for (int i = 0; i < day; i++) {
-            planDayEntityList.add(PlanDayEntity.createEntity(createResultInfo, plan, i));
-        }
+        IntStream.range(0, day)
+                .mapToObj(i -> PlanDayEntity.createEntity(createResultInfo, plan, i))
+                .forEach(planDayEntityList::add);
         planDayRepository.saveAll(planDayEntityList);
         // 이메일 전송 스케쥴링
         planSchedulerService.schedulePlanTasks(plan);
@@ -144,15 +145,6 @@ public class PlanServiceImpl implements PlanService {
         }
 
         // 내가 가진 플랜을 하나씩 조회
-//        for (CoworkerEntity coworker : coworkerList) {
-//            // 플랜 상세정보 가져오기
-//            PlanEntity plan = planRepository.findByPlanId(coworker.getPlan().getPlanId());
-//            // 플랜에서 선택한 타운 리스트 가져오기
-//            List<PlanTownEntity> planTown = planTownRepository.findByPlan_PlanId(plan.getPlanId());
-//            PlanDetailMainDTO.MyPlan myPlan = PlanDetailMainDTO.MyPlan.valueOfPlanPlanTownCoworkerEntity(plan, PlanTownEntity.getFirstImg(planTown), planTown, coworkerRepository.findByPlan_PlanId(plan.getPlanId())); // 플랜의 멤버 리스트 넣기
-//            myPlans.add(myPlan);
-//        }
-
         return coworkerList.stream()
                 .map(coworker -> {
                     // 플랜 상세정보 가져오기
@@ -346,37 +338,30 @@ public class PlanServiceImpl implements PlanService {
     //플랜 디테일 전체 조회
     @Override
     public Map<Integer, List<PlanDetailMainDTO.PlanSpotDetail>> getAllPlanDetail(long planId) {
-        Map<Integer, List<PlanDetailMainDTO.PlanSpotDetail>> planSpotDetailMap = new HashMap<>();
-        //조회할 플랜을 가져옴
         PlanEntity plan = planRepository.findByPlanId(planId);
-        //시작날짜, 끝날짜를 이용해서 몇일 여행인지 계산
-        int day = (int) ChronoUnit.DAYS.between(plan.getStartDate(), plan.getEndDate()) + 1;
-
-        //여행알 일자만큼 반복, 각 일자별 디테일을 뽑아오기 위해
-        for (int i = 0; i < day; i++) {
-            // N일차 플랜의 id를 찾아옴
-            long planDayId = planDayRepository.findByPlan_PlanIdAndDay(planId, plan.getStartDate().plusDays(i)).getPlanDayId();
-            // 얻으려는 일차의 플랜을 step 순서로 정렬
-            List<PlanDetailEntity> planDetailEntityList = planDetailRepository.findByPlanDay_PlanDayId(planDayId, Sort.by(Sort.Direction.ASC, "step"));
-
-            List<PlanDetailMainDTO.PlanSpotDetail> planSpotDetailList = planDetailEntityList.stream().map(PlanDetailMainDTO.PlanSpotDetail::fromEntity).toList();
-            planSpotDetailMap.put(i+1, planSpotDetailList);
-        }
-        return planSpotDetailMap;
+        return IntStream.range(0, (int) ChronoUnit.DAYS.between(plan.getStartDate(), plan.getEndDate()) + 1)
+                .boxed()
+                .collect(Collectors.toMap(
+                        i -> i + 1,
+                        i -> {
+                            long planDayId = planDayRepository.findByPlan_PlanIdAndDay(planId, plan.getStartDate().plusDays(i)).getPlanDayId();
+                            List<PlanDetailEntity> planDetailEntityList = planDetailRepository.findByPlanDay_PlanDayId(planDayId, Sort.by(Sort.Direction.ASC, "step"));
+                            return planDetailEntityList.stream().map(PlanDetailMainDTO.PlanSpotDetail::fromEntity).toList();
+                        }
+                ));
     }
 
     //플랜 나의 정보 조회(기존 내정보 + 나의 coworker 에서의 순서)
     @Override
-    public PlanDetailMainDTO.PlanCoworker getPlanMyinfo(long planId, long userId) {
+    public PlanDetailMainDTO.PlanCoworker getPlanMyInfo(long planId, long userId) {
         //요청된 플랜의 동행자 목록 조회
         List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanId(planId);
-        int order = -1;
-        for (CoworkerEntity coworker : coworkerList) {
-            order++;
-            if(userId != coworker.getUser().getUserId()) continue;
-            return PlanDetailMainDTO.PlanCoworker.fromCoworkerEntity(coworker, order);
-        }
-        throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
+
+        return IntStream.range(0, coworkerList.size())
+                .filter(i -> userId == coworkerList.get(i).getUser().getUserId()) // userId가 일치하는 인덱스를 필터링
+                .mapToObj(i -> PlanDetailMainDTO.PlanCoworker.fromCoworkerEntity(coworkerList.get(i), i)) // 인덱스와 함께 객체로 변환
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_HAS_COWORKER));
     }
 
     /*

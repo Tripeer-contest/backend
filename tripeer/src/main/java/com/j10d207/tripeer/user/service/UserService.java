@@ -2,6 +2,7 @@ package com.j10d207.tripeer.user.service;
 
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
+import com.j10d207.tripeer.user.dto.req.WishlistReq;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,7 +30,7 @@ public interface UserService {
     //내 찜목록 전체 불러오기
     public List<UserDTO.Wishlist> getMyWishlist(long userId);
     //즐겨찾기 추가
-    public void addWishList(int spotInfoId, long userId);
+    public void addWishList(WishlistReq wishlistReq, long userId);
     //access 토큰 재발급
     public void tokenRefresh(String token, Cookie[] cookies, HttpServletResponse response);
 

@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.user.service;
 
+import com.j10d207.tripeer.place.db.repository.SpotReviewRepository;
 import com.j10d207.tripeer.s3.dto.S3Option;
 import com.j10d207.tripeer.s3.dto.FileInfoDto;
 import com.j10d207.tripeer.s3.service.S3Service;
@@ -12,6 +13,7 @@ import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.user.config.JWTUtil;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.repository.UserRepository;
+import com.j10d207.tripeer.user.dto.req.WishlistReq;
 import com.j10d207.tripeer.user.dto.res.JWTDto;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import jakarta.servlet.http.Cookie;
@@ -41,6 +43,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final WishListRepository wishListRepository;
     private final S3Service s3Service;
+    private final SpotReviewRepository spotReviewRepository;
 
     //회원 가입
     @Override
@@ -121,16 +124,25 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<UserDTO.Wishlist> getMyWishlist(long userId) {
         List<WishListEntity> wishListEntityList = wishListRepository.findByUser_UserId(userId);
-        return wishListEntityList.stream().map(UserDTO.Wishlist::fromEntity).toList();
+        List<UserDTO.Wishlist> wishlistList = wishListEntityList.stream().map(UserDTO.Wishlist::ofEntity).toList();
+        for ( UserDTO.Wishlist wishlist : wishlistList) {
+            Optional<Double> starPoint = spotReviewRepository.findAverageStarPointBySpotInfoId(wishlist.getSpotInfoId());
+            if(starPoint.isPresent()) {
+                wishlist.setStarPointAvg(Math.round(starPoint.get()*10)/10.0);
+            } else {
+                wishlist.setStarPointAvg(0);
+            }
+        }
+        return wishlistList;
     }
 
     //찜목록 추가 or 삭제
-    public void addWishList(int spotInfoId, long userId) {
-        Optional<WishListEntity> optionalWishList = wishListRepository.findBySpotInfo_SpotInfoIdAndUser_UserId(spotInfoId, userId);
-        if (optionalWishList.isPresent()) {
+    public void addWishList(WishlistReq wishlistReq, long userId) {
+        Optional<WishListEntity> optionalWishList = wishListRepository.findBySpotInfo_SpotInfoIdAndUser_UserId(wishlistReq.getSpotInfoId(), userId);
+        if (optionalWishList.isPresent() && wishlistReq.isLike() ) {
             wishListRepository.delete(optionalWishList.get());
         } else {
-            wishListRepository.save(WishListEntity.CreateWishListEntity(spotInfoId, userId));
+            wishListRepository.save(WishListEntity.CreateWishListEntity(wishlistReq.getSpotInfoId(), userId));
         }
     }
 

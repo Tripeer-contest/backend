@@ -5,6 +5,7 @@ import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
+import com.j10d207.tripeer.user.dto.req.WishlistReq;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.j10d207.tripeer.user.service.UserService;
@@ -72,10 +73,10 @@ public class UserController {
     }
 
     //즐겨찾기 추가
-    @PostMapping("/wishlist/{spotInfoId}")
-    public Response<?> addWishList(@PathVariable("spotInfoId") int spotInfoId,
+    @PostMapping("/wishlist")
+    public Response<?> addWishList(@RequestBody WishlistReq wishlistReq,
                                    @AuthenticationPrincipal CustomOAuth2User user) {
-        userService.addWishList(spotInfoId, user.getUserId());
+        userService.addWishList(wishlistReq, user.getUserId());
         return Response.of(HttpStatus.OK, "즐겨찾기 추가 완료", null);
     }
 

@@ -41,7 +41,7 @@ public interface PlanService {
     //플랜 디테일 전체 조회
     public Map<Integer, List<PlanDetailMainDTO.PlanSpotDetail>> getAllPlanDetail(long planId);
     //플랜 나의 정보 조회(기존 내정보 + 나의 coworker에서의 순서)
-    public PlanDetailMainDTO.PlanCoworker getPlanMyinfo(long planId, long userId);
+    public PlanDetailMainDTO.PlanCoworker getPlanMyInfo(long planId, long userId);
 
     //목적지간 최단 루트 계산
     public RootOptimizeDTO getShortTime(RootOptimizeDTO rootOptimizeDTO);
