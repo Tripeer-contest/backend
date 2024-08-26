@@ -192,12 +192,17 @@ public class PlanServiceImpl implements PlanService {
      */
     @Override
     public void joinPlan(CoworkerInvitedReq coworkerInvitedReq, long userId) {
+        //로그인 사용자가 소유하지 않은 플랜 접근시
+        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedReq.getPlanId(), userId)) {
+            throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
+        }
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         PlanEntity planEntity = planRepository.findById(coworkerInvitedReq.getPlanId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
-        UserEntity user = UserEntity.builder().userId(coworkerInvitedReq.getUserId()).build();
-
+        UserEntity user = userRepository.findById(coworkerInvitedReq.getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        
         if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerInvitedReq.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
             throw new CustomException(ErrorCode.TOO_MANY_PLAN);
         }

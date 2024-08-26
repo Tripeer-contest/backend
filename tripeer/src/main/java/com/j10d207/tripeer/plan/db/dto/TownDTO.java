@@ -1,10 +1,11 @@
 package com.j10d207.tripeer.plan.db.dto;
 
 import com.j10d207.tripeer.plan.db.entity.PlanTownEntity;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class TownDTO {
 
