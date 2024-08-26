@@ -141,6 +141,11 @@ public class UserServiceImpl implements UserService{
         Optional<WishListEntity> optionalWishList = wishListRepository.findBySpotInfo_SpotInfoIdAndUser_UserId(wishlistReq.getSpotInfoId(), userId);
         if (optionalWishList.isPresent() && wishlistReq.isLike() ) {
             wishListRepository.delete(optionalWishList.get());
+        } else if (optionalWishList.isPresent()) {
+            throw new CustomException(ErrorCode.HAS_WISHLIST);
+
+        } else if (wishlistReq.isLike()) {
+            throw new CustomException(ErrorCode.NONE_WISHLIST);
         } else {
             wishListRepository.save(WishListEntity.CreateWishListEntity(wishlistReq.getSpotInfoId(), userId));
         }
