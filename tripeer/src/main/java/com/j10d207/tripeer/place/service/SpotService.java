@@ -10,9 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface SpotService {
-    public SpotListDto getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, long userId);
-
-    public SpotListDto getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, long userId);
+    public SpotListDto getSpotSearch(int page, int ContentTypeId, int cityId, int townId, long userId);
 
     public SpotDetailDto getSpotDetail(Integer spotId);
 

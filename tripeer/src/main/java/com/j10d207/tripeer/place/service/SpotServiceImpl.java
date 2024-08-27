@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +28,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SpotServiceImpl implements SpotService{
 
-    private final JWTUtil jwtUtil;
     private final SpotInfoRepository spotInfoRepository;
     private final SpotDescriptionRepository spotDescriptionRepository;
     private final SpotDetailRepository spotDetailRepository;
@@ -46,11 +46,25 @@ public class SpotServiceImpl implements SpotService{
     }
 
     @Override
-    public SpotListDto getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, long userId) {
+    public SpotListDto getSpotSearch(int page, int ContentTypeId, int cityId, int townId, long userId) {
+        if (ContentTypeId == 32 || ContentTypeId == 39) {
+            return getSpotByContentType(page, ContentTypeId, cityId, townId, userId);
+        } else if (ContentTypeId == 100) {
+            return getSpotByContentType(page, Arrays.asList(32, 39), cityId, townId, userId);
+        } else if (ContentTypeId == -1) {
+            return getSpotByContentType(page, cityId, townId, userId);
+        } else {
+            throw new CustomException(ErrorCode.UNDEFINED_TYPE);
+        }
+    }
+
+    private SpotListDto getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, long userId) {
         Pageable pageable = PageRequest.of(page,15);
 
         List<SpotInfoEntity> spotInfoEntities;
-        if (townId == -1) {
+        if (townId == -1 && cityId == -1) {
+            spotInfoEntities = spotInfoRepository.findByContentTypeId(ContentTypeId, pageable);
+        } else if (townId == -1) {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityId(ContentTypeId, cityId, pageable);
         } else {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(ContentTypeId, cityId, townId, pageable);
@@ -66,11 +80,12 @@ public class SpotServiceImpl implements SpotService{
                 .build();
     }
 
-    @Override
-    public SpotListDto getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, long userId) {
+    private SpotListDto getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, long userId) {
         Pageable pageable = PageRequest.of(page,15);
         List<SpotInfoEntity> spotInfoEntities;
-        if (townId == -1) {
+        if (townId == -1 && cityId == -1) {
+            spotInfoEntities = spotInfoRepository.findByContentTypeIdNotIn(ContentTypeId, pageable);
+        } else if (townId == -1) {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityId(ContentTypeId, cityId, pageable);
         } else {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(ContentTypeId, cityId, townId, pageable);
@@ -79,6 +94,34 @@ public class SpotServiceImpl implements SpotService{
         List<SpotInfoDto> spotInfoDtos = convertToDtoList(spotInfoEntities, userId);
 
         boolean isLastPage = spotInfoDtos.size() < 15;
+
+        return SpotListDto.builder()
+                .spotInfoDtos(spotInfoDtos)
+                .last(isLastPage)
+                .build();
+    }
+
+    private SpotListDto getSpotByContentType(Integer page, Integer cityId, Integer townId, long userId) {
+        Pageable pageable = PageRequest.of(page,5);
+
+        List<SpotInfoEntity> spotInfoEntities;
+        if (townId == -1 && cityId == -1) {
+            spotInfoEntities = spotInfoRepository.findByContentTypeId(32, pageable);
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeId(39, pageable));
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdNotIn(Arrays.asList(32, 39), pageable));
+        } else if (townId == -1) {
+            spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityId(32, cityId, pageable);
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityId(39, cityId, pageable));
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityId(Arrays.asList(32, 39), cityId, pageable));
+        } else {
+            spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(32, cityId, townId, pageable);
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(39, cityId, townId, pageable));
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(Arrays.asList(32, 39), cityId, townId, pageable));
+        }
+
+        List<SpotInfoDto> spotInfoDtos = convertToDtoList(spotInfoEntities, userId);
+
+        boolean isLastPage = spotInfoDtos.size() < 5;
 
         return SpotListDto.builder()
                 .spotInfoDtos(spotInfoDtos)
