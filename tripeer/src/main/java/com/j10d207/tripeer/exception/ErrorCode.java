@@ -22,6 +22,8 @@ public enum ErrorCode {
     DUPLICATE_USER(HttpStatus.BAD_REQUEST, "ACCOUNT-006", "이미 등록된 사용자입니다."),
     REQUEST_AUTHORIZATION(HttpStatus.FORBIDDEN, "ACCOUNT-007", "권한이 없는 요청입니다."),
     EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "ACCOUNT-008", "토큰이 만료되었습니다."),
+    NONE_WISHLIST(HttpStatus.BAD_REQUEST, "ACCOUNT-009", "찜목록에 없는 장소입니다"),
+    HAS_WISHLIST(HttpStatus.BAD_REQUEST, "ACCOUNT-009", "이미 찜목록에 등록된 장소입니다"),
 
     // plan
     HAS_BUCKET(HttpStatus.BAD_REQUEST, "PLAN-001", "이미 등록된 장소입니다."),

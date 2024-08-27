@@ -77,7 +77,7 @@ public class UserController {
     public Response<?> addWishList(@RequestBody WishlistReq wishlistReq,
                                    @AuthenticationPrincipal CustomOAuth2User user) {
         userService.addWishList(wishlistReq, user.getUserId());
-        return Response.of(HttpStatus.OK, "즐겨찾기 추가 완료", null);
+        return Response.of(HttpStatus.OK, "찜목록 변경 완료", null);
     }
 
     //내 정보 수정
