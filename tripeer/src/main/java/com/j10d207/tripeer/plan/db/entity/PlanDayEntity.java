@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.j10d207.tripeer.history.db.entity.GalleryEntity;
 
+import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -35,15 +36,24 @@ public class PlanDayEntity {
 	@JoinColumn(name = "PLAN_ID")
 	private PlanEntity plan;
 
-	private LocalDate day;
-	private LocalTime startTime;
-	private String vehicle;
+    private LocalDate day;
+    private LocalTime startTime;
+    private String vehicle;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "PLAN_DAY_ID")
-	private List<PlanDetailEntity> planDetailList;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PLAN_DAY_ID")
+    private List<PlanDetailEntity> planDetailList;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "PLAN_DAY_ID")
-	private List<GalleryEntity> galleryList;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PLAN_DAY_ID")
+    private List<GalleryEntity> galleryList;
+
+    public static PlanDayEntity createEntity(PlanDetailMainDTO.CreateResultInfo createResultInfo, PlanEntity planEntity, int i) {
+        return PlanDayEntity.builder()
+                .plan(planEntity)
+                .day(createResultInfo.getStartDay().plusDays(i))
+                .vehicle(createResultInfo.getVehicle())
+                .build();
+
+    }
 }

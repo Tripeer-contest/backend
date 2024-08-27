@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.plan.db.dto;
+package com.j10d207.tripeer.plan.dto.res;
 
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
@@ -22,7 +22,7 @@ public class SpotSearchResDTO {
     private boolean isWishlist;
     private boolean isSpot;
 
-    public static SpotSearchResDTO WishEntityToDTO (WishListEntity wishList, boolean isSpot) {
+    public static SpotSearchResDTO fromWishListEntity(WishListEntity wishList, boolean isSpot) {
 
         return SpotSearchResDTO.builder()
                 .spotInfoId(wishList.getSpotInfo().getSpotInfoId())
@@ -37,7 +37,7 @@ public class SpotSearchResDTO {
                 .build();
     }
 
-    public static SpotSearchResDTO SpotInfoEntityToDTO (SpotInfoEntity spotInfo, boolean isWishlist, boolean isSpot) {
+    public static SpotSearchResDTO fromSpotInfoEntity(SpotInfoEntity spotInfo, boolean isWishlist, boolean isSpot) {
         String img;
         if (spotInfo.getFirstImage().contains("default")) {
             img = spotInfo.getFirstImage();

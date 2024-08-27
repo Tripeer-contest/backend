@@ -27,4 +27,11 @@ public class CoworkerEntity {
     @JoinColumn(name = "PLAN_ID")
     private PlanEntity plan;
 
+    public static CoworkerEntity MakeCoworkerEntity(UserEntity userEntity, PlanEntity planEntity) {
+        return CoworkerEntity.builder()
+                .user(userEntity)
+                .plan(planEntity)
+                .build();
+    }
+
 }

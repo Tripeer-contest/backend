@@ -1,11 +1,7 @@
 package com.j10d207.tripeer.plan.db.entity;
 
+import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
-import com.j10d207.tripeer.plan.db.vo.PlanCreateInfoVO;
-import java.time.LocalDate;
-import java.util.List;
-
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +10,8 @@ import jakarta.persistence.Id;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
+
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -53,12 +51,12 @@ public class PlanEntity {
 	@JoinColumn(name = "PLAN_ID")
 	private List<CoworkerEntity> coworkerList;
 
-    public static PlanEntity VOToEntity (PlanCreateInfoVO createInfo) {
+    public static PlanEntity fromDto(PlanDetailMainDTO.CreateResultInfo CreateResultInfo) {
         return PlanEntity.builder()
-                .title(createInfo.getTitle())
-                .vehicle(createInfo.getVehicle())
-                .startDate(createInfo.getStartDay())
-                .endDate(createInfo.getEndDay())
+                .title(CreateResultInfo.getTitle())
+                .vehicle(CreateResultInfo.getVehicle())
+                .startDate(CreateResultInfo.getStartDay())
+                .endDate(CreateResultInfo.getEndDay())
                 .createDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .build();
     }

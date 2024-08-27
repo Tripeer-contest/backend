@@ -3,7 +3,7 @@ package com.j10d207.tripeer.plan.db.entity;
 import java.time.LocalTime;
 
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
-import com.j10d207.tripeer.plan.db.vo.PlanDetailVO;
+import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 
 import jakarta.persistence.Entity;
@@ -55,20 +55,19 @@ public class PlanDetailEntity {
 	@JoinColumn(name = "PUBLIC_ROOT_ID")
 	private PublicRootEntity publicRoot;
 
-	public static PlanDetailEntity VOToEntity(PlanDetailVO planDetailVO) {
-		return PlanDetailEntity.builder()
-			.planDetailId(planDetailVO.getPlanDetailId())
-			.planDay(PlanDayEntity.builder()
-				.planDayId(planDetailVO.getPlanDayId())
-				.build())
-			.spotInfo(SpotInfoEntity.builder()
-				.spotInfoId(planDetailVO.getSpotInfoId())
-				.build())
-			.day(planDetailVO.getDay())
-			.spotTime(planDetailVO.getSpotTime())
-			.step(planDetailVO.getStep())
-			.description(planDetailVO.getDescription())
-			.cost(planDetailVO.getCost())
-			.build();
-	}
+    public static PlanDetailEntity fromReq(PlanDetailReq planDetailReq) {
+        return PlanDetailEntity.builder()
+                .planDay(PlanDayEntity.builder()
+                        .planDayId(planDetailReq.getPlanDayId())
+                        .build())
+                .spotInfo(SpotInfoEntity.builder()
+                        .spotInfoId(planDetailReq.getSpotInfoId())
+                        .build())
+                .day(planDetailReq.getDay())
+                .spotTime(planDetailReq.getSpotTime())
+                .step(planDetailReq.getStep())
+                .description(planDetailReq.getDescription())
+                .cost(planDetailReq.getCost())
+                .build();
+    }
 }
