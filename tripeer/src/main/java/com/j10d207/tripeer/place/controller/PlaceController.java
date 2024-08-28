@@ -61,43 +61,13 @@ public class PlaceController {
     }
 
 
-    /*
-     * 해당 지역(군, 구)
-     * 의 숙소 조회
-     * */
-    @GetMapping("/stay")
-    public Response<SpotListDto> getStayList(@RequestParam("cityId") Integer cityId,
+    @GetMapping("/search")
+    public Response<SpotListDto> getSearchList(@RequestParam("contentTypeId") int contentTypeId,
+                                               @RequestParam("cityId") Integer cityId,
                                              @RequestParam("townId") Integer townId,
                                              @RequestParam("page") Integer page,
                                              @AuthenticationPrincipal CustomOAuth2User user) {
-        return Response.of(HttpStatus.OK, "숙소 조회", spotService.getSpotByContentType(page,32, cityId, townId, user.getUserId()));
-    }
-
-
-    /*
-     * 해당 지역(군, 구)
-     * 의 식당 조회
-     * */
-    @GetMapping("/restaurant")
-    public Response<SpotListDto> getRestaurantList(@RequestParam("cityId") Integer cityId,
-                                                   @RequestParam("townId") Integer townId,
-                                                   @RequestParam("page") Integer page,
-                                                   @AuthenticationPrincipal CustomOAuth2User user) {
-        return Response.of(HttpStatus.OK, "식당 조회", spotService.getSpotByContentType(page,39, cityId, townId, user.getUserId()));
-    }
-
-
-    /*
-     * 해당 지역(군, 구)
-     * 의 명소 조회
-     * */
-    @GetMapping("/mecca")
-    public Response<SpotListDto> getmeccaList(@RequestParam("cityId") Integer cityId,
-                                              @RequestParam("townId") Integer townId,
-                                              @RequestParam("page") Integer page,
-                                              @AuthenticationPrincipal CustomOAuth2User user) {
-        List<Integer> contentTypeIds = Arrays.asList(32, 39);
-        return Response.of(HttpStatus.OK, "명소 조회", spotService.getSpotByContentType(page, contentTypeIds, cityId, townId, user.getUserId()));
+        return Response.of(HttpStatus.OK, "장소 조회", spotService.getSpotSearch(page, contentTypeId, cityId, townId, user.getUserId()));
     }
 
 

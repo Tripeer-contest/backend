@@ -15,7 +15,8 @@ public class ContentTypeEnum {
         SPORTS(28, "레포츠"),
         ACCOMMODATION(32, "숙박"),
         SHOPPING(38, "쇼핑"),
-        RESTAURANT(39, "맛집");
+        RESTAURANT(39, "맛집"),
+        MECCA(100, "명소");
 
         private final int code;
         private final String name;

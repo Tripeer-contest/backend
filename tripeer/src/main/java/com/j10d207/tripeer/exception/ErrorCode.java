@@ -40,14 +40,11 @@ public enum ErrorCode {
     UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "GALLERY-002", "지원하지 않는 파일타입"),
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "GALLERY-003", "지원하지 않는 파일타입"),
 
-    //city
-    CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "CITY-001", "도시를 찾을 수 없습니다."),
-
-    //town
-    TOWN_NOT_FOUND(HttpStatus.NOT_FOUND, "TOWN-001", "타운을 찾을 수 없습니다."),
-
-    //spot
-    SPOT_NOT_FOUND(HttpStatus.NOT_FOUND, "SPOT-001", "스팟을 찾을 수 없습니다."),
+    // place
+    CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-001", "도시를 찾을 수 없습니다."),
+    TOWN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-002", "타운을 찾을 수 없습니다."),
+    SPOT_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-003", "스팟을 찾을 수 없습니다."),
+    UNDEFINED_TYPE(HttpStatus.NOT_FOUND, "PLACE-004", "정의되지 않은 타입입니다."),
 
     //root
     NOT_FOUND_ROOT(HttpStatus.BAD_REQUEST, "ROOT-001", "대중교통 수단이 없습니다."),
