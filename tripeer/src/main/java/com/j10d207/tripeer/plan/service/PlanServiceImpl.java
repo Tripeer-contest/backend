@@ -5,6 +5,7 @@ import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
 import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
 import com.j10d207.tripeer.plan.dto.req.TitleChangeReq;
 import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
+import com.j10d207.tripeer.plan.dto.res.PlanNodeTempleDTO;
 import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
 import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
@@ -36,7 +37,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -71,6 +74,8 @@ public class PlanServiceImpl implements PlanService {
 
     private final EmailService emailService;
 
+    private final WebClient webClient;
+
     //플랜 생성
     /*
     플랜 생성 요청이 들어오면
@@ -79,6 +84,7 @@ public class PlanServiceImpl implements PlanService {
     3. 플랜의 여행지 목록 생성
     4. 요청된 일자만큼 플랜 데이 생성
     5. 이메일 전송
+    6. node 서버에 y-doc 탬플릿 생성 요청 보내기
      */
     @Override
     public PlanDetailMainDTO.CreateResultInfo createPlan(PlanCreateInfoReq planCreateInfoReq, long userId) {
@@ -102,6 +108,17 @@ public class PlanServiceImpl implements PlanService {
         planDayRepository.saveAll(planDayEntityList);
         // 이메일 전송 스케쥴링
         planSchedulerService.schedulePlanTasks(plan);
+
+        PlanNodeTempleDTO planNodeTempleDTO = new PlanNodeTempleDTO(createResultInfo, UserDTO.Search.fromUserEntity(user));
+        webClient.post()
+            .uri("/node/plan")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(planNodeTempleDTO)
+            .retrieve()
+            .bodyToMono(Void.class)  // 응답 본문이 없을 경우
+            .doOnSuccess(result -> log.info("Successfully sent request to node server"))
+            .doOnError(error -> log.error("Failed to send request to node server", error))
+            .subscribe();  // 비동기 처리
         return createResultInfo;
     }
 
