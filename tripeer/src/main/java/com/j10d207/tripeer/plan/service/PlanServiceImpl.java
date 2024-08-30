@@ -1,5 +1,9 @@
 package com.j10d207.tripeer.plan.service;
 
+import com.j10d207.tripeer.place.db.entity.CityEntity;
+import com.j10d207.tripeer.place.db.entity.TownEntity;
+import com.j10d207.tripeer.place.db.repository.CityRepository;
+import com.j10d207.tripeer.place.db.repository.TownRepository;
 import com.j10d207.tripeer.plan.dto.req.CoworkerInvitedReq;
 import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
 import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
@@ -75,6 +79,8 @@ public class PlanServiceImpl implements PlanService {
     private final EmailService emailService;
 
     private final WebClient webClient;
+    private final CityRepository cityRepository;
+    private final TownRepository townRepository;
 
     //플랜 생성
     /*
@@ -98,8 +104,9 @@ public class PlanServiceImpl implements PlanService {
 
         List<PlanTownEntity> planTownEntityList = createResultInfo.getTownList().stream()
                 .map(townDTO -> PlanTownEntity.ofDtoAndPlanEntity(townDTO, plan)).toList();
+
         planTownRepository.saveAll(planTownEntityList);
-        List<TownDTO> townDTOList = planTownEntityList.stream().map(TownDTO::fromPlanTownEntity).toList();
+
         int day = (int) ChronoUnit.DAYS.between(createResultInfo.getStartDay(), createResultInfo.getEndDay()) + 1;
         List<PlanDayEntity> planDayEntityList = new ArrayList<>();
         IntStream.range(0, day)
@@ -109,6 +116,29 @@ public class PlanServiceImpl implements PlanService {
         // 이메일 전송 스케쥴링
         planSchedulerService.schedulePlanTasks(plan);
 
+        // city-town 정보 누락 이슈에 대하여
+        // 1. 플랜 생성시에는 플랜타운이 가지고 있는 city나 town이 가지고 있는 데이터 중 id값 빼고는 null인 임시 객체라서 데이터를 들고올 수 없었다
+        // planTownEntityList.stream().map(TownDTO::fromPlanTownEntity).toList() 이거 하면 데이터가 없음
+        // 2. 플랜타운 세이브 이후 db에서 플랜타운을 들고와서 city town 을 들고 와도 null 이었다.
+        // List<PlanTownEntity> pt = planTownRepository.findByPlan_PlanId(plan.getPlanId());
+        // System.out.println(pt.getFirst().getCityOnly().toString());
+        // 출력 : CityEntity(cityId=3, description=null, cityImg=null, cityName=null, latitude=0.0, longitude=0.0)
+        // 3. 그래서 결국 각 city_id town_id를 가지고 db에서 직접 조회해야 이름, 이미지, 설명, 위도, 경도를 들고 올 수 밖에 없었다.
+        List<TownDTO> townDTOList = planTownEntityList.stream()
+            .map(planTown -> {
+                CityEntity city = cityRepository.findByCityId(planTown.getCityOnly().getCityId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.CITY_NOT_FOUND));
+                if (planTown.getTown() == null) {
+                    return TownDTO.from(city);
+                } else {
+                    TownEntity town = townRepository
+                        .findByTownPK_TownIdAndTownPK_City_CityId(
+                            planTown.getTown().getTownPK().getTownId(),
+                            planTown.getTown().getTownPK().getCity().getCityId())
+                        .orElseThrow(() -> new CustomException(ErrorCode.TOWN_NOT_FOUND));
+                    return TownDTO.from(city, town);
+                }
+            }).toList();
         PlanNodeTempleDTO planNodeTempleDTO = new PlanNodeTempleDTO(createResultInfo,
                                                                     UserDTO.Search.fromUserEntity(user),
                                                                     townDTOList);
