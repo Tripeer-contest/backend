@@ -15,7 +15,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class PlanTownEntity {
 
     @Id
@@ -32,7 +31,7 @@ public class PlanTownEntity {
     private TownEntity town;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CITY_ONLY_ID")
+    @JoinColumn(name = "CITY_ONLY_ID", referencedColumnName = "city_id")
     private CityEntity cityOnly;
 
 
