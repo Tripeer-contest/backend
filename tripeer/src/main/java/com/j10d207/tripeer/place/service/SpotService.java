@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.place.service;
 
+import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.vo.SpotAddVO;
@@ -10,6 +11,8 @@ public interface SpotService {
     public SpotDetailPageDto getDetailMainPage(long userId, int spotInfoId);
 
     public List<ReviewDto> getReviewPage(int spotInfoId, int page);
+
+    public List<BlogInfoResponse.Document> getBlogInfoPage(String query, int page);
 
     public SpotListDto getSpotSearch(int page, int ContentTypeId, int cityId, int townId, long userId);
 
