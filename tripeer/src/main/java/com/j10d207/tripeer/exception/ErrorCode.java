@@ -64,8 +64,10 @@ public enum ErrorCode {
     INVALID_ADMIN(HttpStatus.UNAUTHORIZED, "ADMIN-001", "허용되지 않은 접근입니다."),
 
     //Valid
-    INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-001", "Invalid argument"),
-    INVALID_PAGE(HttpStatus.BAD_REQUEST, "VALID-002", "입력될 수 없는 페이지 값");
+    RUNTIME_EXCEPTION(HttpStatus.NOT_FOUND, "VALID-001", "예측되지 않은 오류가 발생했습니다. "),
+    INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-002", "Invalid argument"),
+    INVALID_PAGE(HttpStatus.BAD_REQUEST, "VALID-003", "입력될 수 없는 페이지 값");
+
 
     private final HttpStatus httpStatus;	// HttpStatus
     private final String code;				// ACCOUNT-001
