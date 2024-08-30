@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -28,6 +27,21 @@ public class PlaceController {
     private final SpotService spotService;
     private final PlanService planService;
     private final ReviewService reviewService;
+
+    /*
+    장소 디테일 페이지 첫 로딩 정보
+     */
+    @GetMapping("/main")
+    public Response<SpotDetailPageDto> getSpotDetailMain(@AuthenticationPrincipal CustomOAuth2User user,
+                                                         @RequestParam("spotId") int spotId) {
+        return Response.of(HttpStatus.OK, "장소 메인 로딩 성공", spotService.getDetailMainPage(user.getUserId(), spotId));
+    }
+
+    @GetMapping("/main/review")
+    public Response<List<ReviewDto>> getSpotDetailReview(@RequestParam("spotId") int spotId,
+                                                           @RequestParam("page") int page) {
+        return Response.of(HttpStatus.OK, "리뷰 페이지 로딩 성공", spotService.getReviewPage(spotId, page));
+    }
 
     /*
     * city 검색

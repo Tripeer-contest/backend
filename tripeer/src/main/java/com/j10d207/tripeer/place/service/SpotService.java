@@ -1,15 +1,16 @@
 package com.j10d207.tripeer.place.service;
 
-import com.j10d207.tripeer.place.db.dto.SpotAddResDto;
-import com.j10d207.tripeer.place.db.dto.SpotDetailDto;
-import com.j10d207.tripeer.place.db.dto.SpotListDto;
+import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.vo.SpotAddVO;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
 public interface SpotService {
+    public SpotDetailPageDto getDetailMainPage(long userId, int spotInfoId);
+
+    public List<ReviewDto> getReviewPage(int spotInfoId, int page);
+
     public SpotListDto getSpotSearch(int page, int ContentTypeId, int cityId, int townId, long userId);
 
     public SpotDetailDto getSpotDetail(Integer spotId);
