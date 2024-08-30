@@ -99,7 +99,7 @@ public class PlanServiceImpl implements PlanService {
         List<PlanTownEntity> planTownEntityList = createResultInfo.getTownList().stream()
                 .map(townDTO -> PlanTownEntity.ofDtoAndPlanEntity(townDTO, plan)).toList();
         planTownRepository.saveAll(planTownEntityList);
-
+        List<TownDTO> townDTOList = planTownEntityList.stream().map(TownDTO::fromPlanTownEntity).toList();
         int day = (int) ChronoUnit.DAYS.between(createResultInfo.getStartDay(), createResultInfo.getEndDay()) + 1;
         List<PlanDayEntity> planDayEntityList = new ArrayList<>();
         IntStream.range(0, day)
@@ -109,7 +109,9 @@ public class PlanServiceImpl implements PlanService {
         // 이메일 전송 스케쥴링
         planSchedulerService.schedulePlanTasks(plan);
 
-        PlanNodeTempleDTO planNodeTempleDTO = new PlanNodeTempleDTO(createResultInfo, UserDTO.Search.fromUserEntity(user));
+        PlanNodeTempleDTO planNodeTempleDTO = new PlanNodeTempleDTO(createResultInfo,
+                                                                    UserDTO.Search.fromUserEntity(user),
+                                                                    townDTOList);
         webClient.post()
             .uri("/node/plan")
             .contentType(MediaType.APPLICATION_JSON)
