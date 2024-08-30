@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.place.controller;
 
+import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.vo.ReviewVO;
 import com.j10d207.tripeer.place.db.vo.SpotAddVO;
@@ -31,9 +32,9 @@ public class PlaceController {
     /*
     장소 디테일 페이지 첫 로딩 정보
      */
-    @GetMapping("/main")
+    @GetMapping("/main/{spotId}")
     public Response<SpotDetailPageDto> getSpotDetailMain(@AuthenticationPrincipal CustomOAuth2User user,
-                                                         @RequestParam("spotId") int spotId) {
+                                                         @PathVariable("spotId") int spotId) {
         return Response.of(HttpStatus.OK, "장소 메인 로딩 성공", spotService.getDetailMainPage(user.getUserId(), spotId));
     }
 
@@ -41,6 +42,12 @@ public class PlaceController {
     public Response<List<ReviewDto>> getSpotDetailReview(@RequestParam("spotId") int spotId,
                                                            @RequestParam("page") int page) {
         return Response.of(HttpStatus.OK, "리뷰 페이지 로딩 성공", spotService.getReviewPage(spotId, page));
+    }
+
+    @GetMapping("/main/bloginfo")
+    public Response<List<BlogInfoResponse.Document>> getBlogInfo(@RequestParam("title") String title,
+                                                                 @RequestParam("page") int page) {
+        return Response.of(HttpStatus.OK, "블로그 추가정보 조회 성공", spotService.getBlogInfoPage(title, page));
     }
 
     /*

@@ -52,7 +52,7 @@ public class UserDTO {
         private long wishlistId;
         private long cityId;
         private long townId;
-        private long spotInfoId;
+        private int spotInfoId;
         private String title;
         private double starPointAvg;
         private String contentType;

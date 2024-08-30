@@ -17,5 +17,5 @@ public interface SpotReviewRepository extends JpaRepository<SpotReviewEntity, Lo
     List<SpotReviewEntity> findBySpotInfo_SpotInfoIdAndUser_UserId(int spotInfoId, long userId);
 //    Optional<Double> findAverageStarPointBySpotInfo_SpotInfoId(long spotInfoId);
     @Query(value = "SELECT AVG(star_point) FROM tripeer.spot_review WHERE spot_info_id = :spotInfoId", nativeQuery = true)
-    Optional<Double> findAverageStarPointBySpotInfoId(@Param("spotInfoId") Long spotInfoId);
+    Optional<Double> findAverageStarPointBySpotInfoId(@Param("spotInfoId") int spotInfoId);
 }
