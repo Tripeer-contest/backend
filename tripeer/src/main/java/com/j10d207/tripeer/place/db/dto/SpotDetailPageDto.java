@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.place.db.dto;
 
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
+import com.j10d207.tripeer.place.db.entity.AdditionalBaseEntity;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.entity.SpotReviewEntity;
 import lombok.Builder;
@@ -26,11 +27,16 @@ public class SpotDetailPageDto {
     private double latitude;
     private double longitude;
 
+    private List<AdditionalDto> detailInfoList;
+
     private String addr1;
 
     private String overview;
 
-    public static SpotDetailPageDto createDto (SpotInfoEntity spotInfoEntity, boolean isLike, Page<SpotReviewEntity> spotReviewEntityPage, String overview) {
+    public static SpotDetailPageDto createDto (SpotInfoEntity spotInfoEntity,
+                                                boolean isLike,
+                                                Page<SpotReviewEntity> spotReviewEntityPage,
+                                                String overview, List<AdditionalDto> detailInfoList ) {
         Page<ReviewDto> reviewDtoPage = spotReviewEntityPage.map(ReviewDto::fromEntity);
         return SpotDetailPageDto.builder()
                 .title(spotInfoEntity.getTitle())
@@ -41,6 +47,7 @@ public class SpotDetailPageDto {
                 .reviewPageCount(spotReviewEntityPage.getTotalPages())
                 .latitude(spotInfoEntity.getLatitude())
                 .longitude(spotInfoEntity.getLongitude())
+                .detailInfoList(detailInfoList)
                 .addr1(spotInfoEntity.getAddr1())
                 .overview(overview)
                 .build();

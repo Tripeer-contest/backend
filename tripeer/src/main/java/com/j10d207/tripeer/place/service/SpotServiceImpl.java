@@ -2,16 +2,17 @@ package com.j10d207.tripeer.place.service;
 
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
-import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.*;
 import com.j10d207.tripeer.place.db.repository.*;
 import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,10 @@ public class SpotServiceImpl implements SpotService{
     private final SpotReviewRepository spotReviewRepository;
     private final PlanService planService;
     private final WishListRepository wishListRepository;
+    private final AdditionalBaseRepository additionalBaseRepository;
+
+
+
 
     private List<SpotInfoDto> convertToDtoList(List<SpotInfoEntity> spotInfoEntities, long userId) {
         List<SpotInfoDto> spotInfoDtos = new ArrayList<>();
@@ -49,11 +54,12 @@ public class SpotServiceImpl implements SpotService{
     @Override
     public SpotDetailPageDto getDetailMainPage(long userId, int spotInfoId) {
         SpotInfoEntity spotInfoEntity = spotInfoRepository.findBySpotInfoId(spotInfoId);
+        List<AdditionalDto> additionalDtoList = additionalBaseRepository.findBySpotInfo(spotInfoEntity).toDTO();
         SpotDescriptionEntity spotDescriptionEntity = spotDescriptionRepository.findBySpotInfo(spotInfoEntity);
         boolean isLike = wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoId);
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createTime"));
         Page<SpotReviewEntity> spotReviewEntityPage = spotReviewRepository.findBySpotInfo_SpotInfoId(spotInfoId, pageable);
-        return SpotDetailPageDto.createDto(spotInfoEntity, isLike, spotReviewEntityPage, spotDescriptionEntity.getOverview());
+        return SpotDetailPageDto.createDto(spotInfoEntity, isLike, spotReviewEntityPage, spotDescriptionEntity.getOverview(), additionalDtoList);
     }
 
     @Override

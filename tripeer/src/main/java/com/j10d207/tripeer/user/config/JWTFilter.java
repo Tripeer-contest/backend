@@ -37,18 +37,18 @@ public class JWTFilter extends OncePerRequestFilter {
         //request에서 access 헤더를 찾음
         String access = request.getHeader("Authorization");
 
-        try {
-            setContextAfterVerify(access);
-            filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            if(e instanceof ExpiredJwtException) {
-                log.error("JWT 토큰이 만료된 상태입니다.");
-            } else {
-                log.error(e.getMessage());
-                log.error("JWT 토큰의 변조가 의심되거나 형식이 불일치한 상태입니다.");
-            }
-            setErrorResponse(response);
-        }
+        // try {
+        setContextAfterVerify(access);
+        filterChain.doFilter(request, response);
+        // } catch (Exception e) {
+        //     if(e instanceof ExpiredJwtException) {
+        //         log.error("JWT 토큰이 만료된 상태입니다.");
+        //     } else {
+        //         log.error(e.getMessage());
+        //         log.error("JWT 토큰의 변조가 의심되거나 형식이 불일치한 상태입니다.");
+        //     }
+        //     setErrorResponse(response);
+        // }
 
     }
 
