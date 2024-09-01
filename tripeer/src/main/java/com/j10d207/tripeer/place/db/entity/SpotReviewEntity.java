@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity(name = "spot_review")
 @Getter
@@ -39,6 +44,11 @@ public class SpotReviewEntity {
     private String image3;
     private String image4;
 
+    public List<String> createImageList() {
+        return Stream.of(image1, image2, image3, image4)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 
     public static SpotReviewEntity ofReviewVO(ReviewVO reviewVO, long userId) {
         return  SpotReviewEntity.builder()
