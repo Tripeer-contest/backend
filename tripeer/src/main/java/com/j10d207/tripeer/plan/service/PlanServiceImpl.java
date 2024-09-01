@@ -8,6 +8,7 @@ import com.j10d207.tripeer.plan.dto.req.CoworkerInvitedReq;
 import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
 import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
 import com.j10d207.tripeer.plan.dto.req.TitleChangeReq;
+import com.j10d207.tripeer.plan.dto.res.NodeInviteDTO;
 import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
 import com.j10d207.tripeer.plan.dto.res.PlanNodeTempleDTO;
 import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
@@ -259,7 +260,17 @@ public class PlanServiceImpl implements PlanService {
         if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedReq.getPlanId(), coworkerInvitedReq.getUserId())) {
             CoworkerEntity coworkerEntity = CoworkerEntity.MakeCoworkerEntity(user, PlanEntity.builder().planId(coworkerInvitedReq.getPlanId()).build());
             coworkerRepository.save(coworkerEntity);
-
+            // ydoc 에 유저 정보 업데이트를 위한 node 서버에 유저 정보 보내기
+            NodeInviteDTO nodeInviteDTO = NodeInviteDTO.from(user,planEntity);
+            webClient.post()
+                .uri("/node/plan/invite")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(nodeInviteDTO)
+                .retrieve()
+                .bodyToMono(Void.class)  // 응답 본문이 없을 경우
+                .doOnSuccess(result -> log.info("Successfully sent request to node server"))
+                .doOnError(error -> log.error("Failed to send request to node server", error))
+                .subscribe();  // 비동기 처리
             emailService.sendEmail(EmailDTO.MakeInvitedEmail(planEntity.getTitle(), userEntity.getNickname(), user.getUserId()));
         } else {
             throw new CustomException(ErrorCode.DUPLICATE_USER);

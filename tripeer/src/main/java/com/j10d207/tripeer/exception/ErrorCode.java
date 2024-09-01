@@ -45,6 +45,7 @@ public enum ErrorCode {
     TOWN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-002", "타운을 찾을 수 없습니다."),
     SPOT_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-003", "스팟을 찾을 수 없습니다."),
     UNDEFINED_TYPE(HttpStatus.NOT_FOUND, "PLACE-004", "정의되지 않은 타입입니다."),
+    BLOG_SEARCH_ERROR(HttpStatus.BAD_REQUEST, "PLACE-005", "블로그 검색 중 마지막 페이지를 넘었거나 오류가 발생했습니다."),
 
     //root
     NOT_FOUND_ROOT(HttpStatus.BAD_REQUEST, "ROOT-001", "대중교통 수단이 없습니다."),
@@ -63,7 +64,10 @@ public enum ErrorCode {
     INVALID_ADMIN(HttpStatus.UNAUTHORIZED, "ADMIN-001", "허용되지 않은 접근입니다."),
 
     //Valid
-    INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-001", "Invalid argument");
+    RUNTIME_EXCEPTION(HttpStatus.NOT_FOUND, "VALID-001", "예측되지 않은 오류가 발생했습니다. "),
+    INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-002", "Invalid argument"),
+    INVALID_PAGE(HttpStatus.BAD_REQUEST, "VALID-003", "입력될 수 없는 페이지 값");
+
 
     private final HttpStatus httpStatus;	// HttpStatus
     private final String code;				// ACCOUNT-001

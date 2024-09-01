@@ -2,6 +2,8 @@ package com.j10d207.tripeer.place.service;
 
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
+import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
+import com.j10d207.tripeer.kakao.service.KakaoService;
 import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.*;
 import com.j10d207.tripeer.place.db.repository.*;
@@ -36,6 +38,7 @@ public class SpotServiceImpl implements SpotService{
     private final TownRepository townRepository;
     private final SpotReviewRepository spotReviewRepository;
     private final PlanService planService;
+    private final KakaoService kakaoService;
     private final WishListRepository wishListRepository;
     private final AdditionalBaseRepository additionalBaseRepository;
 
@@ -54,20 +57,40 @@ public class SpotServiceImpl implements SpotService{
     @Override
     public SpotDetailPageDto getDetailMainPage(long userId, int spotInfoId) {
         SpotInfoEntity spotInfoEntity = spotInfoRepository.findBySpotInfoId(spotInfoId);
-        List<AdditionalDto> additionalDtoList = AdditionalDto.from(additionalBaseRepository.findBySpotInfo(spotInfoEntity));
-        SpotDescriptionEntity spotDescriptionEntity = spotDescriptionRepository.findBySpotInfo(spotInfoEntity);
-        boolean isLike = wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoId);
+
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createTime"));
         Page<SpotReviewEntity> spotReviewEntityPage = spotReviewRepository.findBySpotInfo_SpotInfoId(spotInfoId, pageable);
-        return SpotDetailPageDto.createDto(spotInfoEntity, isLike, spotReviewEntityPage, spotDescriptionEntity.getOverview(), additionalDtoList);
+
+        SpotDetailPageDto spotDetailPageDto = SpotDetailPageDto.createDto(spotInfoEntity, spotReviewEntityPage, getBlogSearchInfo(spotInfoEntity.getTitle(), 1));
+
+        spotDetailPageDto.setLike(wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoId));
+        spotDetailPageDto.setOverview(spotDescriptionRepository.findBySpotInfo(spotInfoEntity).getOverview());
+
+        List<AdditionalDto> additionalDtoList = AdditionalDto.from(additionalBaseRepository.findBySpotInfo(spotInfoEntity));
+        spotDetailPageDto.setDetailInfoList(additionalDtoList);
+
+        Optional<Double> starPoint = spotReviewRepository.findAverageStarPointBySpotInfoId(spotInfoEntity.getSpotInfoId());
+        if(starPoint.isPresent()) {
+            spotDetailPageDto.setStarPointAvg(Math.round(starPoint.get()*10)/10.0);
+        } else {
+            spotDetailPageDto.setStarPointAvg(0);
+        }
+
+        return spotDetailPageDto;
     }
 
     @Override
     public List<ReviewDto> getReviewPage(int spotInfoId, int page) {
+        if(page < 1) throw new CustomException(ErrorCode.INVALID_PAGE);
         Pageable pageable = PageRequest.of(page-1, 5, Sort.by(Sort.Direction.DESC, "createTime"));
         Page<SpotReviewEntity> spotReviewEntityPage = spotReviewRepository.findBySpotInfo_SpotInfoId(spotInfoId, pageable);
         Page<ReviewDto> reviewDtoPage = spotReviewEntityPage.map(ReviewDto::fromEntity);
         return reviewDtoPage.getContent();
+    }
+
+    @Override
+    public List<BlogInfoResponse.Document> getBlogInfoPage(String query, int page) {
+        return getBlogSearchInfo(query, page);
     }
 
     @Override
@@ -320,5 +343,10 @@ public class SpotServiceImpl implements SpotService{
 
         return SpotAddResDto.EntityToDTO(spotInfo, spotAddVO.isAddPlanCheck());
 
+    }
+
+
+    private List<BlogInfoResponse.Document> getBlogSearchInfo(String query, int page) {
+        return kakaoService.getBlogInfo(query, "accuracy", page, 5).getDocuments();
     }
 }

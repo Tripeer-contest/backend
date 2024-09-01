@@ -61,4 +61,15 @@ public class ErrorResponseEntity {
                         .message(e.getMessage())
                         .build());
     }
+
+    public static ResponseEntity<ErrorResponseEntity> CustomRuntime(RuntimeException e) {
+        return ResponseEntity
+                .status(ErrorCode.RUNTIME_EXCEPTION.getHttpStatus())
+                .body(ErrorResponseEntity.builder()
+                        .status(ErrorCode.RUNTIME_EXCEPTION.getHttpStatus().value())
+                        .name("RUNTIME_EXCEPTION")
+                        .code(ErrorCode.RUNTIME_EXCEPTION.getCode())
+                        .message(ErrorCode.RUNTIME_EXCEPTION.getMessage() + e.getMessage())
+                        .build());
+    }
 }
