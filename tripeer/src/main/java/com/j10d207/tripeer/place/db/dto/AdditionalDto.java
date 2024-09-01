@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.place.db.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.j10d207.tripeer.place.db.entity.AdditionalBaseEntity;
@@ -23,6 +24,9 @@ public class AdditionalDto {
 	}
 
 	public static List<AdditionalDto> from(AdditionalBaseEntity additionalBaseEntity) {
-		 return additionalBaseEntity.toDTO();
+		if (additionalBaseEntity == null) {
+			return new ArrayList<>();
+		}
+		return additionalBaseEntity.toDTO();
 	}
 }

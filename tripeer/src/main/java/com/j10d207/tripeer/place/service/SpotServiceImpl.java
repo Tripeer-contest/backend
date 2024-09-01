@@ -54,7 +54,7 @@ public class SpotServiceImpl implements SpotService{
     @Override
     public SpotDetailPageDto getDetailMainPage(long userId, int spotInfoId) {
         SpotInfoEntity spotInfoEntity = spotInfoRepository.findBySpotInfoId(spotInfoId);
-        List<AdditionalDto> additionalDtoList = additionalBaseRepository.findBySpotInfo(spotInfoEntity).toDTO();
+        List<AdditionalDto> additionalDtoList = AdditionalDto.from(additionalBaseRepository.findBySpotInfo(spotInfoEntity));
         SpotDescriptionEntity spotDescriptionEntity = spotDescriptionRepository.findBySpotInfo(spotInfoEntity);
         boolean isLike = wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoId);
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createTime"));
