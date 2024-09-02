@@ -1,15 +1,20 @@
 package com.j10d207.tripeer.place.service;
 
-import com.j10d207.tripeer.place.db.dto.SpotDTO;
+import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
+import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 
 import java.util.List;
 
 public interface SpotService {
-    public SpotDTO.SpotListDTO getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, long userId);
+    public SpotDetailPageDto getDetailMainPage(long userId, int spotInfoId);
 
-    public SpotDTO.SpotListDTO getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, long userId);
+    public List<ReviewDto> getReviewPage(int spotInfoId, int page);
+
+    public List<BlogInfoResponse.Document> getBlogInfoPage(String query, int page);
+
+    public SpotListDto getSpotSearch(int page, int ContentTypeId, int cityId, int townId, long userId);
 
     public SpotDTO.SpotDetailDTO getSpotDetail(Integer spotId);
 

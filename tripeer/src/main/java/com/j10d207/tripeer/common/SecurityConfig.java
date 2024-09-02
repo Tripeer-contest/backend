@@ -29,7 +29,6 @@ public class SecurityConfig {
 
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
 //    private final AuthenticationConfiguration authenticationConfiguration;
-    //JWTUtil 주입
     private final JWTUtil jwtUtil;
 
     //OAuth 로그인
@@ -60,7 +59,7 @@ public class SecurityConfig {
 
                         CorsConfiguration config = new CorsConfiguration();
 
-                        config.setAllowedOrigins(List.of("http://192.168.100.188:5173/", "http://localhost:5173/", "http://localhost:3000", "https://k10d207.p.ssafy.io/"));
+                        config.setAllowedOrigins(List.of("http://192.168.100.188:5173/", "http://localhost:5173/", "http://localhost:3000", "https://k10d207.p.ssafy.io/", "https://tripeer.co.kr/"));
                         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(List.of("*"));
@@ -95,6 +94,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/error", "/swagger-ui/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/admin/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/name/duplicatecheck/*").hasAnyRole("VALIDATE", "USER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/user/signup").hasAnyRole("VALIDATE")
                         //배포시 test 삭제 필요

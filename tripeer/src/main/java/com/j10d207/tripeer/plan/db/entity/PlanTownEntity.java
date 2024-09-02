@@ -15,7 +15,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class PlanTownEntity {
 
     @Id
@@ -32,11 +31,11 @@ public class PlanTownEntity {
     private TownEntity town;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CITY_ONLY_ID")
+    @JoinColumn(name = "CITY_ONLY_ID", referencedColumnName = "city_id")
     private CityEntity cityOnly;
 
 
-    public static List<String> ConvertToNameList (List<PlanTownEntity> planTown) {
+    public static List<String> convertToNameList(List<PlanTownEntity> planTown) {
         List<String> townNameList = new ArrayList<>();
         for(PlanTownEntity planTownEntity : planTown) {
             if(planTownEntity.getTown() == null) {
@@ -49,7 +48,7 @@ public class PlanTownEntity {
         return townNameList;
     }
 
-    public static PlanTownEntity TownDTOToEntity (TownDTO townDTO, PlanEntity planEntity)
+    public static PlanTownEntity ofDtoAndPlanEntity(TownDTO townDTO, PlanEntity planEntity)
     {
         PlanTownEntity planTown;
         if(townDTO.getTownId() == -1) {

@@ -77,7 +77,7 @@ public class ApiRequestServiceImpl implements ApiRequestService {
     @Override
     public PublicRootDTO getRootDTO (PublicRootEntity publicRootEntity) {
         List<PublicRootDetailEntity> publicRootDetailEntityList = publicRootDetailRepository.findByPublicRoot_PublicRootId(publicRootEntity.getPublicRootId());
-        return PublicRootDTO.EntityToDTO(publicRootEntity, publicRootDetailEntityList);
+        return PublicRootDTO.ofEntityAndDetailList(publicRootEntity, publicRootDetailEntityList);
     }
 
     //최초에 조회된 경로를 저장

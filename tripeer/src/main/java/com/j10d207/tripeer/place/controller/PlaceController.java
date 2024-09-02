@@ -1,20 +1,21 @@
 package com.j10d207.tripeer.place.controller;
 
+import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.place.db.dto.*;
+import com.j10d207.tripeer.place.db.vo.ReviewVO;
 import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import com.j10d207.tripeer.place.service.CityService;
+import com.j10d207.tripeer.place.service.ReviewService;
 import com.j10d207.tripeer.place.service.SpotService;
 import com.j10d207.tripeer.place.service.TownService;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
-import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
-import jakarta.validation.Valid;
+import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -26,6 +27,28 @@ public class PlaceController {
     private final TownService townService;
     private final SpotService spotService;
     private final PlanService planService;
+    private final ReviewService reviewService;
+
+    /*
+    장소 디테일 페이지 첫 로딩 정보
+     */
+    @GetMapping("/main/{spotId}")
+    public Response<SpotDetailPageDto> getSpotDetailMain(@AuthenticationPrincipal CustomOAuth2User user,
+                                                         @PathVariable("spotId") int spotId) {
+        return Response.of(HttpStatus.OK, "장소 메인 로딩 성공", spotService.getDetailMainPage(user.getUserId(), spotId));
+    }
+
+    @GetMapping("/main/review")
+    public Response<List<ReviewDto>> getSpotDetailReview(@RequestParam("spotId") int spotId,
+                                                           @RequestParam("page") int page) {
+        return Response.of(HttpStatus.OK, "리뷰 페이지 로딩 성공", spotService.getReviewPage(spotId, page));
+    }
+
+    @GetMapping("/main/bloginfo")
+    public Response<List<BlogInfoResponse.Document>> getBlogInfo(@RequestParam("title") String title,
+                                                                 @RequestParam("page") int page) {
+        return Response.of(HttpStatus.OK, "블로그 추가정보 조회 성공", spotService.getBlogInfoPage(title, page));
+    }
 
     /*
     * city 검색
@@ -59,6 +82,7 @@ public class PlaceController {
     }
 
 
+<<<<<<< HEAD
     /*
      * 해당 지역(군, 구)
      * 의 숙소 조회
@@ -96,6 +120,15 @@ public class PlaceController {
                                                       @AuthenticationPrincipal CustomOAuth2User user) {
         List<Integer> contentTypeIds = Arrays.asList(32, 39);
         return Response.of(HttpStatus.OK, "명소 조회", spotService.getSpotByContentType(page, contentTypeIds, cityId, townId, user.getUserId()));
+=======
+    @GetMapping("/search")
+    public Response<SpotListDto> getSearchList(@RequestParam("contentTypeId") int contentTypeId,
+                                               @RequestParam("cityId") Integer cityId,
+                                             @RequestParam("townId") Integer townId,
+                                             @RequestParam("page") Integer page,
+                                             @AuthenticationPrincipal CustomOAuth2User user) {
+        return Response.of(HttpStatus.OK, "장소 조회", spotService.getSpotSearch(page, contentTypeId, cityId, townId, user.getUserId()));
+>>>>>>> develop
     }
 
 
@@ -126,14 +159,13 @@ public class PlaceController {
         return Response.of(HttpStatus.OK, "모든 도시, 타운 조회", townService.getAllCityAndTown());
     }
 
-    //즐겨찾기 추가
-    @PostMapping("/wishList/{spotInfoId}")
-    public Response<?> addWishList(@PathVariable("spotInfoId") int spotInfoId, @AuthenticationPrincipal CustomOAuth2User user) {
-        try {
-            planService.addWishList(spotInfoId, user.getUserId());
-            return Response.of(HttpStatus.OK, "즐겨찾기 추가 완료", null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    /*
+    리뷰 작성하기 + 별점
+     */
+    @PostMapping("review/write")
+    public Response<?> createReview(@AuthenticationPrincipal CustomOAuth2User user, @RequestBody ReviewVO reviewVO) {
+        reviewService.saveReview(user.getUserId(), reviewVO);
+        return Response.of(HttpStatus.OK, "리뷰 작성 완료", null);
     }
+
 }

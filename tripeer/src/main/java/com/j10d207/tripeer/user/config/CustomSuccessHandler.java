@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.user.config;
 
-import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
+import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
+import com.j10d207.tripeer.user.dto.res.JWTDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,22 +47,21 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if (role.equals("ROLE_VALIDATE")) {
             response.setStatus(205);
             //회원가입 페이지
-            response.sendRedirect("https://k10d207.p.ssafy.io/register");
+            response.sendRedirect("https://tripeer.co.kr/register");
             return;
         }
 
         String name = customUserDetails.getName();
         long userId = customUserDetails.getUserId();
-
         //토큰 생성
-        String access = jwtUtil.createJwt("Authorization", name, role, userId, accessTime);
-        String refresh = jwtUtil.createJwt("Authorization-re", name, role, userId, refreshTime);
+        String access = jwtUtil.createJWT(new JWTDto("Authorization", name, role, userId), accessTime);
+        String refresh = jwtUtil.createJWT(new JWTDto("AuthorizationRe", name, role, userId), refreshTime);
 
         response.addCookie(createCookie("Authorization", access));
-        response.addCookie(createCookie("Authorization-re", refresh));
+        response.addCookie(createCookie("AuthorizationRe", refresh));
         response.setStatus(HttpStatus.OK.value());
         // 04.14 - 로그인 완료 후 이동페이지
-        response.sendRedirect("https://k10d207.p.ssafy.io/redirect");
+        response.sendRedirect("https://tripeer.co.kr/redirect");
     }
 
     private Cookie createCookie(String key, String value) {

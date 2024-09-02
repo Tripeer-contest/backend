@@ -21,6 +21,9 @@ public enum ErrorCode {
     TOKEN_EXPIRED_ERROR(HttpStatus.FORBIDDEN, "ACCOUNT-005", "만료되지 않은 access 또는 만료된 refresh 입니다"),
     DUPLICATE_USER(HttpStatus.BAD_REQUEST, "ACCOUNT-006", "이미 등록된 사용자입니다."),
     REQUEST_AUTHORIZATION(HttpStatus.FORBIDDEN, "ACCOUNT-007", "권한이 없는 요청입니다."),
+    EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "ACCOUNT-008", "토큰이 만료되었습니다."),
+    NONE_WISHLIST(HttpStatus.BAD_REQUEST, "ACCOUNT-009", "찜목록에 없는 장소입니다"),
+    HAS_WISHLIST(HttpStatus.BAD_REQUEST, "ACCOUNT-009", "이미 찜목록에 등록된 장소입니다"),
 
     // plan
     HAS_BUCKET(HttpStatus.BAD_REQUEST, "PLAN-001", "이미 등록된 장소입니다."),
@@ -37,14 +40,12 @@ public enum ErrorCode {
     UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "GALLERY-002", "지원하지 않는 파일타입"),
     S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "GALLERY-003", "지원하지 않는 파일타입"),
 
-    //city
-    CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "CITY-001", "도시를 찾을 수 없습니다."),
-
-    //town
-    TOWN_NOT_FOUND(HttpStatus.NOT_FOUND, "TOWN-001", "타운을 찾을 수 없습니다."),
-
-    //spot
-    SPOT_NOT_FOUND(HttpStatus.NOT_FOUND, "SPOT-001", "스팟을 찾을 수 없습니다."),
+    // place
+    CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-001", "도시를 찾을 수 없습니다."),
+    TOWN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-002", "타운을 찾을 수 없습니다."),
+    SPOT_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-003", "스팟을 찾을 수 없습니다."),
+    UNDEFINED_TYPE(HttpStatus.NOT_FOUND, "PLACE-004", "정의되지 않은 타입입니다."),
+    BLOG_SEARCH_ERROR(HttpStatus.BAD_REQUEST, "PLACE-005", "블로그 검색 중 마지막 페이지를 넘었거나 오류가 발생했습니다."),
 
     //root
     NOT_FOUND_ROOT(HttpStatus.BAD_REQUEST, "ROOT-001", "대중교통 수단이 없습니다."),
@@ -59,8 +60,14 @@ public enum ErrorCode {
     //Weather
     WEATHER_NOT_FOUND(HttpStatus.NOT_FOUND, "WEATHER-001", "날씨 정보를 불러 올 수 없습니다."),
 
+    //admin
+    INVALID_ADMIN(HttpStatus.UNAUTHORIZED, "ADMIN-001", "허용되지 않은 접근입니다."),
+
     //Valid
-    INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-001", "Invalid argument");
+    RUNTIME_EXCEPTION(HttpStatus.NOT_FOUND, "VALID-001", "예측되지 않은 오류가 발생했습니다. "),
+    INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-002", "Invalid argument"),
+    INVALID_PAGE(HttpStatus.BAD_REQUEST, "VALID-003", "입력될 수 없는 페이지 값");
+
 
     private final HttpStatus httpStatus;	// HttpStatus
     private final String code;				// ACCOUNT-001

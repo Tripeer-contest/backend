@@ -1,21 +1,3 @@
-[Place 관련 변경사항 정리]
-
-1. DTO 압축
-
-CityAndTownDTO
-CityDTO
-TownDTO
-
--> CityAndTownDTO 하나에 두개의 이너클래스로 압축
-
-2. VO class 처리
-Place 도메인의 경우 도시 조회가 주류이고 도시 생성 하나만 POST 되기 때문에 VO하나만 존재 valid 또한 한개만 적용
-VO class로 분리되면서 검증 어노테이션이 달리지 않은 변수 몇개가 있는데 QA 후 삭제가능(사용하지 않는 변수)
-
-3. 정적 팩토리 메소드
-
-특별 기조 없음
-
 # Tripeer-backend
 
 ## 컨벤션

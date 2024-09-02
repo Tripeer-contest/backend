@@ -28,7 +28,7 @@ public class WishListEntity {
     @JoinColumn(name = "SPOT_INFO_ID")
     private SpotInfoEntity spotInfo;
 
-    public static WishListEntity MakeWishListEntity (int spotInfoId, long userId) {
+    public static WishListEntity CreateWishListEntity (int spotInfoId, long userId) {
         return WishListEntity.builder()
                 .user(UserEntity.builder()
                         .userId(userId)
