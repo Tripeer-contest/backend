@@ -31,7 +31,7 @@ public class SpotDetailEntity {
     private String modifiedTime;
     private String booktour;
 
-    public static SpotDetailEntity MakeNewSpotDetailEntity (SpotInfoEntity spotInfoEntity, String cat1, String cat2, String cat3) {
+    public static SpotDetailEntity ofInfoEntity(SpotInfoEntity spotInfoEntity, String cat1, String cat2, String cat3) {
         return SpotDetailEntity.builder()
                 .spotInfo(spotInfoEntity)
                 .cat1(cat1)

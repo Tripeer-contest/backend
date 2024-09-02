@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.place.db.dto.additional;
+package com.j10d207.tripeer.place.dto.res.additional;
 
 import com.j10d207.tripeer.place.db.entity.additional.AdditionalLodgingEntity;
 import lombok.Builder;

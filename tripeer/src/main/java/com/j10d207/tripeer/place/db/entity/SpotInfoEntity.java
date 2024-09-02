@@ -1,6 +1,6 @@
 package com.j10d207.tripeer.place.db.entity;
 
-import com.j10d207.tripeer.place.db.vo.SpotAddVO;
+import com.j10d207.tripeer.place.dto.req.SpotAddReq;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -63,17 +63,17 @@ public class SpotInfoEntity {
 				.collect(Collectors.toList());
 	}
 
-	public static SpotInfoEntity MakeNewSpotEntity(SpotAddVO spotAddVO, TownEntity town, String newAddr) {
+	public static SpotInfoEntity ofReq(SpotAddReq spotAddReq, TownEntity town, String newAddr) {
 		return SpotInfoEntity.builder()
 			.town(town)
-			.contentTypeId(spotAddVO.getContentTypeId())
-			.title(spotAddVO.getTitle())
+			.contentTypeId(spotAddReq.getContentTypeId())
+			.title(spotAddReq.getTitle())
 			.addr1(newAddr)
-			.tel(spotAddVO.getTel())
-			.firstImage(spotAddVO.getFirstImage())
-			.firstImage2(spotAddVO.getSecondImage())
-			.latitude(spotAddVO.getLatitude())
-			.longitude(spotAddVO.getLongitude())
+			.tel(spotAddReq.getTel())
+			.firstImage(spotAddReq.getFirstImage())
+			.firstImage2(spotAddReq.getSecondImage())
+			.latitude(spotAddReq.getLatitude())
+			.longitude(spotAddReq.getLongitude())
 			.build();
 	}
 

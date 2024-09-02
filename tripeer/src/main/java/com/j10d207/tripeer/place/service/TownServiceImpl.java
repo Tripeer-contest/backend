@@ -2,7 +2,7 @@ package com.j10d207.tripeer.place.service;
 
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
-import com.j10d207.tripeer.place.db.dto.CityAndTownDTO;
+import com.j10d207.tripeer.place.dto.res.CityAndTownDTO;
 import com.j10d207.tripeer.place.db.entity.CityEntity;
 import com.j10d207.tripeer.place.db.entity.TownEntity;
 import com.j10d207.tripeer.place.db.repository.CityRepository;

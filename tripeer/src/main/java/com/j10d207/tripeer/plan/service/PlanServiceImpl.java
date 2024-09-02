@@ -13,6 +13,7 @@ import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
 import com.j10d207.tripeer.plan.dto.res.PlanNodeTempleDTO;
 import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
 import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
+import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;

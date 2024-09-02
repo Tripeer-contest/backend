@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.tmap.service;
 
-import com.j10d207.tripeer.plan.db.dto.RootOptimizeDTO;
+
+import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
 import com.j10d207.tripeer.tmap.db.dto.CoordinateDTO;
 import com.j10d207.tripeer.tmap.db.dto.RootInfoDTO;
 

@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.place.db.vo;
+package com.j10d207.tripeer.place.dto.req;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
-public class SpotAddVO {
+public class SpotAddReq {
 
     private int cityId;
     private int townId;
@@ -29,8 +29,8 @@ public class SpotAddVO {
     @Min(value = 33, message = "한국영토에 포함되지 않은 위도입니다. ${validatedValue}")
     @Max(value = 39, message = "한국영토에 포함되지 않은 위도입니다. ${validatedValue}")
     private Double latitude;
-    @Min(124)
-    @Max(131)
+    @Min(value = 124, message = "한국영토에 포함되지 않은 경도입니다. ${validatedValue}")
+    @Max(value = 131, message = "한국영토에 포함되지 않은 경도입니다. ${validatedValue}")
     private Double longitude;
     private String overview;
     private String cat1;

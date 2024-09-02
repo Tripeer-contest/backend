@@ -1,6 +1,5 @@
-package com.j10d207.tripeer.place.service;
+package com.j10d207.tripeer.place.db.repository.addional;
 
-import com.j10d207.tripeer.place.db.repository.addional.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

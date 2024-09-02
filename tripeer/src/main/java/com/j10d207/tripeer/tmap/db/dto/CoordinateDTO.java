@@ -1,6 +1,6 @@
 package com.j10d207.tripeer.tmap.db.dto;
 
-import com.j10d207.tripeer.plan.db.dto.RootOptimizeDTO;
+import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
 import lombok.Builder;
 import lombok.Getter;
 

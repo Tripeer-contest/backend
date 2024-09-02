@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.tmap.service;
 
-import com.j10d207.tripeer.plan.db.dto.RootOptimizeDTO;
+
+import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
@@ -232,7 +233,7 @@ public class TMapServiceImpl implements TMapService {
         }
         JsonObject infoObject = rootInfo.getAsJsonObject();
 
-        PublicRootDTO publicRoot = PublicRootDTO.JsonToDTO(infoObject);
+        PublicRootDTO publicRoot = PublicRootDTO.fromJson(infoObject);
 
 
         List<PublicRootDTO> rootList = new ArrayList<>();

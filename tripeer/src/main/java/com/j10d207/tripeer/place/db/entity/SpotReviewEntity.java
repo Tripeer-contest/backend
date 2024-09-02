@@ -1,6 +1,6 @@
 package com.j10d207.tripeer.place.db.entity;
 
-import com.j10d207.tripeer.place.db.vo.ReviewVO;
+import com.j10d207.tripeer.place.dto.req.ReviewReq;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -50,18 +49,18 @@ public class SpotReviewEntity {
                 .collect(Collectors.toList());
     }
 
-    public static SpotReviewEntity ofReviewVO(ReviewVO reviewVO, long userId) {
+    public static SpotReviewEntity ofReviewReq(ReviewReq reviewReq, long userId) {
         return  SpotReviewEntity.builder()
-                .spotReviewId(reviewVO.getSpotReviewId())
-                .spotInfo(SpotInfoEntity.builder().spotInfoId(reviewVO.getSpotInfoId()).build())
+                .spotReviewId(reviewReq.getSpotReviewId())
+                .spotInfo(SpotInfoEntity.builder().spotInfoId(reviewReq.getSpotInfoId()).build())
                 .user(UserEntity.builder().userId(userId).build())
-                .starPoint(reviewVO.getStarPoint())
-                .message(reviewVO.getMessage())
+                .starPoint(reviewReq.getStarPoint())
+                .message(reviewReq.getMessage())
                 .createTime(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-                .image1(reviewVO.getImage1())
-                .image2(reviewVO.getImage2())
-                .image3(reviewVO.getImage3())
-                .image4(reviewVO.getImage4())
+                .image1(reviewReq.getImg().isEmpty() ? null : reviewReq.getImg().poll())
+                .image2(reviewReq.getImg().isEmpty() ? null : reviewReq.getImg().poll())
+                .image3(reviewReq.getImg().isEmpty() ? null : reviewReq.getImg().poll())
+                .image4(reviewReq.getImg().isEmpty() ? null : reviewReq.getImg().poll())
                 .build();
     }
 
