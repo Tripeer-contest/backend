@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.j10d207.tripeer.place.db.dto.AdditionalDto;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -38,9 +39,13 @@ public class AdditionalFestivalEntity extends AdditionalBaseEntity {
     private String festivalGrade;
     private String program;
     private String spendTimeFestival;
+    @Column(name = "sponsor_1")
     private String sponsor1;
+    @Column(name = "sponsor_1_tel")
     private String sponsor1Tel;
+    @Column(name = "sponsor_2")
     private String sponsor2;
+    @Column(name = "sponsor_2_tel")
     private String sponsor2Tel;
     private String subEvent;
     private String ageLimit;
