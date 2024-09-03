@@ -59,7 +59,7 @@ public class SpotInfoEntity {
 
 	public List<String> createImageList() {
 		return Stream.of(firstImage, firstImage2)
-				.filter(Objects::nonNull)
+				.filter(image -> image != null && !image.isEmpty())
 				.collect(Collectors.toList());
 	}
 
