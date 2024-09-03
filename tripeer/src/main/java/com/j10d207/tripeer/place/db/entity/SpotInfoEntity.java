@@ -19,6 +19,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Table(name = "spot_info", indexes = {
 	@Index(name = "idx_content_type_city", columnList = "contentTypeId, cityId"),
 	@Index(name = "idx_content_type_city_town", columnList = "contentTypeId, cityId, townId")
@@ -52,6 +57,12 @@ public class SpotInfoEntity {
 	private double longitude;
 	//받은 DB에 있었는데 뭔지 모르겠습니다.
 	private String mlevel;
+
+	public List<String> createImageList() {
+		return Stream.of(firstImage, firstImage2)
+				.filter(image -> image != null && !image.isEmpty())
+				.collect(Collectors.toList());
+	}
 
 	public static SpotInfoEntity MakeNewSpotEntity(SpotAddVO spotAddVO, TownEntity town, String newAddr) {
 		return SpotInfoEntity.builder()

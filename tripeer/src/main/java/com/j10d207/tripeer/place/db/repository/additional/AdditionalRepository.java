@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.place.db.repository;
+package com.j10d207.tripeer.place.db.repository.additional;
 
 import java.util.Optional;
 

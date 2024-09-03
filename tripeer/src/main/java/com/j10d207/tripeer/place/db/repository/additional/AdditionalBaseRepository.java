@@ -1,11 +1,11 @@
-package com.j10d207.tripeer.place.db.repository;
+package com.j10d207.tripeer.place.db.repository.additional;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.j10d207.tripeer.place.db.entity.AdditionalBaseEntity;
+import com.j10d207.tripeer.place.db.entity.additional.AdditionalBaseEntity;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 
 import jakarta.annotation.PostConstruct;

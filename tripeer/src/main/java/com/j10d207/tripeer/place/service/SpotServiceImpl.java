@@ -7,6 +7,7 @@ import com.j10d207.tripeer.kakao.service.KakaoService;
 import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.*;
 import com.j10d207.tripeer.place.db.repository.*;
+import com.j10d207.tripeer.place.db.repository.additional.AdditionalBaseRepository;
 import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
@@ -14,7 +15,6 @@ import com.j10d207.tripeer.user.db.repository.WishListRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,8 +43,6 @@ public class SpotServiceImpl implements SpotService{
     private final AdditionalBaseRepository additionalBaseRepository;
 
 
-
-
     private List<SpotInfoDto> convertToDtoList(List<SpotInfoEntity> spotInfoEntities, long userId) {
         List<SpotInfoDto> spotInfoDtos = new ArrayList<>();
         for (SpotInfoEntity spotInfoEntity : spotInfoEntities) {
@@ -66,18 +64,16 @@ public class SpotServiceImpl implements SpotService{
         spotDetailPageDto.setLike(wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoId));
         spotDetailPageDto.setOverview(spotDescriptionRepository.findBySpotInfo(spotInfoEntity).getOverview());
 
-        List<AdditionalDto> additionalDtoList = AdditionalDto.from(additionalBaseRepository.findBySpotInfo(spotInfoEntity));
-        spotDetailPageDto.setDetailInfoList(additionalDtoList);
-
-        Optional<Double> starPoint = spotReviewRepository.findAverageStarPointBySpotInfoId(spotInfoEntity.getSpotInfoId());
-        if(starPoint.isPresent()) {
-            spotDetailPageDto.setStarPointAvg(Math.round(starPoint.get()*10)/10.0);
-        } else {
-            spotDetailPageDto.setStarPointAvg(0);
-        }
+        spotReviewRepository.findAverageStarPointBySpotInfoId(spotInfoEntity.getSpotInfoId())
+                .map(starPoint -> Math.round(starPoint * 10) / 10.0)
+                    .ifPresentOrElse(spotDetailPageDto::setStarPointAvg,
+                            () -> spotDetailPageDto.setStarPointAvg(0)
+                    );
+        spotDetailPageDto.setAdditionalInfo(AdditionalDto.from(additionalBaseRepository.findBySpotInfo(spotInfoEntity)));
 
         return spotDetailPageDto;
     }
+
 
     @Override
     public List<ReviewDto> getReviewPage(int spotInfoId, int page) {

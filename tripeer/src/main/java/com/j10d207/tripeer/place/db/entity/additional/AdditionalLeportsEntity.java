@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.place.db.entity;
+package com.j10d207.tripeer.place.db.entity.additional;
 
 import java.util.ArrayList;
 import java.util.List;

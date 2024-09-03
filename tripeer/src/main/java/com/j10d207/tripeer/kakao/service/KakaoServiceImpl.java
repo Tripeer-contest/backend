@@ -67,7 +67,7 @@ public class KakaoServiceImpl implements KakaoService {
                     .queryParam("query", query)
                     .queryParam("sort", sort)
                     .queryParam("page", page)
-                    .queryParam("size", size);
+                    .queryParam("size", size).encode();
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "KakaoAK " + kakaoApiKey2);
@@ -75,7 +75,7 @@ public class KakaoServiceImpl implements KakaoService {
             HttpEntity<?> entity = new HttpEntity<>(headers);
 
             ResponseEntity<String> response = restTemplate.exchange(
-                    builder.toUriString(),
+                    builder.build().toUri(),
                     HttpMethod.GET,
                     entity,
                     String.class
