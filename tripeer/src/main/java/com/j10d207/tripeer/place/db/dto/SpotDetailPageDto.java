@@ -2,8 +2,6 @@ package com.j10d207.tripeer.place.db.dto;
 
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
-import com.j10d207.tripeer.place.db.dto.additional.AdditionalInfo;
-import com.j10d207.tripeer.place.db.dto.additional.Leports;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.entity.SpotReviewEntity;
 import lombok.Builder;
@@ -39,7 +37,7 @@ public class SpotDetailPageDto {
 
     private String overview;
 
-    private AdditionalInfo additionalInfo;
+    private List<AdditionalDto> additionalInfo;
 
 
     public static SpotDetailPageDto createDto (SpotInfoEntity spotInfoEntity, Page<SpotReviewEntity> spotReviewEntityPage, List<BlogInfoResponse.Document> blogInfoList) {
