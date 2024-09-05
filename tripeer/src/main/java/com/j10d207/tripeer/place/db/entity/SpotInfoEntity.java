@@ -11,6 +11,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,7 +60,7 @@ public class SpotInfoEntity {
 
 	public List<String> createImageList() {
 		return Stream.of(firstImage, firstImage2)
-				.filter(Objects::nonNull)
+				.filter(image -> image != null && !image.isEmpty())
 				.collect(Collectors.toList());
 	}
 

@@ -35,7 +35,7 @@ public class PlanDetailMainDTO {
         private long planId;
         private String title;
         private List<TownDTO> townList;
-        private String vehicle;
+        private Boolean isSaved;
         private LocalDate startDay;
         private LocalDate endDay;
         private LocalDate createDay;
@@ -45,7 +45,7 @@ public class PlanDetailMainDTO {
             return CreateResultInfo.builder()
                     .title(createInfo.getTitle())
                     .townList(createInfo.getTownList())
-                    .vehicle(createInfo.getVehicle())
+                    .isSaved(createInfo.getIsSaved())
                     .startDay(createInfo.getStartDay())
                     .endDay(createInfo.getEndDay())
                     .createDay(LocalDate.now(ZoneId.of("Asia/Seoul")))

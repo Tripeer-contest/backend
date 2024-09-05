@@ -4,18 +4,14 @@ import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.kakao.service.KakaoService;
-import com.j10d207.tripeer.place.db.ContentTypeEnum;
-import com.j10d207.tripeer.place.db.repository.addional.AdditionalRepositories;
-import com.j10d207.tripeer.place.dto.res.additional.*;
+import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.*;
-import com.j10d207.tripeer.place.db.entity.additional.*;
 import com.j10d207.tripeer.place.db.repository.*;
-import com.j10d207.tripeer.place.dto.req.SpotAddReq;
-import com.j10d207.tripeer.place.dto.res.ReviewDto;
-import com.j10d207.tripeer.place.dto.res.SpotDTO;
-import com.j10d207.tripeer.place.dto.res.SpotDetailPageDto;
+import com.j10d207.tripeer.place.db.repository.additional.AdditionalBaseRepository;
+import com.j10d207.tripeer.place.db.vo.SpotAddVO;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +39,7 @@ public class SpotServiceImpl implements SpotService{
     private final PlanService planService;
     private final KakaoService kakaoService;
     private final WishListRepository wishListRepository;
-
-    private final AdditionalRepositories additionalRepositories;
+    private final AdditionalBaseRepository additionalBaseRepository;
 
     /*
     특정 장소에 대한 세부정보 페이지에서 메인 화면을 구성하는데 필요한 데이터들의 Response 를 생성하기 위한 메소드
@@ -67,51 +62,11 @@ public class SpotServiceImpl implements SpotService{
                     .ifPresentOrElse(spotDetailPageDto::setStarPointAvg,
                             () -> spotDetailPageDto.setStarPointAvg(0)
                     );
-        // 장소의 ContentType 마다 AdditionalInfo가 달라서 AdditionalInfo를 인터페이스 화 하였음
-        spotDetailPageDto.setAdditionalInfo(getAdditionalInfo(spotInfoEntity.getSpotInfoId(), spotInfoEntity.getContentTypeId()));
+        spotDetailPageDto.setAdditionalInfo(AdditionalDto.from(additionalBaseRepository.findBySpotInfo(spotInfoEntity)));
 
         return spotDetailPageDto;
     }
 
-    //contentType에 따른 추가정보 가져오기
-    private AdditionalInfo getAdditionalInfo (int spotInfoId, int contentTypeId) {
-        return switch (ContentTypeEnum.getByCode(contentTypeId)) {
-            case TOURIST_ATTRACTION -> {
-                AdditionalTourismEntity tourismEntity = additionalRepositories.getAdditionalTourismRepository().findBySpotInfo_SpotInfoId(spotInfoId);
-                yield Tourism.fromEntity(tourismEntity);
-            }
-            case CULTURAL_FACILITY -> {
-                AdditionalCultureFacilityEntity cultureFacilityEntity = additionalRepositories.getAdditionalCultureFacilityRepository().findBySpotInfo_SpotInfoId(spotInfoId);
-                yield CultureFacility.fromEntity(cultureFacilityEntity);
-            }
-            case FESTIVAL_EVENT -> {
-                AdditionalFestivalEntity festivalEntity = additionalRepositories.getAdditionalFestivalRepository().findBySpotInfo_SpotInfoId(spotInfoId);
-                yield Festival.fromEntity(festivalEntity);
-            }
-            case TRAVEL_COURSE -> {
-                AdditionalTourCourseEntity tourCourseEntity = additionalRepositories.getAdditionalTourCourseRepository().findBySpotInfo_SpotInfoId(spotInfoId);
-                yield TourCourse.fromEntity(tourCourseEntity);
-            }
-            case SPORTS -> {
-                AdditionalLeportsEntity leportsEntity = additionalRepositories.getAdditionalLeportsRepository().findBySpotInfo_SpotInfoId(spotInfoId);
-                yield Leports.fromEntity(leportsEntity);
-            }
-            case ACCOMMODATION -> {
-                AdditionalLodgingEntity lodgingEntity = additionalRepositories.getAdditionalLodgingRepository().findBySpotInfo_SpotInfoId(spotInfoId);
-                yield Lodging.fromEntity(lodgingEntity);
-            }
-            case SHOPPING -> {
-                AdditionalShoppingEntity shoppingEntity = additionalRepositories.getAdditionalShoppingRepository().findBySpotInfo_SpotInfoId(spotInfoId);
-                yield Shopping.fromEntity(shoppingEntity);
-            }
-            case RESTAURANT -> {
-                AdditionalFoodEntity foodEntity = additionalRepositories.getAdditionalFoodRepository().findBySpotInfo_SpotInfoId(spotInfoId);
-                yield Food.fromEntity(foodEntity);
-            }
-            case null, default -> throw new CustomException(ErrorCode.UNDEFINED_TYPE);
-        };
-
-    }
 
     //특정 페이지 리뷰 가져오기
     @Override

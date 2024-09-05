@@ -51,7 +51,7 @@ public class HistoryServiceImpl implements HistoryService {
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_HAS_COWORKER));
 		return coworkerList.stream()
 			.map(CoworkerEntity::getPlan)
-			.filter(plan -> plan.getVehicle().equals("history"))
+			.filter(PlanEntity::getIsSaved)
 			.map(PlanInfoRes::from)
 			.toList();
 	}
@@ -72,10 +72,10 @@ public class HistoryServiceImpl implements HistoryService {
 		long planId = planSaveReq.getPlanId();
 		List<PlanDayEntity> planDayEntityList = planDayRepository.findAllByPlan_PlanIdOrderByDayAsc(planId);
 		PlanEntity planEntity = planRepository.findByPlanId(planId);
-		if (planEntity.getVehicle().equals("history")) {
+		if (planEntity.getIsSaved()) {
 			throw new CustomException(ErrorCode.HISTORY_ALREADY_EXISTS);
 		}
-		planEntity.setVehicle("history");
+		planEntity.setIsSaved(true);
 		planRepository.save(planEntity);
 		List<PlanDetailEntity> revokePlanDetailList = new ArrayList<>();
 		for (int day = 1; day < totalYList.size(); day++) {
@@ -92,7 +92,7 @@ public class HistoryServiceImpl implements HistoryService {
 					List<Object> timeList = tmp;
 					if (timeList.get(1).equals("2")) {
 						planDetailRepository.deleteAll(revokePlanDetailList);
-						planEntity.setVehicle("private");
+						planEntity.setIsSaved(false);
 						planRepository.save(planEntity);
 						throw new CustomException(ErrorCode.UNSUPPORTED_JSON_TYPE);
 					}
@@ -162,7 +162,7 @@ public class HistoryServiceImpl implements HistoryService {
 		planDayEntityList.stream()
 			.map(PlanDayEntity::getPlanDetailList)  // PlanDayEntity에서 PlanDetailEntity 리스트를 가져옴
 			.forEach(planDetailRepository::deleteAll);  // 가져온 각각의 PlanDetailEntity 리스트를 삭제
-		plan.setVehicle("private");
+		plan.setIsSaved(false);
 		planRepository.save(plan);
 		return "복구 성공";
 	}
