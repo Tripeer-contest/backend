@@ -34,7 +34,7 @@ public class PlanEntity {
 	@Setter
 	private String title;
 	@Setter
-	private String vehicle;
+	private Boolean isSaved;
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private LocalDate createDate;
@@ -54,7 +54,7 @@ public class PlanEntity {
     public static PlanEntity fromDto(PlanDetailMainDTO.CreateResultInfo CreateResultInfo) {
         return PlanEntity.builder()
                 .title(CreateResultInfo.getTitle())
-                .vehicle(CreateResultInfo.getVehicle())
+                .isSaved(CreateResultInfo.getIsSaved())
                 .startDate(CreateResultInfo.getStartDay())
                 .endDate(CreateResultInfo.getEndDay())
                 .createDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
