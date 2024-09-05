@@ -37,8 +37,6 @@ public class PlanDayEntity {
 	private PlanEntity plan;
 
     private LocalDate day;
-    private LocalTime startTime;
-    private String vehicle;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "PLAN_DAY_ID")
@@ -52,7 +50,6 @@ public class PlanDayEntity {
         return PlanDayEntity.builder()
                 .plan(planEntity)
                 .day(createResultInfo.getStartDay().plusDays(i))
-                .vehicle(createResultInfo.getVehicle())
                 .build();
 
     }
