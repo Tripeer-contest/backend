@@ -2,16 +2,11 @@ package com.j10d207.tripeer.place.controller;
 
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.place.dto.req.ReviewReq;
-import com.j10d207.tripeer.place.dto.req.SpotAddReq;
-import com.j10d207.tripeer.place.dto.res.CityAndTownDTO;
 import com.j10d207.tripeer.place.dto.res.ReviewDto;
 import com.j10d207.tripeer.place.dto.res.SpotDTO;
 import com.j10d207.tripeer.place.dto.res.SpotDetailPageDto;
-import com.j10d207.tripeer.place.service.CityService;
 import com.j10d207.tripeer.place.service.ReviewService;
 import com.j10d207.tripeer.place.service.SpotService;
-import com.j10d207.tripeer.place.service.TownService;
-import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import jakarta.validation.Valid;
@@ -27,10 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PlaceController {
 
-    private final CityService cityService;
-    private final TownService townService;
     private final SpotService spotService;
-    private final PlanService planService;
     private final ReviewService reviewService;
 
     /*
@@ -53,40 +45,6 @@ public class PlaceController {
                                                                  @RequestParam("page") int page) {
         return Response.of(HttpStatus.OK, "블로그 추가정보 조회 성공", spotService.getBlogInfoPage(title, page));
     }
-
-    /*
-    * city 검색
-    * cityName이 -1일 경우 전체 조회
-    * 그 외의 경우 해당 city 조회
-    * */
-    @GetMapping("/city/{cityName}")
-    public Response<List<CityAndTownDTO.CityListDTO>> searchCity(@PathVariable("cityName") String cityName) {
-        return Response.of(HttpStatus.OK, "도시 검색 결과", cityService.searchCity(cityName));
-    }
-
-
-    /*
-     * town 검색
-     * townName이 -1일 경우 전체 조회
-     * 그 외의 경우 해당 town 조회
-     * */
-    @GetMapping("/town")
-    public Response<List<CityAndTownDTO.TownListDTO>> searchTown(@RequestParam("cityId") String cityId,
-                                                                 @RequestParam("townName") String townName) {
-        return Response.of(HttpStatus.OK, "타운 검색 결과", townService.searchTown(cityId, townName));
-    }
-
-
-    /*
-     * town 디테일 조회
-     * */
-    @GetMapping("/detail/{townName}")
-    public Response<CityAndTownDTO.TownListDTO> townDetail(@PathVariable("townName") String townName) {
-        return Response.of(HttpStatus.OK, "타운 디테일 조회", townService.townDetail(townName));
-    }
-
-
-
     @GetMapping("/search")
     public Response<SpotDTO.SpotListDTO> getSearchList(@RequestParam("contentTypeId") int contentTypeId,
                                                        @RequestParam("cityId") Integer cityId,
@@ -104,14 +62,6 @@ public class PlaceController {
 //
 //        return Response.of(HttpStatus.OK, "새로운 스팟 생성", spotService.createNewSpot(spotAddReq, user.getUserId()));
 //    }
-
-    /*
-    * 모든 도시, 타운 조회
-    * */
-    @GetMapping("/all")
-    public Response<CityAndTownDTO> getAllCityAndTown() {
-        return Response.of(HttpStatus.OK, "모든 도시, 타운 조회", townService.getAllCityAndTown());
-    }
 
     /*
     리뷰 작성하기 + 별점

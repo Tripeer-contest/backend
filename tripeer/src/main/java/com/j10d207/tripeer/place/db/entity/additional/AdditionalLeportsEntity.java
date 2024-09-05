@@ -3,7 +3,7 @@ package com.j10d207.tripeer.place.db.entity.additional;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.j10d207.tripeer.place.db.dto.AdditionalDto;
+import com.j10d207.tripeer.place.dto.res.AdditionalDto;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

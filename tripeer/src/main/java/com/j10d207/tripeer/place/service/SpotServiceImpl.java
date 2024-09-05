@@ -4,15 +4,15 @@ import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.kakao.service.KakaoService;
-import com.j10d207.tripeer.place.db.dto.*;
 import com.j10d207.tripeer.place.db.entity.*;
 import com.j10d207.tripeer.place.db.repository.*;
 import com.j10d207.tripeer.place.db.repository.additional.AdditionalBaseRepository;
-import com.j10d207.tripeer.place.db.vo.SpotAddVO;
-import com.j10d207.tripeer.plan.service.PlanService;
+import com.j10d207.tripeer.place.dto.res.AdditionalDto;
+import com.j10d207.tripeer.place.dto.res.ReviewDto;
+import com.j10d207.tripeer.place.dto.res.SpotDTO;
+import com.j10d207.tripeer.place.dto.res.SpotDetailPageDto;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -32,11 +31,7 @@ public class SpotServiceImpl implements SpotService{
 
     private final SpotInfoRepository spotInfoRepository;
     private final SpotDescriptionRepository spotDescriptionRepository;
-    private final SpotDetailRepository spotDetailRepository;
-    private final CityRepository cityRepository;
-    private final TownRepository townRepository;
     private final SpotReviewRepository spotReviewRepository;
-    private final PlanService planService;
     private final KakaoService kakaoService;
     private final WishListRepository wishListRepository;
     private final AdditionalBaseRepository additionalBaseRepository;
@@ -151,8 +146,6 @@ public class SpotServiceImpl implements SpotService{
         }
 
         List<SpotDTO.SpotInfoDTO> spotInfoDtos = convertToDtoList(spotInfoEntities, userId);
-
-        boolean isLastPage = spotInfoDtos.size() < 5;
 
         return new SpotDTO.SpotListDTO(spotInfoDtos.size() < 5, spotInfoDtos);
     }
