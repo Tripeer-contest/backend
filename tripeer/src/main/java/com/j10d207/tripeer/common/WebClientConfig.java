@@ -10,5 +10,6 @@ public class WebClientConfig {
 	public WebClient webClient() {
 		return WebClient.create("https://tripeer.co.kr");
 		// return WebClient.create("http://localhost:3001");
+		// return WebClient.create("http://localhost:8000");
 	}
 }
