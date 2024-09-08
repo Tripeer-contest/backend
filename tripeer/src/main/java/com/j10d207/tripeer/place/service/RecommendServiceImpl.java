@@ -48,8 +48,7 @@ public class RecommendServiceImpl implements RecommendService {
 
 		List<RecommendVO> recommendVOList = responseFlux.collectList().block();
 
-		List<WishListEntity> wishList = wishListRepository.findByUser_UserId(userId);
-		Set<Integer> wishListIds = wishList.stream()
+		Set<Integer> wishList = wishListRepository.findByUser_UserId(userId).stream()
 			.map(el -> el.getSpotInfo().getSpotInfoId())
 			.collect(Collectors.toSet());
 
@@ -68,7 +67,7 @@ public class RecommendServiceImpl implements RecommendService {
 				.spotInfoDtos(recommendVO.getIdList().stream()
 					.map(el -> SpotInfoDto.convertToDto(
 						spotInfoMap.get(el),
-						wishListIds.contains(el))
+						wishList.contains(el))
 					)
 					.toList())
 				.build())
@@ -86,7 +85,9 @@ public class RecommendServiceImpl implements RecommendService {
 			.retrieve()
 			.bodyToMono(RecommendVO.class);
 
-		List<Integer> wishList = wishListRepository.findByUser_UserId(userId).stream().map(el -> el.getSpotInfo().getSpotInfoId()).toList();
+		Set<Integer> wishList = wishListRepository.findByUser_UserId(userId).stream()
+			.map(el -> el.getSpotInfo().getSpotInfoId())
+			.collect(Collectors.toSet());
 		RecommendVO recommendVO = recommendVOMono.block();
 		return RecommendDTO.builder()
 			.comment(recommendVO.getComment())

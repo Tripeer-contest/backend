@@ -37,7 +37,11 @@ public class SpotDetailPageDto {
 
     private String overview;
 
-    private List<AdditionalDto> additionalInfo;
+    private List<AdditionalDto> additionalInfo;   // 상세 정보
+
+    private List<SpotInfoDto> similarSpotList;   // 비슷한 관광지
+
+    private List<SpotInfoDto> nearSpotList;   // 가까운 관광지
 
 
     public static SpotDetailPageDto createDto (SpotInfoEntity spotInfoEntity, Page<SpotReviewEntity> spotReviewEntityPage, List<BlogInfoResponse.Document> blogInfoList) {
