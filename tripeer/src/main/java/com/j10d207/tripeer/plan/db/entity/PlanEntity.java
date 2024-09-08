@@ -54,7 +54,7 @@ public class PlanEntity {
     public static PlanEntity fromDto(PlanDetailMainDTO.CreateResultInfo CreateResultInfo) {
         return PlanEntity.builder()
                 .title(CreateResultInfo.getTitle())
-                .isSaved(CreateResultInfo.getIsSaved())
+                .isSaved(false)
                 .startDate(CreateResultInfo.getStartDay())
                 .endDate(CreateResultInfo.getEndDay())
                 .createDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
