@@ -7,6 +7,9 @@ spring:
     multipart:
       max-file-size: -1
       max-request-size: -1
+  data:
+    mongodb:
+      uri: ENC(L6iHx2pLNBhXcyl+0zQERCKGHkt+N21FxPil8/c7JigZRGW012tC8GilDiXlVGYzPWaE+Z+Algt1kY0IVodf6jDwK4k6/tb4)
 
   datasource:
     url: ENC(lOFswiNgkkKFVYcwvYjD6SjBxBjdd98SV7GocEaulhDjhhQbtUO9uoSQB5O9uCg8ClK5mzgXiWg=)
