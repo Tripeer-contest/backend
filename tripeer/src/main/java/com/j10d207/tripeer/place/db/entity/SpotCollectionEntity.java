@@ -13,6 +13,7 @@ import lombok.Setter;
 @Setter
 @Document(collection = "spot_collection")
 public class SpotCollectionEntity {
+
 	@Id
 	private String id;
 
