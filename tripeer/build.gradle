@@ -79,6 +79,8 @@ dependencies {
 	// http 요청을 위한 webclient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	// Spring Data MongoDB 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 }
 
 tasks.named('test') {

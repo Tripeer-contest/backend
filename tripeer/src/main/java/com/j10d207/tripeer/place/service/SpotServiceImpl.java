@@ -12,6 +12,7 @@ import com.j10d207.tripeer.place.dto.res.ReviewDto;
 import com.j10d207.tripeer.place.dto.res.SpotDTO;
 import com.j10d207.tripeer.place.dto.res.SpotDetailPageDto;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
+import com.j10d207.tripeer.user.dto.res.UserDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -35,11 +39,18 @@ public class SpotServiceImpl implements SpotService{
     private final KakaoService kakaoService;
     private final WishListRepository wishListRepository;
     private final AdditionalBaseRepository additionalBaseRepository;
+    private final SpotCollectionRepository spotCollectionRepository;
 
-    /*
-    특정 장소에 대한 세부정보 페이지에서 메인 화면을 구성하는데 필요한 데이터들의 Response 를 생성하기 위한 메소드
-    장소 기본 정보, 리뷰, 좋아요 상태, 세부정보, 평균별점, 추가 정보 가 구성된다.
-     */
+
+    private List<SpotInfoDto> convertToDtoList(List<SpotInfoEntity> spotInfoEntities, long userId) {
+        List<SpotInfoDto> spotInfoDtos = new ArrayList<>();
+        for (SpotInfoEntity spotInfoEntity : spotInfoEntities) {
+            boolean isWishlist = wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoEntity.getSpotInfoId());
+            spotInfoDtos.add(SpotInfoDto.convertToDto(spotInfoEntity, isWishlist));
+        }
+        return spotInfoDtos;
+    }
+
     @Override
     public SpotDetailPageDto getDetailMainPage(long userId, int spotInfoId) {
         SpotInfoEntity spotInfoEntity = spotInfoRepository.findBySpotInfoId(spotInfoId);
@@ -48,7 +59,9 @@ public class SpotServiceImpl implements SpotService{
         Page<SpotReviewEntity> spotReviewEntityPage = spotReviewRepository.findBySpotInfo_SpotInfoId(spotInfoId, pageable);
 
         SpotDetailPageDto spotDetailPageDto = SpotDetailPageDto.createDto(spotInfoEntity, spotReviewEntityPage, getBlogSearchInfo(spotInfoEntity.getTitle(), 1));
-
+        Set<Integer> wishList = wishListRepository.findByUser_UserId(userId).stream()
+            .map(el -> el.getSpotInfo().getSpotInfoId())
+            .collect(Collectors.toSet());
         spotDetailPageDto.setLike(wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoId));
         spotDetailPageDto.setOverview(spotDescriptionRepository.findBySpotInfo(spotInfoEntity).getOverview());
 
@@ -59,6 +72,14 @@ public class SpotServiceImpl implements SpotService{
                     );
         spotDetailPageDto.setAdditionalInfo(AdditionalDto.from(additionalBaseRepository.findBySpotInfo(spotInfoEntity)));
 
+        SpotCollectionEntity spotCollection = spotCollectionRepository.findBySpotInfoId(spotInfoEntity.getSpotInfoId());
+        System.out.println(spotInfoEntity.getSpotInfoId());
+        System.out.println(spotCollection);
+        spotDetailPageDto.setSimilarSpotList(spotCollection.getSimSpotIdList().stream().map(
+			spotInfoRepository::findBySpotInfoId).map(el -> SpotInfoDto.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
+
+        spotDetailPageDto.setNearSpotList(spotCollection.getNearSpotIdList().stream().map(
+            spotInfoRepository::findBySpotInfoId).map(el -> SpotInfoDto.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
         return spotDetailPageDto;
     }
 

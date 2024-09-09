@@ -24,6 +24,7 @@ public class PlaceController {
 
     private final SpotService spotService;
     private final ReviewService reviewService;
+    private final RecommendService recommendService;
 
     /*
     장소 디테일 페이지 첫 로딩 정보
@@ -70,6 +71,22 @@ public class PlaceController {
     public Response<?> createReview(@AuthenticationPrincipal CustomOAuth2User user, @RequestBody @Valid ReviewReq reviewReq) {
         reviewService.saveReview(user.getUserId(), reviewReq);
         return Response.of(HttpStatus.OK, "리뷰 작성 완료", null);
+    }
+
+    @GetMapping("/recommend/home")
+    public Response<List<RecommendDTO>> getHomeRecommend(@RequestParam("contentTypeId") int contentTypeId,
+                                                        @RequestParam("cityId") Integer cityId,
+                                                        @RequestParam("townId") Integer townId,
+                                                        @AuthenticationPrincipal CustomOAuth2User user) {
+        return Response.of(HttpStatus.OK, "홈 추천 조회", recommendService.getHomeRecommends(contentTypeId, cityId, townId, user.getUserId()));
+    }
+
+    @GetMapping("/recommend/keyword")
+    public Response<RecommendDTO> getKeywordRecommends(@RequestParam("keyword") String keyword,
+                                                            @RequestParam("cityId") Integer cityId,
+                                                            @RequestParam("townId") Integer townId,
+                                                            @AuthenticationPrincipal CustomOAuth2User user) {
+        return Response.of(HttpStatus.OK, "키워드 추천 조회", recommendService.getKeywordRecommends(keyword, cityId, townId, user.getUserId()));
     }
 
 }
