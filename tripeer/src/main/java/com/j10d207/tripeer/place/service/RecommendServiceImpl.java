@@ -1,25 +1,21 @@
 package com.j10d207.tripeer.place.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.j10d207.tripeer.place.dto.res.SpotDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.j10d207.tripeer.exception.CustomException;
-import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.place.db.dto.RecommendDTO;
-import com.j10d207.tripeer.place.db.dto.SpotInfoDto;
+//import com.j10d207.tripeer.place.db.dto.SpotInfoDto;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.repository.SpotInfoRepository;
-import com.j10d207.tripeer.place.db.vo.RecommendVO;
-import com.j10d207.tripeer.user.db.entity.WishListEntity;
+import com.j10d207.tripeer.place.dto.req.RecommendReq;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
-import com.j10d207.tripeer.user.dto.res.UserDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +31,7 @@ public class RecommendServiceImpl implements RecommendService {
 	private final WishListRepository wishListRepository;
 
 	public List<RecommendDTO> getHomeRecommends(int contentTypeId, int cityId, int townId, long userId) {
-		Flux<RecommendVO> responseFlux = webClient.get()
+		Flux<RecommendReq> responseFlux = webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/recommend/spring/home")
 				.queryParam("contentType", contentTypeId)
@@ -44,28 +40,28 @@ public class RecommendServiceImpl implements RecommendService {
 				.queryParam("userId", userId)
 				.build())
 			.retrieve()
-			.bodyToFlux(RecommendVO.class);
+			.bodyToFlux(RecommendReq.class);
 
-		List<RecommendVO> recommendVOList = responseFlux.collectList().block();
+		List<RecommendReq> recommendReqList = responseFlux.collectList().block();
 
 		Set<Integer> wishList = wishListRepository.findByUser_UserId(userId).stream()
 			.map(el -> el.getSpotInfo().getSpotInfoId())
 			.collect(Collectors.toSet());
 
-		List<Integer> allSpotInfoIds = recommendVOList.stream()
-			.flatMap(recommendVO -> recommendVO.getIdList().stream())
+		List<Integer> allSpotInfoIds = recommendReqList.stream()
+			.flatMap(recommendReq -> recommendReq.getIdList().stream())
 			.distinct()
 			.toList();
 
 		Map<Integer, SpotInfoEntity> spotInfoMap = spotInfoRepository.findAllById(allSpotInfoIds).stream()
 			.collect(Collectors.toMap(SpotInfoEntity::getSpotInfoId, Function.identity()));
 
-		return recommendVOList.stream()
-			.map(recommendVO -> RecommendDTO.builder()
-				.comment(recommendVO.getComment())
-				.keyword(recommendVO.getKeyword())
-				.spotInfoDtos(recommendVO.getIdList().stream()
-					.map(el -> SpotInfoDto.convertToDto(
+		return recommendReqList.stream()
+			.map(recommendReq -> RecommendDTO.builder()
+				.comment(recommendReq.getComment())
+				.keyword(recommendReq.getKeyword())
+				.spotInfoDtos(recommendReq.getIdList().stream()
+					.map(el -> SpotDTO.SpotInfoDTO.convertToDto(
 						spotInfoMap.get(el),
 						wishList.contains(el))
 					)
@@ -75,7 +71,7 @@ public class RecommendServiceImpl implements RecommendService {
 	}
 
 	public RecommendDTO getKeywordRecommends(String keyword, int cityId, int townId, long userId){
-		Mono<RecommendVO> recommendVOMono = webClient.get()
+		Mono<RecommendReq> recommendVOMono = webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/recommend/spring/keyword")
 				.queryParam("keyword", keyword)
@@ -83,17 +79,17 @@ public class RecommendServiceImpl implements RecommendService {
 				.queryParam("townId", townId)
 				.build())
 			.retrieve()
-			.bodyToMono(RecommendVO.class);
+			.bodyToMono(RecommendReq.class);
 
 		Set<Integer> wishList = wishListRepository.findByUser_UserId(userId).stream()
 			.map(el -> el.getSpotInfo().getSpotInfoId())
 			.collect(Collectors.toSet());
-		RecommendVO recommendVO = recommendVOMono.block();
+		RecommendReq recommendReq = recommendVOMono.block();
 		return RecommendDTO.builder()
-			.comment(recommendVO.getComment())
-			.keyword(recommendVO.getKeyword())
-			.spotInfoDtos(recommendVO.getIdList().stream()
-				.map(el -> SpotInfoDto.convertToDto(spotInfoRepository.findBySpotInfoId(el), wishList.contains(el)))
+			.comment(recommendReq.getComment())
+			.keyword(recommendReq.getKeyword())
+			.spotInfoDtos(recommendReq.getIdList().stream()
+				.map(el -> SpotDTO.SpotInfoDTO.convertToDto(spotInfoRepository.findBySpotInfoId(el), wishList.contains(el)))
 				.toList())
 			.build();
 	};

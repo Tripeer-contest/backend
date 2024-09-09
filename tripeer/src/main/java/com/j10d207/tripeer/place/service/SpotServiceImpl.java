@@ -12,7 +12,6 @@ import com.j10d207.tripeer.place.dto.res.ReviewDto;
 import com.j10d207.tripeer.place.dto.res.SpotDTO;
 import com.j10d207.tripeer.place.dto.res.SpotDetailPageDto;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
-import com.j10d207.tripeer.user.dto.res.UserDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,15 +37,6 @@ public class SpotServiceImpl implements SpotService{
     private final AdditionalBaseRepository additionalBaseRepository;
     private final SpotCollectionRepository spotCollectionRepository;
 
-
-    private List<SpotInfoDto> convertToDtoList(List<SpotInfoEntity> spotInfoEntities, long userId) {
-        List<SpotInfoDto> spotInfoDtos = new ArrayList<>();
-        for (SpotInfoEntity spotInfoEntity : spotInfoEntities) {
-            boolean isWishlist = wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoEntity.getSpotInfoId());
-            spotInfoDtos.add(SpotInfoDto.convertToDto(spotInfoEntity, isWishlist));
-        }
-        return spotInfoDtos;
-    }
 
     @Override
     public SpotDetailPageDto getDetailMainPage(long userId, int spotInfoId) {
@@ -73,13 +60,11 @@ public class SpotServiceImpl implements SpotService{
         spotDetailPageDto.setAdditionalInfo(AdditionalDto.from(additionalBaseRepository.findBySpotInfo(spotInfoEntity)));
 
         SpotCollectionEntity spotCollection = spotCollectionRepository.findBySpotInfoId(spotInfoEntity.getSpotInfoId());
-        System.out.println(spotInfoEntity.getSpotInfoId());
-        System.out.println(spotCollection);
         spotDetailPageDto.setSimilarSpotList(spotCollection.getSimSpotIdList().stream().map(
-			spotInfoRepository::findBySpotInfoId).map(el -> SpotInfoDto.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
+			spotInfoRepository::findBySpotInfoId).map(el -> SpotDTO.SpotInfoDTO.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
 
         spotDetailPageDto.setNearSpotList(spotCollection.getNearSpotIdList().stream().map(
-            spotInfoRepository::findBySpotInfoId).map(el -> SpotInfoDto.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
+            spotInfoRepository::findBySpotInfoId).map(el -> SpotDTO.SpotInfoDTO.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
         return spotDetailPageDto;
     }
 

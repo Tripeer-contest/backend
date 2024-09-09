@@ -73,6 +73,8 @@ public class SpotDTO {
         private String spotName;
         private String spotImg;
         private String address;
+        private double latitude;
+        private double longitude;
         private boolean isWishlist;
 
         public static SpotInfoDTO convertToDto(SpotInfoEntity spotInfoEntity, boolean isWishlist) {
@@ -82,6 +84,8 @@ public class SpotDTO {
                     .spotImg(spotInfoEntity.getFirstImage())
                     .address(spotInfoEntity.getAddr1())
                     .spotName(spotInfoEntity.getTitle())
+                    .latitude(spotInfoEntity.getLatitude())
+                    .longitude(spotInfoEntity.getLongitude())
                     .isWishlist(isWishlist)
                     .build();
         }

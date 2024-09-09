@@ -1,10 +1,12 @@
 package com.j10d207.tripeer.place.controller;
 
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
+import com.j10d207.tripeer.place.db.dto.RecommendDTO;
 import com.j10d207.tripeer.place.dto.req.ReviewReq;
 import com.j10d207.tripeer.place.dto.res.ReviewDto;
 import com.j10d207.tripeer.place.dto.res.SpotDTO;
 import com.j10d207.tripeer.place.dto.res.SpotDetailPageDto;
+import com.j10d207.tripeer.place.service.RecommendService;
 import com.j10d207.tripeer.place.service.ReviewService;
 import com.j10d207.tripeer.place.service.SpotService;
 import com.j10d207.tripeer.response.Response;
@@ -75,9 +77,9 @@ public class PlaceController {
 
     @GetMapping("/recommend/home")
     public Response<List<RecommendDTO>> getHomeRecommend(@RequestParam("contentTypeId") int contentTypeId,
-                                                        @RequestParam("cityId") Integer cityId,
-                                                        @RequestParam("townId") Integer townId,
-                                                        @AuthenticationPrincipal CustomOAuth2User user) {
+                                                         @RequestParam("cityId") Integer cityId,
+                                                         @RequestParam("townId") Integer townId,
+                                                         @AuthenticationPrincipal CustomOAuth2User user) {
         return Response.of(HttpStatus.OK, "홈 추천 조회", recommendService.getHomeRecommends(contentTypeId, cityId, townId, user.getUserId()));
     }
 
