@@ -52,4 +52,14 @@ public class FindRoot {
             }
         }
     }
+
+    public String rootTimeToString (int i) {
+        StringBuilder sb = new StringBuilder();
+        if( this.rootTime[i]/60 != 0 ) {
+            sb.append(this.rootTime[i]/60).append("시간 ");
+        }
+        sb.append(this.rootTime[i]%60).append("분");
+
+        return sb.toString();
+    }
 }

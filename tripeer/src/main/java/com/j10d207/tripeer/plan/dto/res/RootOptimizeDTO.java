@@ -1,7 +1,7 @@
 package com.j10d207.tripeer.plan.dto.res;
 
-import com.j10d207.tripeer.plan.db.dto.PublicRootDTO;
 import com.j10d207.tripeer.plan.dto.req.PlaceListReq;
+import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import lombok.*;
 import org.springframework.beans.BeanUtils;
 

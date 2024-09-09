@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.place.db.dto;
+package com.j10d207.tripeer.place.dto.res;
 
 import com.j10d207.tripeer.place.db.entity.SpotReviewEntity;
 import lombok.Builder;

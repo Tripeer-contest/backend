@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.place.db.dto;
+package com.j10d207.tripeer.place.dto.res;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import lombok.Getter;
 public class RecommendDTO {
 	private String keyword;
 	private String comment;
-	private List<SpotInfoDto> spotInfoDtos;
+	private List<SpotDTO.SpotInfoDTO> spotInfoDtos;
 
 
 }

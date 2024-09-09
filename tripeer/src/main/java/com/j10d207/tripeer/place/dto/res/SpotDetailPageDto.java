@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.place.db.dto;
+package com.j10d207.tripeer.place.dto.res;
 
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
@@ -39,9 +39,9 @@ public class SpotDetailPageDto {
 
     private List<AdditionalDto> additionalInfo;   // 상세 정보
 
-    private List<SpotInfoDto> similarSpotList;   // 비슷한 관광지
+    private List<SpotDTO.SpotInfoDTO> similarSpotList;   // 비슷한 관광지
 
-    private List<SpotInfoDto> nearSpotList;   // 가까운 관광지
+    private List<SpotDTO.SpotInfoDTO> nearSpotList;   // 가까운 관광지
 
 
     public static SpotDetailPageDto createDto (SpotInfoEntity spotInfoEntity, Page<SpotReviewEntity> spotReviewEntityPage, List<BlogInfoResponse.Document> blogInfoList) {

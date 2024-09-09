@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.plan.db.dto;
+package com.j10d207.tripeer.tmap.db.dto;
 
 import com.j10d207.tripeer.tmap.db.entity.PublicRootDetailEntity;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
