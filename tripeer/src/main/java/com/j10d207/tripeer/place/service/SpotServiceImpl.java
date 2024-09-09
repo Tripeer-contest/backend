@@ -4,6 +4,7 @@ import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.kakao.service.KakaoService;
+import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.*;
 import com.j10d207.tripeer.place.db.repository.*;
 import com.j10d207.tripeer.place.db.repository.additional.AdditionalBaseRepository;
@@ -37,12 +38,17 @@ public class SpotServiceImpl implements SpotService{
     private final AdditionalBaseRepository additionalBaseRepository;
     private final SpotCollectionRepository spotCollectionRepository;
 
+    private static final int ALL = -1;
+    private static final int SPOT_SEARCH_PER_PAGE = 15;
+    private static final int REVIEW_PER_PAGE = 5;
+    private static final int BLOG_PER_PAGE = 5;
+
 
     @Override
     public SpotDetailPageDto getDetailMainPage(long userId, int spotInfoId) {
         SpotInfoEntity spotInfoEntity = spotInfoRepository.findBySpotInfoId(spotInfoId);
 
-        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createTime"));
+        Pageable pageable = PageRequest.of(0, REVIEW_PER_PAGE, Sort.by(Sort.Direction.DESC, "createTime"));
         Page<SpotReviewEntity> spotReviewEntityPage = spotReviewRepository.findBySpotInfo_SpotInfoId(spotInfoId, pageable);
 
         SpotDetailPageDto spotDetailPageDto = SpotDetailPageDto.createDto(spotInfoEntity, spotReviewEntityPage, getBlogSearchInfo(spotInfoEntity.getTitle(), 1));
@@ -73,7 +79,7 @@ public class SpotServiceImpl implements SpotService{
     @Override
     public List<ReviewDto> getReviewPage(int spotInfoId, int page) {
         if(page < 1) throw new CustomException(ErrorCode.INVALID_PAGE);
-        Pageable pageable = PageRequest.of(page-1, 5, Sort.by(Sort.Direction.DESC, "createTime"));
+        Pageable pageable = PageRequest.of(page-1, REVIEW_PER_PAGE, Sort.by(Sort.Direction.DESC, "createTime"));
         Page<SpotReviewEntity> spotReviewEntityPage = spotReviewRepository.findBySpotInfo_SpotInfoId(spotInfoId, pageable);
         Page<ReviewDto> reviewDtoPage = spotReviewEntityPage.map(ReviewDto::fromEntity);
         return reviewDtoPage.getContent();
@@ -88,22 +94,23 @@ public class SpotServiceImpl implements SpotService{
     // 도시, 구 선택 혹은 타입 등의 옵션으로 장소를 받아오기
     @Override
     public SpotDTO.SpotListDTO getSpotSearch(int page, int ContentTypeId, int cityId, int townId, long userId) {
-        return switch (ContentTypeId) {
-            case 32, 39 -> getSpotByContentType(page, ContentTypeId, cityId, townId, userId);
-            case 100 -> getSpotByContentType(page, Arrays.asList(32, 39), cityId, townId, userId);
-            case -1 -> getSpotByContentType(page, cityId, townId, userId);
+        ContentTypeEnum contentTypeEnum = ContentTypeEnum.getByCode(ContentTypeId);
+        return switch (contentTypeEnum) {
+            case ACCOMMODATION, RESTAURANT -> getSpotByContentType(page, ContentTypeId, cityId, townId, userId);
+            case MECCA -> getSpotByContentType(page, Arrays.asList(32, 39), cityId, townId, userId);
+            case ALL_SPOT -> getSpotByContentType(page, cityId, townId, userId);
             default -> throw new CustomException(ErrorCode.UNDEFINED_TYPE);
         };
     }
 
     //타입별 오버로딩, -1은 전체를 의미
     private SpotDTO.SpotListDTO getSpotByContentType(Integer page, Integer ContentTypeId, Integer cityId, Integer townId, long userId) {
-        Pageable pageable = PageRequest.of(page,15);
+        Pageable pageable = PageRequest.of(page, SPOT_SEARCH_PER_PAGE);
 
         List<SpotInfoEntity> spotInfoEntities;
-        if (townId == -1 && cityId == -1) {
+        if (townId == ALL && cityId == ALL) {
             spotInfoEntities = spotInfoRepository.findByContentTypeId(ContentTypeId, pageable);
-        } else if (townId == -1) {
+        } else if (townId == ALL) {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityId(ContentTypeId, cityId, pageable);
         } else {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(ContentTypeId, cityId, townId, pageable);
@@ -111,16 +118,16 @@ public class SpotServiceImpl implements SpotService{
 
         List<SpotDTO.SpotInfoDTO> spotInfoDTOList = convertToDtoList(spotInfoEntities, userId);
 
-        return new SpotDTO.SpotListDTO(spotInfoDTOList.size() < 15, spotInfoDTOList);
+        return new SpotDTO.SpotListDTO(spotInfoDTOList.size() < SPOT_SEARCH_PER_PAGE, spotInfoDTOList);
     }
 
     //타입별 오버로딩, -1은 전체를 의미
     private SpotDTO.SpotListDTO getSpotByContentType(Integer page, List<Integer> ContentTypeId, Integer cityId, Integer townId, long userId) {
-        Pageable pageable = PageRequest.of(page,15);
+        Pageable pageable = PageRequest.of(page, SPOT_SEARCH_PER_PAGE);
         List<SpotInfoEntity> spotInfoEntities;
-        if (townId == -1 && cityId == -1) {
+        if (townId == ALL && cityId == ALL) {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdNotIn(ContentTypeId, pageable);
-        } else if (townId == -1) {
+        } else if (townId == ALL) {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityId(ContentTypeId, cityId, pageable);
         } else {
             spotInfoEntities = spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(ContentTypeId, cityId, townId, pageable);
@@ -128,32 +135,32 @@ public class SpotServiceImpl implements SpotService{
 
         List<SpotDTO.SpotInfoDTO> spotInfoDTOList = convertToDtoList(spotInfoEntities, userId);
 
-        return new SpotDTO.SpotListDTO(spotInfoDTOList.size() < 15, spotInfoDTOList);
+        return new SpotDTO.SpotListDTO(spotInfoDTOList.size() < SPOT_SEARCH_PER_PAGE, spotInfoDTOList);
     }
 
     //타입별 오버로딩, -1은 전체를 의미
     private SpotDTO.SpotListDTO getSpotByContentType(Integer page, Integer cityId, Integer townId, long userId) {
-        Pageable pageable = PageRequest.of(page,5);
+        Pageable pageable = PageRequest.of(page, SPOT_SEARCH_PER_PAGE /3);
 
         //전체 검색의 경우 결과를 타입별로 다양성 있게 반환하기 위해 다음과 같이 작성, 요소 별 5개씩 반환 0개인경우 고려X 0~15개 유동적 갯수반환
         List<SpotInfoEntity> spotInfoEntities;
-        if (townId == -1 && cityId == -1) {
-            spotInfoEntities = spotInfoRepository.findByContentTypeId(32, pageable);
-            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeId(39, pageable));
-            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdNotIn(Arrays.asList(32, 39), pageable));
-        } else if (townId == -1) {
-            spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityId(32, cityId, pageable);
-            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityId(39, cityId, pageable));
-            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityId(Arrays.asList(32, 39), cityId, pageable));
+        if (townId == ALL && cityId == ALL) {
+            spotInfoEntities = spotInfoRepository.findByContentTypeId(ContentTypeEnum.ACCOMMODATION.getCode(), pageable);
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeId(ContentTypeEnum.RESTAURANT.getCode(), pageable));
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdNotIn(Arrays.asList(ContentTypeEnum.ACCOMMODATION.getCode(), ContentTypeEnum.RESTAURANT.getCode()), pageable));
+        } else if (townId == ALL) {
+            spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityId(ContentTypeEnum.ACCOMMODATION.getCode(), cityId, pageable);
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityId(ContentTypeEnum.RESTAURANT.getCode(), cityId, pageable));
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityId(Arrays.asList(ContentTypeEnum.ACCOMMODATION.getCode(), ContentTypeEnum.RESTAURANT.getCode()), cityId, pageable));
         } else {
-            spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(32, cityId, townId, pageable);
-            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(39, cityId, townId, pageable));
-            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(Arrays.asList(32, 39), cityId, townId, pageable));
+            spotInfoEntities = spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(ContentTypeEnum.ACCOMMODATION.getCode(), cityId, townId, pageable);
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(ContentTypeEnum.RESTAURANT.getCode(), cityId, townId, pageable));
+            spotInfoEntities.addAll(spotInfoRepository.findByContentTypeIdNotInAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(Arrays.asList(ContentTypeEnum.ACCOMMODATION.getCode(), ContentTypeEnum.RESTAURANT.getCode()), cityId, townId, pageable));
         }
 
         List<SpotDTO.SpotInfoDTO> spotInfoDtos = convertToDtoList(spotInfoEntities, userId);
 
-        return new SpotDTO.SpotListDTO(spotInfoDtos.size() < 5, spotInfoDtos);
+        return new SpotDTO.SpotListDTO(spotInfoDtos.size() < SPOT_SEARCH_PER_PAGE /3, spotInfoDtos);
     }
 
     private List<SpotDTO.SpotInfoDTO> convertToDtoList(List<SpotInfoEntity> spotInfoEntities, long userId) {
@@ -299,6 +306,6 @@ public class SpotServiceImpl implements SpotService{
 */
 
     private List<BlogInfoResponse.Document> getBlogSearchInfo(String query, int page) {
-        return kakaoService.getBlogInfo(query, "accuracy", page, 5).getDocuments();
+        return kakaoService.getBlogInfo(query, "accuracy", page, BLOG_PER_PAGE).getDocuments();
     }
 }

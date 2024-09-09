@@ -6,12 +6,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.j10d207.tripeer.place.dto.res.RecommendDTO;
 import com.j10d207.tripeer.place.dto.res.SpotDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.j10d207.tripeer.place.db.dto.RecommendDTO;
-//import com.j10d207.tripeer.place.db.dto.SpotInfoDto;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.repository.SpotInfoRepository;
 import com.j10d207.tripeer.place.dto.req.RecommendReq;

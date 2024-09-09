@@ -1,8 +1,8 @@
 package com.j10d207.tripeer.place.controller;
 
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
-import com.j10d207.tripeer.place.db.dto.RecommendDTO;
 import com.j10d207.tripeer.place.dto.req.ReviewReq;
+import com.j10d207.tripeer.place.dto.res.RecommendDTO;
 import com.j10d207.tripeer.place.dto.res.ReviewDto;
 import com.j10d207.tripeer.place.dto.res.SpotDTO;
 import com.j10d207.tripeer.place.dto.res.SpotDetailPageDto;

@@ -1,11 +1,14 @@
 package com.j10d207.tripeer.place.db;
 
+import com.j10d207.tripeer.exception.CustomException;
+import com.j10d207.tripeer.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
 public enum ContentTypeEnum {
+    ALL_SPOT(-1, "전체"),
     TOURIST_ATTRACTION(12, "관광지"),
     CULTURAL_FACILITY(14, "문화시설"),
     FESTIVAL_EVENT(15, "축제 공연 행사"),
@@ -26,7 +29,7 @@ public enum ContentTypeEnum {
                 return contentType.getName();
             }
         }
-        return null; // 매칭되는 값이 없을 경우 null 반환
+        throw new CustomException(ErrorCode.UNDEFINED_TYPE);
     }
 
     // 상수 값을 대분류 이름으로 변환하는 메서드
@@ -38,7 +41,7 @@ public enum ContentTypeEnum {
                 return "명소";
             }
         }
-        return null; // 매칭되는 값이 없을 경우 null 반환
+        throw new CustomException(ErrorCode.UNDEFINED_TYPE);
     }
 
     public static ContentTypeEnum getByCode(int code) {
@@ -47,7 +50,7 @@ public enum ContentTypeEnum {
                 return contentTypeEnum;
             }
         }
-        return null;
+        throw new CustomException(ErrorCode.UNDEFINED_TYPE);
     }
 
 }
