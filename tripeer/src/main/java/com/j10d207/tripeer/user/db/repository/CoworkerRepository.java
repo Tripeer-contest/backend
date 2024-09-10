@@ -16,8 +16,9 @@ import java.util.Optional;
 public interface CoworkerRepository  extends JpaRepository<CoworkerEntity, Long> {
 
     Boolean existsByPlan_PlanIdAndUser_UserId(long planId, long userId);
+    Boolean existsByPlan_PlanIdAndUser_UserIdAndRole(long planId, long userId, String role);
     List<CoworkerEntity> findByUser_UserId(long userId);
-    List<CoworkerEntity> findByPlan_PlanId(long planId);
+    List<CoworkerEntity> findByPlan_PlanIdAndRole(long planId, String role);
     Optional<CoworkerEntity> findByPlan_PlanIdAndUser_UserId(long planId, long userId);
 
     List<CoworkerEntity> findByUser_UserIdAndRole(long userId, String role);

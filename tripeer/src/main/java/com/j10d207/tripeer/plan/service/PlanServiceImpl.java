@@ -154,7 +154,7 @@ public class PlanServiceImpl implements PlanService {
     public void changeTitle(TitleChangeReq titleChangeReq, long userId) {
         PlanEntity plan = planRepository.findByPlanId(titleChangeReq.getPlanId());
 
-        if(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(titleChangeReq.getPlanId(), userId)) {
+        if(coworkerRepository.existsByPlan_PlanIdAndUser_UserIdAndRole(titleChangeReq.getPlanId(), userId, "member")) {
             plan.setTitle(titleChangeReq.getTitle());
             planRepository.save(plan);
         } else {
@@ -202,7 +202,7 @@ public class PlanServiceImpl implements PlanService {
                             plan,
                             PlanTownEntity.getFirstImg(planTown),
                             planTown,
-                            coworkerRepository.findByPlan_PlanId(plan.getPlanId()) // 플랜의 멤버 리스트 넣기
+                            coworkerRepository.findByPlan_PlanIdAndRole(plan.getPlanId(), "member") // 플랜의 멤버 리스트 넣기
                     );
                 })
                 .collect(Collectors.toList());
@@ -218,11 +218,11 @@ public class PlanServiceImpl implements PlanService {
     public PlanDetailMainDTO.MainPageInfo getPlanDetailMain(long planId, long userId) {
         PlanEntity plan = planRepository.findByPlanId(planId);
         //로그인 사용자가 소유하지 않은 플랜 접근시
-        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planId, userId)) {
+        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserIdAndRole(planId, userId, "member")) {
             throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
         }
         List<PlanTownEntity> planTown = planTownRepository.findByPlan_PlanId(plan.getPlanId());
-        List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanId(plan.getPlanId());
+        List<CoworkerEntity> coworkerEntityList = coworkerRepository.findByPlan_PlanIdAndRole(plan.getPlanId(), "member");
 
         //선택한 도시 목록 구성
         List<TownDTO> townDTOList = planTown.stream().map(TownDTO::fromPlanTownEntity).toList();
@@ -234,20 +234,22 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public void invitePlan(CoworkerInvitedReq coworkerInvitedReq, long userId) {
         //로그인 사용자가 소유하지 않은 플랜 접근시
-        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedReq.getPlanId(), userId)) {
+        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserIdAndRole(coworkerInvitedReq.getPlanId(), userId, "member")) {
             throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
         }
 
+        //이미 초대된 상태 or 멤버인 상태 확인
+        if(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedReq.getPlanId(), coworkerInvitedReq.getUserId())) {
+            throw new CustomException(ErrorCode.HAS_COWORKER);
+        }
+
+        //너무 많은 플랜을 가진건 아닌지 확인
         if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerInvitedReq.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
             throw new CustomException(ErrorCode.TOO_MANY_PLAN);
         }
 
-        if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedReq.getPlanId(), coworkerInvitedReq.getUserId())) {
-            CoworkerEntity coworkerEntity = CoworkerEntity.createInviteEntity(coworkerInvitedReq.getUserId(), coworkerInvitedReq.getPlanId(), userId);
-            coworkerRepository.save(coworkerEntity);
-        } else {
-            throw new CustomException(ErrorCode.DUPLICATE_USER);
-        }
+        CoworkerEntity coworkerEntity = CoworkerEntity.createInviteEntity(coworkerInvitedReq.getUserId(), coworkerInvitedReq.getPlanId(), userId);
+        coworkerRepository.save(coworkerEntity);
     }
 
     //동행자 추가
@@ -286,6 +288,11 @@ public class PlanServiceImpl implements PlanService {
     public List<PlanMemberDto.Pending> getPendingList(long userId) {
         List<CoworkerEntity> pendingPlanList = coworkerRepository.findByUser_UserIdAndRole(userId, "pending");
 
+        // 수락 대기중인 플랜이 없을 때
+        if (pendingPlanList.isEmpty()) {
+            throw new CustomException(ErrorCode.NOT_FOUND_PENDING);
+        }
+
         return pendingPlanList.stream().map(coworkerEntity -> {
             List<UserEntity> userEntityList = coworkerRepository.findUserByPlanIdAndRole(coworkerEntity.getPlan().getPlanId(), "member");
             return PlanMemberDto.Pending.ofCoworkerEntity(coworkerEntity, userEntityList.stream().map(UserDTO.Search::fromUserEntity).toList());
@@ -298,7 +305,7 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public List<PlanDetailMainDTO.PlanCoworker> getCoworker(long planId) {
         //요청된 플랜의 동행자 목록 조회
-        List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanId(planId);
+        List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanIdAndRole(planId, "member");
         //DTO로 변환
         AtomicInteger order = new AtomicInteger();
         return coworkerList.stream().map(test -> PlanDetailMainDTO.PlanCoworker.fromCoworkerEntity(test, order.getAndIncrement())).toList();
@@ -373,7 +380,7 @@ public class PlanServiceImpl implements PlanService {
         if(planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, spotInfoId)) {
             throw new CustomException(ErrorCode.HAS_BUCKET);
         }
-        if(!(coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planId, userId))) {
+        if(!(coworkerRepository.existsByPlan_PlanIdAndUser_UserIdAndRole(planId, userId, "member"))) {
             throw new CustomException(ErrorCode.USER_NOT_CORRESPOND);
         }
         planBucketRepository.save(PlanBucketEntity.createEntityOfId(planId, spotInfoId, userId));
@@ -385,7 +392,7 @@ public class PlanServiceImpl implements PlanService {
         Optional<PlanBucketEntity> planBucket = planBucketRepository.findByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, spotInfoId);
         if (planBucket.isPresent()){
             PlanBucketEntity planBucketEntity = planBucket.get();
-            if (coworkerRepository.existsByPlan_PlanIdAndUser_UserId(planBucketEntity.getPlan().getPlanId(), userId)) {
+            if (coworkerRepository.existsByPlan_PlanIdAndUser_UserIdAndRole(planBucketEntity.getPlan().getPlanId(), userId, "member")) {
                 planBucketRepository.delete(planBucketEntity);
             } else {
                 // 로그인된 사용자가 가지고 있지 않은 변경
@@ -437,7 +444,7 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public PlanDetailMainDTO.PlanCoworker getPlanMyInfo(long planId, long userId) {
         //요청된 플랜의 동행자 목록 조회
-        List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanId(planId);
+        List<CoworkerEntity> coworkerList = coworkerRepository.findByPlan_PlanIdAndRole(planId, "member");
 
         return IntStream.range(0, coworkerList.size())
                 .filter(i -> userId == coworkerList.get(i).getUser().getUserId()) // userId가 일치하는 인덱스를 필터링
