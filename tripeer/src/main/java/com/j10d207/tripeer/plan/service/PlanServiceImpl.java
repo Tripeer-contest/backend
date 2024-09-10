@@ -8,16 +8,11 @@ import com.j10d207.tripeer.plan.dto.req.CoworkerInvitedReq;
 import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
 import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
 import com.j10d207.tripeer.plan.dto.req.TitleChangeReq;
-import com.j10d207.tripeer.plan.dto.res.NodeInviteDTO;
-import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
-import com.j10d207.tripeer.plan.dto.res.PlanNodeTempleDTO;
-import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
-import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
+import com.j10d207.tripeer.plan.dto.res.*;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
-import com.j10d207.tripeer.email.db.dto.EmailDTO;
 import com.j10d207.tripeer.email.service.EmailService;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
@@ -103,7 +98,7 @@ public class PlanServiceImpl implements PlanService {
         createResultInfo.setPlanId(plan.getPlanId());
         //생성된 플랜을 가지기
         UserEntity user = userRepository.findByUserId(userId);
-        coworkerRepository.save(CoworkerEntity.createEntity(user, plan));
+        coworkerRepository.save(CoworkerEntity.createNewEntity(user, plan));
 
         List<PlanTownEntity> planTownEntityList = createResultInfo.getTownList().stream()
                 .map(townDTO -> PlanTownEntity.ofDtoAndPlanEntity(townDTO, plan)).toList();
@@ -246,19 +241,12 @@ public class PlanServiceImpl implements PlanService {
             throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
         }
 
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        PlanEntity planEntity = planRepository.findById(coworkerInvitedReq.getPlanId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
-        UserEntity user = userRepository.findById(coworkerInvitedReq.getUserId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
         if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerInvitedReq.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
             throw new CustomException(ErrorCode.TOO_MANY_PLAN);
         }
 
         if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedReq.getPlanId(), coworkerInvitedReq.getUserId())) {
-            CoworkerEntity coworkerEntity = CoworkerEntity.createEntity(user, PlanEntity.builder().planId(coworkerInvitedReq.getPlanId()).build());
+            CoworkerEntity coworkerEntity = CoworkerEntity.createInviteEntity(coworkerInvitedReq.getUserId(), coworkerInvitedReq.getPlanId(), userId);
             coworkerRepository.save(coworkerEntity);
         } else {
             throw new CustomException(ErrorCode.DUPLICATE_USER);
@@ -266,9 +254,6 @@ public class PlanServiceImpl implements PlanService {
     }
 
     //동행자 추가
-    /*
-    요청된 유저가 존재하는지 2중검증 후 등록이 완료되면 이메일 전송
-     */
     @Override
     public void joinPlan(long planId, long userId) {
         PlanEntity planEntity = planRepository.findById(planId)
@@ -293,6 +278,37 @@ public class PlanServiceImpl implements PlanService {
             .doOnSuccess(result -> log.info("Successfully sent request to node server"))
             .doOnError(error -> log.error("Failed to send request to node server", error))
             .subscribe();  // 비동기 처리
+
+    }
+
+    @Override
+    public List<PlanMemberDto.Pending> getPendingList(long userId) {
+        List<CoworkerEntity> pendingPlanList = coworkerRepository.findByUser_UserIdAndRole(userId, "pending");
+
+
+        List<PlanMemberDto.Pending> pendingList = new ArrayList<>();
+        for (CoworkerEntity coworkerEntity : pendingPlanList) {
+            PlanEntity plan = coworkerEntity.getPlan();
+            List<UserEntity> userEntityList = coworkerRepository.findUserByPlanIdAndRole(plan.getPlanId(), "member");
+
+            List<UserDTO.Search> memberList = new ArrayList<>();
+            for(UserEntity userEntity : userEntityList) {
+                memberList.add(UserDTO.Search.fromUserEntity(userEntity));
+            }
+
+            PlanMemberDto.Pending newPending = PlanMemberDto.Pending.builder()
+                    .inviteUser(UserDTO.Search.fromUserEntity(coworkerEntity.getInvite()))
+                    .planId(plan.getPlanId())
+                    .title(plan.getTitle())
+                    .townList(PlanTownEntity.convertToNameList(plan.getPlanTown()))
+                    .startDay(plan.getStartDate())
+                    .endDay(plan.getEndDate())
+                    .memberList(memberList)
+                    .build();
+            pendingList.add(newPending);
+        }
+
+        return pendingList;
 
     }
 

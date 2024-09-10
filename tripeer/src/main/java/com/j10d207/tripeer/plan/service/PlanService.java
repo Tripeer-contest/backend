@@ -5,6 +5,7 @@ import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
 import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
 import com.j10d207.tripeer.plan.dto.req.TitleChangeReq;
 import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
+import com.j10d207.tripeer.plan.dto.res.PlanMemberDto;
 import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
 import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
@@ -38,6 +39,9 @@ public interface PlanService {
 
     //동행자 추가
     public void joinPlan(long planId, long userId);
+
+    //초대된 플랜 리스트 조회하기
+    public List<PlanMemberDto.Pending> getPendingList(long userId);
 
     //동행자 조회
     public List<PlanDetailMainDTO.PlanCoworker> getCoworker(long planId);

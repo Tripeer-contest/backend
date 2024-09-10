@@ -2,6 +2,7 @@ package com.j10d207.tripeer.plan.controller;
 
 import com.j10d207.tripeer.plan.dto.req.*;
 import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
+import com.j10d207.tripeer.plan.dto.res.PlanMemberDto;
 import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
 import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
 import com.j10d207.tripeer.plan.service.PlanService;
@@ -74,12 +75,18 @@ public class PlanController {
         return Response.of(HttpStatus.OK, "초대 완료", null);
     }
 
-    //동행자 추가
+    //동행자 추가 (초대 수락)
     @GetMapping("/member/join/{planId}")
     public Response<?> joinPlan(@PathVariable("planId") long planId,
                                 @AuthenticationPrincipal CustomOAuth2User user) {
         planService.joinPlan(planId, user.getUserId());
         return Response.of(HttpStatus.OK, "추가 완료", null);
+    }
+
+    //초대된 플랜 리스트 조회하기
+    @GetMapping("/member/pending")
+    public Response<List<PlanMemberDto.Pending>> getPendingList(@AuthenticationPrincipal CustomOAuth2User user) {
+        return Response.of(HttpStatus.OK, "초대된 리스트 조회 완료", planService.getPendingList(user.getUserId()));
     }
 
     //플랜에서 나의 정보 조회(기존 내정보 + 나의 coworker에서의 순서)
