@@ -52,10 +52,8 @@ public class SpotServiceImpl implements SpotService{
         Page<SpotReviewEntity> spotReviewEntityPage = spotReviewRepository.findBySpotInfo_SpotInfoId(spotInfoId, pageable);
 
         SpotDetailPageDto spotDetailPageDto = SpotDetailPageDto.createDto(spotInfoEntity, spotReviewEntityPage, getBlogSearchInfo(spotInfoEntity.getTitle(), 1));
-        Set<Integer> wishList = wishListRepository.findByUser_UserId(userId).stream()
-            .map(el -> el.getSpotInfo().getSpotInfoId())
-            .collect(Collectors.toSet());
-        spotDetailPageDto.setLike(wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoId));
+        Set<Integer> wishList = wishListRepository.findAllSpotInfoIdsByUserId(userId);
+        spotDetailPageDto.setLike(wishList.contains(spotInfoId));
         spotDetailPageDto.setOverview(spotDescriptionRepository.findBySpotInfo(spotInfoEntity).getOverview());
 
         spotReviewRepository.findAverageStarPointBySpotInfoId(spotInfoEntity.getSpotInfoId())

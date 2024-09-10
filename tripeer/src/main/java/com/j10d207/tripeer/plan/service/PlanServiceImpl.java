@@ -40,6 +40,8 @@ import com.j10d207.tripeer.user.db.repository.WishListRepository;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -561,4 +563,23 @@ public class PlanServiceImpl implements PlanService {
         return rootOptimizeDTO;
     }
 
+    public List<SpotSearchResDTO> getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
+                                                double minLon, double maxLon, int sortType, long userId) {
+        PageRequest pageRequest = PageRequest.of(page, 20); // 20개씩 페이징
+
+        // 지도 영역 내의 관광지 검색
+        Page<SpotInfoEntity> spots = spotInfoRepository.searchSpotsInMap(
+            minLat, maxLat, minLon, maxLon, keyword, sortType, pageRequest);
+        // 현재 여행 버킷
+        Set<Integer> planBucketSet = planBucketRepository.findAllSpotInfoIdsByUserId(userId);
+        // 위시리스트
+        Set<Integer> wishSet = wishListRepository.findAllSpotInfoIdsByUserId(userId);
+
+        return spots.getContent().stream()
+            .map(spot -> SpotSearchResDTO.fromSpotInfoEntity(spot,
+                                                             wishSet.contains(spot.getSpotInfoId()),    // 위시리스트에 있는지
+                                                             planBucketSet.contains(spot.getSpotInfoId()))  // 버킷에 있는지
+            )
+            .collect(Collectors.toList());
+    }
 }
