@@ -13,7 +13,6 @@ import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
-import com.j10d207.tripeer.email.service.EmailService;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.kakao.service.KakaoService;
@@ -73,8 +72,6 @@ public class PlanServiceImpl implements PlanService {
     private final TMapService tMapService;
 
     private final KakaoService kakaoService;
-
-    private final EmailService emailService;
 
     private final WebClient webClient;
     private final CityRepository cityRepository;
@@ -281,34 +278,19 @@ public class PlanServiceImpl implements PlanService {
 
     }
 
+    /*
+    수락 대기중인 초대 리스트를 반환
+    포함내용 -> 초대를 보낸사람, 플랜 정보 일부(생성정보), 현재 멤버 리스트
+     */
     @Override
     public List<PlanMemberDto.Pending> getPendingList(long userId) {
         List<CoworkerEntity> pendingPlanList = coworkerRepository.findByUser_UserIdAndRole(userId, "pending");
 
+        return pendingPlanList.stream().map(coworkerEntity -> {
+            List<UserEntity> userEntityList = coworkerRepository.findUserByPlanIdAndRole(coworkerEntity.getPlan().getPlanId(), "member");
+            return PlanMemberDto.Pending.ofCoworkerEntity(coworkerEntity, userEntityList.stream().map(UserDTO.Search::fromUserEntity).toList());
+        }).toList();
 
-        List<PlanMemberDto.Pending> pendingList = new ArrayList<>();
-        for (CoworkerEntity coworkerEntity : pendingPlanList) {
-            PlanEntity plan = coworkerEntity.getPlan();
-            List<UserEntity> userEntityList = coworkerRepository.findUserByPlanIdAndRole(plan.getPlanId(), "member");
-
-            List<UserDTO.Search> memberList = new ArrayList<>();
-            for(UserEntity userEntity : userEntityList) {
-                memberList.add(UserDTO.Search.fromUserEntity(userEntity));
-            }
-
-            PlanMemberDto.Pending newPending = PlanMemberDto.Pending.builder()
-                    .inviteUser(UserDTO.Search.fromUserEntity(coworkerEntity.getInvite()))
-                    .planId(plan.getPlanId())
-                    .title(plan.getTitle())
-                    .townList(PlanTownEntity.convertToNameList(plan.getPlanTown()))
-                    .startDay(plan.getStartDate())
-                    .endDay(plan.getEndDate())
-                    .memberList(memberList)
-                    .build();
-            pendingList.add(newPending);
-        }
-
-        return pendingList;
 
     }
 
