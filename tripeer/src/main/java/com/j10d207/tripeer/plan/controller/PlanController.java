@@ -66,12 +66,20 @@ public class PlanController {
         return Response.of(HttpStatus.OK, "플랜 메인 조회", result);
     }
 
-    //동행자 추가
-    @PostMapping("/member")
-    public Response<?> joinPlan(@RequestBody @Valid CoworkerInvitedReq coworkerInvitedReq,
-                                @AuthenticationPrincipal CustomOAuth2User user) {
-        planService.joinPlan(coworkerInvitedReq, user.getUserId());
+    //동행자 초대
+    @PostMapping("/member/invite")
+    public Response<?> invitePlan(@RequestBody @Valid CoworkerInvitedReq coworkerInvitedReq,
+                                  @AuthenticationPrincipal CustomOAuth2User user) {
+        planService.invitePlan(coworkerInvitedReq, user.getUserId());
         return Response.of(HttpStatus.OK, "초대 완료", null);
+    }
+
+    //동행자 추가
+    @GetMapping("/member/join/{planId}")
+    public Response<?> joinPlan(@PathVariable("planId") long planId,
+                                @AuthenticationPrincipal CustomOAuth2User user) {
+        planService.joinPlan(planId, user.getUserId());
+        return Response.of(HttpStatus.OK, "추가 완료", null);
     }
 
     //플랜에서 나의 정보 조회(기존 내정보 + 나의 coworker에서의 순서)

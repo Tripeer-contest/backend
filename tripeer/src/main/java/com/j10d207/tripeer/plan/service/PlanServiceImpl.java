@@ -28,7 +28,6 @@ import com.j10d207.tripeer.plan.db.dto.*;
 import com.j10d207.tripeer.plan.db.entity.*;
 import com.j10d207.tripeer.plan.db.repository.*;
 import com.j10d207.tripeer.tmap.db.dto.CoordinateDTO;
-import com.j10d207.tripeer.tmap.db.dto.RootInfoDTO;
 import com.j10d207.tripeer.tmap.service.FindRoot;
 import com.j10d207.tripeer.tmap.service.TMapService;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
@@ -37,7 +36,6 @@ import com.j10d207.tripeer.user.db.entity.WishListEntity;
 import com.j10d207.tripeer.user.db.repository.CoworkerRepository;
 import com.j10d207.tripeer.user.db.repository.UserRepository;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -105,7 +103,7 @@ public class PlanServiceImpl implements PlanService {
         createResultInfo.setPlanId(plan.getPlanId());
         //생성된 플랜을 가지기
         UserEntity user = userRepository.findByUserId(userId);
-        coworkerRepository.save(CoworkerEntity.MakeCoworkerEntity(user, plan));
+        coworkerRepository.save(CoworkerEntity.createEntity(user, plan));
 
         List<PlanTownEntity> planTownEntityList = createResultInfo.getTownList().stream()
                 .map(townDTO -> PlanTownEntity.ofDtoAndPlanEntity(townDTO, plan)).toList();
@@ -240,45 +238,62 @@ public class PlanServiceImpl implements PlanService {
         return new PlanDetailMainDTO.MainPageInfo(planId, plan.getTitle(), townDTOList, coworkerEntityList.stream().map(UserDTO.Search::fromCoworkerEntity).toList());
     }
 
-    //동행자 추가
-    /*
-    요청된 유저가 존재하는지 2중검증 후 등록이 완료되면 이메일 전송
-     */
+    //동행자 초대
     @Override
-    public void joinPlan(CoworkerInvitedReq coworkerInvitedReq, long userId) {
+    public void invitePlan(CoworkerInvitedReq coworkerInvitedReq, long userId) {
         //로그인 사용자가 소유하지 않은 플랜 접근시
         if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedReq.getPlanId(), userId)) {
             throw new CustomException(ErrorCode.NOT_HAS_COWORKER);
         }
+
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         PlanEntity planEntity = planRepository.findById(coworkerInvitedReq.getPlanId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
         UserEntity user = userRepository.findById(coworkerInvitedReq.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        
+
         if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerInvitedReq.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
             throw new CustomException(ErrorCode.TOO_MANY_PLAN);
         }
 
         if(!coworkerRepository.existsByPlan_PlanIdAndUser_UserId(coworkerInvitedReq.getPlanId(), coworkerInvitedReq.getUserId())) {
-            CoworkerEntity coworkerEntity = CoworkerEntity.MakeCoworkerEntity(user, PlanEntity.builder().planId(coworkerInvitedReq.getPlanId()).build());
+            CoworkerEntity coworkerEntity = CoworkerEntity.createEntity(user, PlanEntity.builder().planId(coworkerInvitedReq.getPlanId()).build());
             coworkerRepository.save(coworkerEntity);
-            // ydoc 에 유저 정보 업데이트를 위한 node 서버에 유저 정보 보내기
-            NodeInviteDTO nodeInviteDTO = NodeInviteDTO.from(user,planEntity);
-            webClient.post()
-                .uri("/node/plan/invite")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(nodeInviteDTO)
-                .retrieve()
-                .bodyToMono(Void.class)  // 응답 본문이 없을 경우
-                .doOnSuccess(result -> log.info("Successfully sent request to node server"))
-                .doOnError(error -> log.error("Failed to send request to node server", error))
-                .subscribe();  // 비동기 처리
-            emailService.sendEmail(EmailDTO.MakeInvitedEmail(planEntity.getTitle(), userEntity.getNickname(), user.getUserId()));
         } else {
             throw new CustomException(ErrorCode.DUPLICATE_USER);
         }
+    }
+
+    //동행자 추가
+    /*
+    요청된 유저가 존재하는지 2중검증 후 등록이 완료되면 이메일 전송
+     */
+    @Override
+    public void joinPlan(long planId, long userId) {
+        PlanEntity planEntity = planRepository.findById(planId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
+
+        Optional<CoworkerEntity> optionalCoworkerEntity = coworkerRepository.findByPlan_PlanIdAndUser_UserId(planId, userId);
+        if (optionalCoworkerEntity.isEmpty()) {
+            throw new CustomException(ErrorCode.NOT_FOUND_PLAN);
+        }
+
+        CoworkerEntity coworkerEntity = optionalCoworkerEntity.get();
+        coworkerEntity.setRole("member");
+        coworkerRepository.save(coworkerEntity);
+        // ydoc 에 유저 정보 업데이트를 위한 node 서버에 유저 정보 보내기
+        NodeInviteDTO nodeInviteDTO = NodeInviteDTO.from(userRepository.findByUserId(userId), planEntity);
+        webClient.post()
+            .uri("/node/plan/invite")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(nodeInviteDTO)
+            .retrieve()
+            .bodyToMono(Void.class)  // 응답 본문이 없을 경우
+            .doOnSuccess(result -> log.info("Successfully sent request to node server"))
+            .doOnError(error -> log.error("Failed to send request to node server", error))
+            .subscribe();  // 비동기 처리
+
     }
 
     //동행자 조회

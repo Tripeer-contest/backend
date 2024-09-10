@@ -74,22 +74,11 @@ public class UserEntity {
                 .build();
     }
 
-    public static UserEntity ofInfoReqUserEntity(InfoReq infoReq, UserEntity userEntity) {
-
-        return UserEntity.builder()
-                .userId(userEntity.getUserId())
-                .provider(userEntity.getProvider())
-                .providerId(userEntity.getProviderId())
-                .email(infoReq.getEmail())
-                .nickname(infoReq.getNickname())
-                .birth(userEntity.getBirth())
-                .profileImage(userEntity.getProfileImage())
-                .role(userEntity.getRole())
-                .style1(TripStyleEnum.getNameOfCode(infoReq.getStyle1Num()))
-                .style2(TripStyleEnum.getNameOfCode(infoReq.getStyle2Num()))
-                .style3(TripStyleEnum.getNameOfCode(infoReq.getStyle3Num()))
-                .isOnline(userEntity.isOnline())
-                .build();
+    public void setModifyInfo(InfoReq infoReq) {
+        this.nickname = infoReq.getNickname();
+        this.style1 = TripStyleEnum.getNameOfCode(infoReq.getStyle1Num());
+        this.style2 = TripStyleEnum.getNameOfCode(infoReq.getStyle2Num());
+        this.style3 = TripStyleEnum.getNameOfCode(infoReq.getStyle3Num());
     }
 
 }

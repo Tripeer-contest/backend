@@ -33,8 +33,11 @@ public interface PlanService {
     //플랜 디테일 메인 조회
     public PlanDetailMainDTO.MainPageInfo getPlanDetailMain(long planId, long userId);
 
+    //동행자 초대
+    public void invitePlan(CoworkerInvitedReq coworkerInvitedReq, long userId);
+
     //동행자 추가
-    public void joinPlan(CoworkerInvitedReq coworkerInvitedReq, long userId);
+    public void joinPlan(long planId, long userId);
 
     //동행자 조회
     public List<PlanDetailMainDTO.PlanCoworker> getCoworker(long planId);

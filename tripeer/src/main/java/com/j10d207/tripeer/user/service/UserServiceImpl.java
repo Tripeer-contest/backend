@@ -89,7 +89,8 @@ public class UserServiceImpl implements UserService{
             throw new CustomException(ErrorCode.DUPLICATE_USER);
         }
         // 변경 사항 반영 부분 Entity 메소드 화 0802
-        userRepository.save(UserEntity.ofInfoReqUserEntity(infoReq, user));
+        user.setModifyInfo(infoReq);
+        userRepository.save(user);
     }
 
     //소셜정보 불러오기
