@@ -43,15 +43,15 @@ public class RecommendServiceImpl implements RecommendService {
 
 		List<RecommendReq> recommendReqList = responseFlux.collectList().block();
 
-		Set<Integer> wishList = wishListRepository.findByUser_UserId(userId).stream()
-			.map(el -> el.getSpotInfo().getSpotInfoId())
-			.collect(Collectors.toSet());
+		Set<Integer> wishList = wishListRepository.findAllSpotInfoIdsByUserId(userId);
 
+		// 각 스팟을 한번에 하나씩 들고 오는것이 아닌 한번에 들고 오기위해서 id 리스트를 만들고
 		List<Integer> allSpotInfoIds = recommendReqList.stream()
 			.flatMap(recommendReq -> recommendReq.getIdList().stream())
 			.distinct()
 			.toList();
 
+		//각 스팟의 Map{ id : 객체 } 을 만들어서 아래에서 dto로 만든다.
 		Map<Integer, SpotInfoEntity> spotInfoMap = spotInfoRepository.findAllById(allSpotInfoIds).stream()
 			.collect(Collectors.toMap(SpotInfoEntity::getSpotInfoId, Function.identity()));
 
@@ -80,9 +80,8 @@ public class RecommendServiceImpl implements RecommendService {
 			.retrieve()
 			.bodyToMono(RecommendReq.class);
 
-		Set<Integer> wishList = wishListRepository.findByUser_UserId(userId).stream()
-			.map(el -> el.getSpotInfo().getSpotInfoId())
-			.collect(Collectors.toSet());
+		Set<Integer> wishList = wishListRepository.findAllSpotInfoIdsByUserId(userId);
+
 		RecommendReq recommendReq = recommendVOMono.block();
 		return RecommendDTO.builder()
 			.comment(recommendReq.getComment())

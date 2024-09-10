@@ -8,6 +8,8 @@ import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -96,6 +98,22 @@ public class PlanController {
                                                      @AuthenticationPrincipal CustomOAuth2User user) {
         List<SpotSearchResDTO> searchResList = planService.getSpotSearch(planId, keyword, page, sortType, user.getUserId());
         return Response.of(HttpStatus.OK, "검색 완료", searchResList);
+    }
+
+    // 지도 줌레벨 기반의 관광지 검색
+    @GetMapping("/spot/map")
+    public Response<List<SpotSearchResDTO>> getSpotsInMap(@RequestParam("planId") long planId,
+                                                          @RequestParam("keyword") String keyword,
+                                                          @RequestParam("sortType") int sortType,
+                                                          @RequestParam("page") int page,
+                                                          @RequestParam("minLat") @Min(32) @Max(39) double minLat,
+                                                          @RequestParam("maxLat") @Min(32) @Max(39) double maxLat,
+                                                          @RequestParam("minLon") @Min(124) @Max(132) double minLon,
+                                                          @RequestParam("maxLon") @Min(124) @Max(132) double maxLon,
+                                                          @AuthenticationPrincipal CustomOAuth2User user) {
+        List<SpotSearchResDTO> searchResList = planService.getSpotsInMap(planId, keyword, page, minLat, maxLat,
+                                                                         minLon, maxLon, sortType, user.getUserId());
+        return Response.of(HttpStatus.OK, "지도 검색 완료", searchResList);
     }
 
     //플랜버킷 관광지 추가
