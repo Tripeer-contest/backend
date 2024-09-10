@@ -27,11 +27,25 @@ public class CoworkerEntity {
     @Setter
     private String role;
 
-    public static CoworkerEntity createEntity(UserEntity userEntity, PlanEntity planEntity) {
+    @ManyToOne
+    @JoinColumn(name = "INVITE_ID")
+    private UserEntity invite;
+
+    public static CoworkerEntity createNewEntity(UserEntity userEntity, PlanEntity planEntity) {
         return CoworkerEntity.builder()
                 .user(userEntity)
                 .plan(planEntity)
+                .role("member")
+                .invite(userEntity)
+                .build();
+    }
+
+    public static CoworkerEntity createInviteEntity(long userId, long planId, long inviteId) {
+        return CoworkerEntity.builder()
+                .user(UserEntity.builder().userId(userId).build())
+                .plan(PlanEntity.builder().planId(planId).build())
                 .role("pending")
+                .invite(UserEntity.builder().userId(inviteId).build())
                 .build();
     }
 
