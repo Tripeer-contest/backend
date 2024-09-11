@@ -3,8 +3,10 @@ package com.j10d207.tripeer.board.db.entity;
 import com.j10d207.tripeer.board.dto.req.BoardWriteReq;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -12,6 +14,8 @@ import java.time.ZoneId;
 @Entity(name = "board_notice")
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BoardNoticeEntity {
 
     @Id
