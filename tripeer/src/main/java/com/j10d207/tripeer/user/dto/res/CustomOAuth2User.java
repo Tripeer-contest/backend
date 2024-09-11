@@ -13,6 +13,7 @@ import java.util.Map;
 public class CustomOAuth2User implements OAuth2User {
 
     private final OAuth2Response oAuth2Response;
+    @Getter
     private final String role;
     @Getter
     private final long userId;
@@ -63,4 +64,6 @@ public class CustomOAuth2User implements OAuth2User {
     public String getProviderId() {
         return oAuth2Response.getProviderId();
     }
+
+
 }
