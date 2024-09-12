@@ -121,9 +121,9 @@ public class PlanServiceImpl implements PlanService {
         // 3. 그래서 결국 각 city_id town_id를 가지고 db에서 직접 조회해야 이름, 이미지, 설명, 위도, 경도를 들고 올 수 밖에 없었다.
         List<TownDTO> townDTOList = planTownEntityList.stream()
             .map(planTown -> {
-                CityEntity city = cityRepository.findByCityId(planTown.getCityOnly().getCityId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.CITY_NOT_FOUND));
                 if (planTown.getTown() == null) {
+                    CityEntity city = cityRepository.findByCityId(planTown.getCityOnly().getCityId())
+                        .orElseThrow(() -> new CustomException(ErrorCode.CITY_NOT_FOUND));
                     return TownDTO.from(city);
                 } else {
                     TownEntity town = townRepository
@@ -131,7 +131,7 @@ public class PlanServiceImpl implements PlanService {
                             planTown.getTown().getTownPK().getTownId(),
                             planTown.getTown().getTownPK().getCity().getCityId())
                         .orElseThrow(() -> new CustomException(ErrorCode.TOWN_NOT_FOUND));
-                    return TownDTO.from(city, town);
+                    return TownDTO.from(town);
                 }
             }).toList();
         PlanNodeTempleDTO planNodeTempleDTO = new PlanNodeTempleDTO(createResultInfo,

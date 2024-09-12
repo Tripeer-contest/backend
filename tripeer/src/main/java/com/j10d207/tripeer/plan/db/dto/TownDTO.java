@@ -56,9 +56,9 @@ public class TownDTO {
             .build();
     }
 
-    public static TownDTO from(CityEntity city, TownEntity town) {
+    public static TownDTO from(TownEntity town) {
         return TownDTO.builder()
-            .cityId(city.getCityId())
+            .cityId(town.getTownPK().getCity().getCityId())
             .townId(town.getTownPK().getTownId())
             .title(town.getTownName())
             .description(town.getDescription())
