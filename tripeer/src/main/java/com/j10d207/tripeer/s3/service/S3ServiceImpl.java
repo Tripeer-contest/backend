@@ -67,7 +67,7 @@ public class S3ServiceImpl implements S3Service {
 	}
 
 	private String createS3Path(FileInfoDto fileInfoDto) {
-		String originName = fileInfoDto.getFile().getOriginalFilename();
+		String originName = fileInfoDto.getFile() == null ? fileInfoDto.getDeleteURL() : fileInfoDto.getFile().getOriginalFilename();
 		String ext = originName.substring(originName.lastIndexOf(".")); //확장자
 		switch (fileInfoDto.getS3Option()) {
 			case profileUpload -> {     //프로필 사진 업로드 경로
