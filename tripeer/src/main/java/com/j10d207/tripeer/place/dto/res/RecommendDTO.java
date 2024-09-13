@@ -11,6 +11,4 @@ public class RecommendDTO {
 	private String keyword;
 	private String comment;
 	private List<SpotDTO.SpotInfoDTO> spotInfoDtos;
-
-
 }

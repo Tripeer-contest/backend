@@ -3,6 +3,8 @@ package com.j10d207.tripeer.place.dto.res;
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.SpotDescriptionEntity;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
+import com.j10d207.tripeer.place.db.entity.SpotReviewEntity;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -73,6 +75,7 @@ public class SpotDTO {
         private String spotName;
         private String spotImg;
         private String address;
+        private double starPointAvg;
         private double latitude;
         private double longitude;
         private boolean isWishlist;
@@ -84,6 +87,8 @@ public class SpotDTO {
                     .spotImg(spotInfoEntity.getFirstImage())
                     .address(spotInfoEntity.getAddr1())
                     .spotName(spotInfoEntity.getTitle())
+                    .starPointAvg(spotInfoEntity.getSpotReviewList().stream().mapToDouble(
+						SpotReviewEntity::getStarPoint).average().orElse(0.0))
                     .latitude(spotInfoEntity.getLatitude())
                     .longitude(spotInfoEntity.getLongitude())
                     .isWishlist(isWishlist)
