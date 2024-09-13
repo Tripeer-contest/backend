@@ -76,9 +76,9 @@ public class UserEntity {
 
     public void setModifyInfo(InfoReq infoReq) {
         this.nickname = infoReq.getNickname();
-        this.style1 = TripStyleEnum.getNameOfCode(infoReq.getStyle1Num());
-        this.style2 = TripStyleEnum.getNameOfCode(infoReq.getStyle2Num());
-        this.style3 = TripStyleEnum.getNameOfCode(infoReq.getStyle3Num());
+        this.style1 = infoReq.getStyle1Num() == 0 ? null : TripStyleEnum.getNameOfCode(infoReq.getStyle1Num());
+        this.style2 = infoReq.getStyle2Num() == 0 ? null : TripStyleEnum.getNameOfCode(infoReq.getStyle2Num());
+        this.style3 = infoReq.getStyle3Num() == 0 ? null : TripStyleEnum.getNameOfCode(infoReq.getStyle3Num());
     }
 
 }
