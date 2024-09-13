@@ -315,26 +315,24 @@ public class PlanServiceImpl implements PlanService {
 
     //관광지 검색
     @Override
-    public List<SpotSearchResDTO> getSpotSearch(long planId, String keyword, int page, int sortType, long userId, int cityId, int townId) {
+    public SpotSearchResDTO getSpotSearch(long planId, String keyword, int page, int sortType, long userId, int cityId, int townId) {
         Pageable pageable = PageRequest.of(page-1, SEARCH_PER_PAGE);
 
         Page<SpotInfoEntity> spotInfoEntityPage = spotInfoRepository.searchSpotsOfOption(planId, keyword, sortType, cityId, townId, pageable);
 
         if(spotInfoEntityPage.getTotalElements() == 0) {
             throw new CustomException(ErrorCode.SEARCH_NULL);
-        } else if (spotInfoEntityPage.getNumberOfElements() == 0) {
-            throw new CustomException(ErrorCode.SCROLL_END);
         }
         // 현재 여행 버킷
         Set<Integer> planBucketSet = planBucketRepository.findAllSpotInfoIdsByUserId(userId);
         // 위시리스트
         Set<Integer> wishSet = wishListRepository.findAllSpotInfoIdsByUserId(userId);
 
-        return spotInfoEntityPage.getContent().stream()
-                .map(spotInfoEntity -> SpotSearchResDTO.fromSpotInfoEntity(spotInfoEntity,
+        return new SpotSearchResDTO(spotInfoEntityPage.getContent().stream()
+                .map(spotInfoEntity -> SpotSearchResDTO.SearchResult.fromSpotInfoEntity(spotInfoEntity,
                         wishSet.contains(spotInfoEntity.getSpotInfoId()),    // 위시리스트에 있는지
                         planBucketSet.contains(spotInfoEntity.getSpotInfoId()))  // 버킷에 있는지
-                ).toList();
+                ).toList(), spotInfoRepository.searchSpotsOfOption(planId, keyword, sortType, cityId, townId, PageRequest.of(page, SEARCH_PER_PAGE)).isEmpty());
     }
 
     //플랜 버킷 관광지 추가
@@ -370,11 +368,11 @@ public class PlanServiceImpl implements PlanService {
 
     //즐겨찾기 조회
     @Override
-    public List<SpotSearchResDTO> getWishList(long userId, long planId) {
+    public List<SpotSearchResDTO.SearchResult> getWishList(long userId, long planId) {
         List<WishListEntity> wishList = wishListRepository.findByUser_UserId(userId);
         return  wishList.stream()
                 .map(wishListEntity ->
-                SpotSearchResDTO.fromWishListEntity
+                SpotSearchResDTO.SearchResult.fromWishListEntity
                         (wishListEntity,
                                 planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, wishListEntity.getSpotInfo().getSpotInfoId()))
                         )
@@ -546,7 +544,7 @@ public class PlanServiceImpl implements PlanService {
         return rootOptimizeDTO;
     }
 
-    public List<SpotSearchResDTO> getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
+    public List<SpotSearchResDTO.SearchResult> getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
                                                 double minLon, double maxLon, int sortType, long userId) {
         PageRequest pageRequest = PageRequest.of(page, 20); // 20개씩 페이징
 
@@ -559,7 +557,7 @@ public class PlanServiceImpl implements PlanService {
         Set<Integer> wishSet = wishListRepository.findAllSpotInfoIdsByUserId(userId);
 
         return spots.getContent().stream()
-            .map(spot -> SpotSearchResDTO.fromSpotInfoEntity(spot,
+            .map(spot -> SpotSearchResDTO.SearchResult.fromSpotInfoEntity(spot,
                                                              wishSet.contains(spot.getSpotInfoId()),    // 위시리스트에 있는지
                                                              planBucketSet.contains(spot.getSpotInfoId()))  // 버킷에 있는지
             )

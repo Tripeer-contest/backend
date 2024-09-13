@@ -14,5 +14,5 @@ import lombok.Getter;
 public class RecommendSearchDTO {
 	private String keyword;
 	private String comment;
-	private List<SpotSearchResDTO> spotInfoDtos;
+	private List<SpotSearchResDTO.SearchResult> spotInfoDtos;
 }
