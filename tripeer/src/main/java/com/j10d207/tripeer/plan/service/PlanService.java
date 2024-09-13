@@ -47,7 +47,7 @@ public interface PlanService {
     public List<PlanDetailMainDTO.PlanCoworker> getCoworker(long planId);
 
     //관광지 검색
-    public List<SpotSearchResDTO> getSpotSearch(long planId, String keyword, int page, int sortType, long userId, int cityId, int townId);
+    public SpotSearchResDTO getSpotSearch(long planId, String keyword, int page, int sortType, long userId, int cityId, int townId);
 
     //플랜버킷 관광지 추가
     public void addPlanSpot(long planId, int spotInfoId, long userId);
@@ -56,7 +56,7 @@ public interface PlanService {
     public void delPlanSpot(long planId, int spotInfoId, long userId);
 
     //즐겨찾기 조회
-    public List<SpotSearchResDTO> getWishList(long userId, long planId);
+    public List<SpotSearchResDTO.SearchResult> getWishList(long userId, long planId);
 
     //플린 디테일 저장
     public void addPlanDetail(PlanDetailReq planDetailReq);
@@ -74,6 +74,6 @@ public interface PlanService {
     public RootOptimizeDTO getOptimizingTime(RootOptimizeDTO rootOptimizeReqDTO) throws IOException;
 
     //지도 줌레벨 기반의 관광지 검색
-    List<SpotSearchResDTO> getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
+    List<SpotSearchResDTO.SearchResult> getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
                                          double minLon, double maxLon, int sortType, long userId);
 }

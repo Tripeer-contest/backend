@@ -106,20 +106,20 @@ public class PlanController {
 
     //관광지 검색
     @GetMapping("/spot")
-    public Response<List<SpotSearchResDTO>> getSpots(@RequestParam("planId") long planId,
+    public Response<SpotSearchResDTO> getSpots(@RequestParam("planId") long planId,
                                                      @RequestParam("keyword") String keyword,
                                                      @RequestParam("page") int page,
                                                      @RequestParam("sortType") int sortType,
                                                      @RequestParam("cityId") int cityId,
                                                      @RequestParam("townId") int townId,
                                                      @AuthenticationPrincipal CustomOAuth2User user) {
-        List<SpotSearchResDTO> searchResList = planService.getSpotSearch(planId, keyword, page, sortType, user.getUserId(), cityId, townId);
+        SpotSearchResDTO searchResList = planService.getSpotSearch(planId, keyword, page, sortType, user.getUserId(), cityId, townId);
         return Response.of(HttpStatus.OK, "검색 완료", searchResList);
     }
 
     // 지도 줌레벨 기반의 관광지 검색
     @GetMapping("/spot/map")
-    public Response<List<SpotSearchResDTO>> getSpotsInMap(@RequestParam("planId") long planId,
+    public Response<List<SpotSearchResDTO.SearchResult>> getSpotsInMap(@RequestParam("planId") long planId,
                                                           @RequestParam("keyword") String keyword,
                                                           @RequestParam("sortType") int sortType,
                                                           @RequestParam("page") int page,
@@ -128,7 +128,7 @@ public class PlanController {
                                                           @RequestParam("minLon") @Min(124) @Max(132) double minLon,
                                                           @RequestParam("maxLon") @Min(124) @Max(132) double maxLon,
                                                           @AuthenticationPrincipal CustomOAuth2User user) {
-        List<SpotSearchResDTO> searchResList = planService.getSpotsInMap(planId, keyword, page, minLat, maxLat,
+        List<SpotSearchResDTO.SearchResult> searchResList = planService.getSpotsInMap(planId, keyword, page, minLat, maxLat,
                                                                          minLon, maxLon, sortType, user.getUserId());
         return Response.of(HttpStatus.OK, "지도 검색 완료", searchResList);
     }
@@ -153,9 +153,9 @@ public class PlanController {
 
     //즐겨찾기 조회
     @GetMapping("wishlist/{planId}")
-    public Response<List<SpotSearchResDTO>> getWishList(@AuthenticationPrincipal CustomOAuth2User user,
+    public Response<List<SpotSearchResDTO.SearchResult>> getWishList(@AuthenticationPrincipal CustomOAuth2User user,
                                                         @PathVariable("planId") long planId) {
-        List<SpotSearchResDTO> searchResDTOList = planService.getWishList(user.getUserId(), planId);
+        List<SpotSearchResDTO.SearchResult> searchResDTOList = planService.getWishList(user.getUserId(), planId);
         return Response.of(HttpStatus.OK, "즐겨찾기 리스트 조회 완료", searchResDTOList);
     }
 

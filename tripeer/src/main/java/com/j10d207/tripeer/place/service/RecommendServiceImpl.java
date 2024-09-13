@@ -129,7 +129,7 @@ public class RecommendServiceImpl implements RecommendService {
 				.comment(recommendReq.getComment())
 				.keyword(recommendReq.getKeyword())
 				.spotInfoDtos(recommendReq.getIdList().stream()
-					.map(el -> SpotSearchResDTO.fromSpotInfoEntity(
+					.map(el -> SpotSearchResDTO.SearchResult.fromSpotInfoEntity(
 						spotInfoMap.get(el),
 						wishList.contains(el),
 						bucket.contains(el))
