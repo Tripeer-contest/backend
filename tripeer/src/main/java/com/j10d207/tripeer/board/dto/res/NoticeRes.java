@@ -13,7 +13,7 @@ import java.util.List;
 public class NoticeRes {
 
     private long totalPage;
-    private List<Summary> summaryList;
+    private List<Detail> noticeList;
 
     @Getter
     @Builder
