@@ -47,7 +47,7 @@ public interface PlanService {
     public List<PlanDetailMainDTO.PlanCoworker> getCoworker(long planId);
 
     //관광지 검색
-    public List<SpotSearchResDTO> getSpotSearch(long planId, String keyword, int page, int sortType, long userId);
+    public List<SpotSearchResDTO> getSpotSearch(long planId, String keyword, int page, int sortType, long userId, int cityId, int townId);
 
     //플랜버킷 관광지 추가
     public void addPlanSpot(long planId, int spotInfoId, long userId);

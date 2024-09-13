@@ -110,8 +110,10 @@ public class PlanController {
                                                      @RequestParam("keyword") String keyword,
                                                      @RequestParam("page") int page,
                                                      @RequestParam("sortType") int sortType,
+                                                     @RequestParam("cityId") int cityId,
+                                                     @RequestParam("townId") int townId,
                                                      @AuthenticationPrincipal CustomOAuth2User user) {
-        List<SpotSearchResDTO> searchResList = planService.getSpotSearch(planId, keyword, page, sortType, user.getUserId());
+        List<SpotSearchResDTO> searchResList = planService.getSpotSearch(planId, keyword, page, sortType, user.getUserId(), cityId, townId);
         return Response.of(HttpStatus.OK, "검색 완료", searchResList);
     }
 

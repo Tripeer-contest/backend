@@ -77,6 +77,8 @@ public class PlanServiceImpl implements PlanService {
     private final CityRepository cityRepository;
     private final TownRepository townRepository;
 
+    private final int SEARCH_PER_PAGE = 10;
+
     //플랜 생성
     /*
     플랜 생성 요청이 들어오면
@@ -311,67 +313,28 @@ public class PlanServiceImpl implements PlanService {
         return coworkerList.stream().map(test -> PlanDetailMainDTO.PlanCoworker.fromCoworkerEntity(test, order.getAndIncrement())).toList();
     }
 
-
     //관광지 검색
-    /*
-    원본 JPA 내용
-    SELECT * FROM spot_info where (제목이나 도시에 키워드 들어가있음) and (해당 플랜의 여행지중 하나) and (현재 선택된 관광지 유형)
-     */
     @Override
-    public List<SpotSearchResDTO> getSpotSearch(long planId, String keyword, int page, int sortType, long userId) {
-        Specification<SpotInfoEntity> spotInfoSpec = Specification.where(null);
-        List<PlanTownEntity> planTownList = planTownRepository.findByPlan_PlanId(planId);
-        Pageable pageable = PageRequest.of(page, 10);
+    public List<SpotSearchResDTO> getSpotSearch(long planId, String keyword, int page, int sortType, long userId, int cityId, int townId) {
+        Pageable pageable = PageRequest.of(page-1, SEARCH_PER_PAGE);
 
-        Specification<SpotInfoEntity> titleSpec = Specification.where(null);
-        titleSpec = titleSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("title"), "%" + keyword + "%"));
-        titleSpec = titleSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("addr1"), "%" + keyword + "%"));
+        Page<SpotInfoEntity> spotInfoEntityPage = spotInfoRepository.searchSpotsOfOption(planId, keyword, sortType, cityId, townId, pageable);
 
-        Specification<SpotInfoEntity> townSpec = Specification.where(null);
-        for (PlanTownEntity planTownEntity : planTownList) {
-            Specification<SpotInfoEntity> cityAndTownSpec = Specification.where(null);
-            if ( planTownEntity.getCityOnly() == null ) {
-                int cityId = planTownEntity.getTown().getTownPK().getCity().getCityId();
-                int townId = planTownEntity.getTown().getTownPK().getTownId();
-                cityAndTownSpec = cityAndTownSpec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.join("town").join("townPK").join("city").get("cityId"), cityId));
-                cityAndTownSpec = cityAndTownSpec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.join("town").join("townPK").get("townId"), townId));
-            } else {
-                int cityId = planTownEntity.getCityOnly().getCityId();
-                cityAndTownSpec = cityAndTownSpec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.join("town").join("townPK").join("city").get("cityId"), cityId));
-            }
-            townSpec = townSpec.or(cityAndTownSpec);
-        }
-
-        Specification<SpotInfoEntity> contentTypeSpec = Specification.where(null);
-        if( sortType == 2 ) {
-            contentTypeSpec = contentTypeSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("contentTypeId"), 12));
-            contentTypeSpec = contentTypeSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("contentTypeId"), 14));
-            contentTypeSpec = contentTypeSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("contentTypeId"), 15));
-            contentTypeSpec = contentTypeSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("contentTypeId"), 25));
-            contentTypeSpec = contentTypeSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("contentTypeId"), 28));
-            contentTypeSpec = contentTypeSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("contentTypeId"), 38));
-        } else if ( sortType == 3 ) {
-            contentTypeSpec = contentTypeSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("contentTypeId"), 32));
-        } else if ( sortType == 4 ) {
-            contentTypeSpec = contentTypeSpec.or((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("contentTypeId"), 39));
-        }
-        spotInfoSpec = spotInfoSpec.and(titleSpec);
-        spotInfoSpec = spotInfoSpec.and(contentTypeSpec);
-        spotInfoSpec = spotInfoSpec.and(townSpec);
-        List<SpotInfoEntity> spotInfoList = spotInfoRepository.findAll(spotInfoSpec, pageable);
-        if(spotInfoList.isEmpty() && page == 0) {
+        if(spotInfoEntityPage.getTotalElements() == 0) {
             throw new CustomException(ErrorCode.SEARCH_NULL);
-        } else if (spotInfoList.isEmpty() && page > 1) {
+        } else if (spotInfoEntityPage.getNumberOfElements() == 0) {
             throw new CustomException(ErrorCode.SCROLL_END);
         }
+        // 현재 여행 버킷
+        Set<Integer> planBucketSet = planBucketRepository.findAllSpotInfoIdsByUserId(userId);
+        // 위시리스트
+        Set<Integer> wishSet = wishListRepository.findAllSpotInfoIdsByUserId(userId);
 
-
-        List<SpotSearchResDTO> spotSearchResDTOList = new ArrayList<>();
-        for (SpotInfoEntity spotInfoEntity : spotInfoList) {
-            spotSearchResDTOList.add(SpotSearchResDTO.fromSpotInfoEntity(spotInfoEntity, wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoEntity.getSpotInfoId()), planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, spotInfoEntity.getSpotInfoId())));
-        }
-
-        return spotSearchResDTOList;
+        return spotInfoEntityPage.getContent().stream()
+                .map(spotInfoEntity -> SpotSearchResDTO.fromSpotInfoEntity(spotInfoEntity,
+                        wishSet.contains(spotInfoEntity.getSpotInfoId()),    // 위시리스트에 있는지
+                        planBucketSet.contains(spotInfoEntity.getSpotInfoId()))  // 버킷에 있는지
+                ).toList();
     }
 
     //플랜 버킷 관광지 추가
