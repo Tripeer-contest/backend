@@ -3,6 +3,7 @@ package com.j10d207.tripeer.place.controller;
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.place.dto.req.ReviewReq;
 import com.j10d207.tripeer.place.dto.res.RecommendDTO;
+import com.j10d207.tripeer.place.dto.res.RecommendSearchDTO;
 import com.j10d207.tripeer.place.dto.res.ReviewDto;
 import com.j10d207.tripeer.place.dto.res.SpotDTO;
 import com.j10d207.tripeer.place.dto.res.SpotDetailPageDto;
@@ -75,6 +76,7 @@ public class PlaceController {
         return Response.of(HttpStatus.OK, "리뷰 작성 완료", null);
     }
 
+    // 홈화면 추천 api
     @GetMapping("/recommend/home")
     public Response<List<RecommendDTO>> getHomeRecommend(@RequestParam("contentTypeId") int contentTypeId,
                                                          @RequestParam("cityId") Integer cityId,
@@ -83,12 +85,22 @@ public class PlaceController {
         return Response.of(HttpStatus.OK, "홈 추천 조회", recommendService.getHomeRecommends(contentTypeId, cityId, townId, user.getUserId()));
     }
 
+    // 추천 더보기를 위한 api
     @GetMapping("/recommend/keyword")
     public Response<RecommendDTO> getKeywordRecommends(@RequestParam("keyword") String keyword,
-                                                            @RequestParam("cityId") Integer cityId,
-                                                            @RequestParam("townId") Integer townId,
-                                                            @AuthenticationPrincipal CustomOAuth2User user) {
+                                                       @RequestParam("cityId") Integer cityId,
+                                                       @RequestParam("townId") Integer townId,
+                                                       @AuthenticationPrincipal CustomOAuth2User user) {
         return Response.of(HttpStatus.OK, "키워드 추천 조회", recommendService.getKeywordRecommends(keyword, cityId, townId, user.getUserId()));
+    }
+
+    // 플랜에서 사용할 추천 api
+    @GetMapping("/recommend/plan")
+    public Response<List<RecommendSearchDTO>> getPlanRecommends(@RequestParam("cityId") Integer cityId,
+                                                                @RequestParam("townId") Integer townId,
+                                                                @RequestParam("planId") Integer planId,
+                                                                @AuthenticationPrincipal CustomOAuth2User user) {
+        return Response.of(HttpStatus.OK, "홈 추천 조회", recommendService.getPlanRecommends(planId, cityId, townId, user.getUserId()));
     }
 
 }
