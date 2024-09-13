@@ -36,7 +36,7 @@ public class BoardNoticeServiceImpl implements BoardNoticeService{
         Page<BoardNoticeEntity> boardNoticeEntityPage = boardNoticeRepository.findAll(pageable);
 
         return new NoticeRes(boardNoticeEntityPage.getTotalPages(),
-                boardNoticeEntityPage.getContent().stream().map(NoticeRes.Summary::fromEntity).toList());
+                boardNoticeEntityPage.getContent().stream().map(NoticeRes.Detail::fromEntity).toList());
     }
 
     //공지사항 내용 조회

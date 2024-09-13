@@ -1,10 +1,7 @@
 package com.j10d207.tripeer.plan.dto.req;
 
 import com.j10d207.tripeer.plan.db.dto.TownDTO;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -19,7 +16,7 @@ public class PlanCreateInfoReq {
     @NotNull(message = "선택된 여행지가 없습니다. townList가 null입니다. ")
     private List<TownDTO> townList;
     private Boolean isSaved;
-    @Future(message = "과거 일자를 계획할 수 없습니다.")
+    @FutureOrPresent(message = "과거 일자를 계획할 수 없습니다.")
     private LocalDate startDay;
     @Future(message = "과거 일자를 계획할 수 없습니다.")
     private LocalDate endDay;
