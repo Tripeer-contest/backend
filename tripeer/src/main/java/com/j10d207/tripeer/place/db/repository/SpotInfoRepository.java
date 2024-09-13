@@ -33,6 +33,18 @@ public interface SpotInfoRepository extends JpaRepository <SpotInfoEntity, Integ
 
     SpotInfoEntity findBySpotInfoId(int spotInfoId);
 
+    @Query("SELECT s FROM spot_info s " +
+            "JOIN plan_town p " +
+            "ON p.plan.planId = :planId AND (p.cityOnly.cityId = s.town.townPK.city.cityId OR (p.town.townPK.city.cityId = s.town.townPK.city.cityId AND p.town.townPK.townId = s.town.townPK.townId)) " +
+            "WHERE s.title LIKE %:keyword% " +
+            "AND (:sortType = 1 OR " +                                                    // sortType 1 이면 전체
+            "    (:sortType = 2 AND s.contentTypeId IN (12, 14, 15, 25, 28, 38)) OR " +   // sortType 2 이면 명소
+            "    (:sortType = 3 AND s.contentTypeId = 32) OR " +                          // sortType 3 이면 숙소
+            "    (:sortType = 4 AND s.contentTypeId = 39)) " +                             // sortType 4 이면 음식점
+            "AND (:cityId = -1 OR s.town.townPK.city.cityId = :cityId) " +
+            "AND (:townId = -1 OR s.town.townPK.townId = :townId)")
+    Page<SpotInfoEntity> searchSpotsOfOption(@Param("planId") long planId, @Param("keyword") String keyword, @Param("sortType") int sortType, @Param("cityId") int cityId, @Param("townId") int townId, Pageable pageable);
+
 
     @Query("SELECT s FROM spot_info s WHERE " +
         "s.latitude BETWEEN :minLat AND :maxLat " +                                   // 위도에 포함되고
