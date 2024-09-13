@@ -1,6 +1,7 @@
 package com.j10d207.tripeer.user.dto.res;
 
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
+import com.j10d207.tripeer.user.db.TripStyleEnum;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.entity.WishListEntity;
@@ -32,15 +33,18 @@ public class UserDTO {
         private int style3Num;
 
         public static Info fromUserEntity(UserEntity userEntity) {
-            return UserDTO.Info.builder()
+            return Info.builder()
                     .userId(userEntity.getUserId())
                     .nickname(userEntity.getNickname())
                     .email(userEntity.getEmail())
                     .birth(userEntity.getBirth())
                     .profileImage(userEntity.getProfileImage())
                     .style1(userEntity.getStyle1())
+                    .style1Num(TripStyleEnum.getCodeOfName(userEntity.getStyle1()))
                     .style2(userEntity.getStyle2())
+                    .style2Num(TripStyleEnum.getCodeOfName(userEntity.getStyle2()))
                     .style3(userEntity.getStyle3())
+                    .style3Num(TripStyleEnum.getCodeOfName(userEntity.getStyle3()))
                     .build();
         }
     }

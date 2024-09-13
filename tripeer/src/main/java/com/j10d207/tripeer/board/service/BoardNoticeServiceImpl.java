@@ -54,15 +54,4 @@ public class BoardNoticeServiceImpl implements BoardNoticeService{
     }
 
 
-    /*
-        //특정 페이지 리뷰 가져오기
-    @Override
-    public List<ReviewDto> getReviewPage(int spotInfoId, int page) {
-        if(page < 1) throw new CustomException(ErrorCode.INVALID_PAGE);
-        Pageable pageable = PageRequest.of(page-1, REVIEW_PER_PAGE, Sort.by(Sort.Direction.DESC, "createTime"));
-        Page<SpotReviewEntity> spotReviewEntityPage = spotReviewRepository.findBySpotInfo_SpotInfoId(spotInfoId, pageable);
-        Page<ReviewDto> reviewDtoPage = spotReviewEntityPage.map(ReviewDto::fromEntity);
-        return reviewDtoPage.getContent();
-    }
-     */
 }
