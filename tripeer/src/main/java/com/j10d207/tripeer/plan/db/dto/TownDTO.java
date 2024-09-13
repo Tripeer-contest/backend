@@ -36,7 +36,7 @@ public class TownDTO {
             return TownDTO.builder()
                 .cityId(planTown.getTown().getTownPK().getCity().getCityId())
                 .townId(planTown.getTown().getTownPK().getTownId())
-                .title(planTown.getCityOnly().getCityName() + " " + planTown.getTown().getTownName())
+                .title(planTown.getTown().getTownPK().getCity().getCityName() + " " + planTown.getTown().getTownName())
                 .description(planTown.getTown().getDescription())
                 .img(planTown.getTown().getTownImg())
                 .latitude(planTown.getTown().getLatitude())
