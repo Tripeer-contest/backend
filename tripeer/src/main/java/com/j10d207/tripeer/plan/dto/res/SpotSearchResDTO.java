@@ -62,7 +62,7 @@ public class SpotSearchResDTO {
             return SearchResult.builder()
                     .spotInfoId(spotInfo.getSpotInfoId())
                     .title(spotInfo.getTitle())
-                    .contentType(ContentTypeEnum.getNameByCode(spotInfo.getContentTypeId()))
+                    .contentType(ContentTypeEnum.getMajorNameByCode(spotInfo.getContentTypeId()))
                     .addr(spotInfo.getAddr1())
                     .starPointAvg(spotInfo.getSpotReviewList().stream().mapToDouble(
                             SpotReviewEntity::getStarPoint).average().orElse(0.0))
