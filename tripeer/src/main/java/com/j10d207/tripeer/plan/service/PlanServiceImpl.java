@@ -335,6 +335,29 @@ public class PlanServiceImpl implements PlanService {
                 ).toList(), spotInfoRepository.searchSpotsOfOption(planId, keyword, sortType, cityId, townId, PageRequest.of(page, SEARCH_PER_PAGE)).isEmpty());
     }
 
+    //관광지 줌레벨 검색
+    @Override
+    public SpotSearchResDTO getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
+        double minLon, double maxLon, int sortType, long userId) {
+        PageRequest pageRequest = PageRequest.of(page-1, SEARCH_PER_PAGE);
+
+        // 지도 영역 내의 관광지 검색
+        Page<SpotInfoEntity> spots = spotInfoRepository.searchSpotsInMap(
+            minLat, maxLat, minLon, maxLon, keyword, sortType, pageRequest);
+        // 현재 여행 버킷
+        Set<Integer> planBucketSet = planBucketRepository.findAllSpotInfoIdsByUserId(userId);
+        // 위시리스트
+        Set<Integer> wishSet = wishListRepository.findAllSpotInfoIdsByUserId(userId);
+
+        return new SpotSearchResDTO(spots.getContent().stream()
+            .map(spot -> SpotSearchResDTO.SearchResult.fromSpotInfoEntity(spot,
+                wishSet.contains(spot.getSpotInfoId()),    // 위시리스트에 있는지
+                planBucketSet.contains(spot.getSpotInfoId()))  // 버킷에 있는지
+            )
+            .collect(Collectors.toList()),spots.isLast());
+    }
+
+
     //플랜 버킷 관광지 추가
     @Override
     public void addPlanSpot(long planId, int spotInfoId, long userId) {
@@ -542,25 +565,5 @@ public class PlanServiceImpl implements PlanService {
         rootOptimizeDTO.setPublicRootList(rootList);
 
         return rootOptimizeDTO;
-    }
-
-    public List<SpotSearchResDTO.SearchResult> getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
-                                                double minLon, double maxLon, int sortType, long userId) {
-        PageRequest pageRequest = PageRequest.of(page, 20); // 20개씩 페이징
-
-        // 지도 영역 내의 관광지 검색
-        Page<SpotInfoEntity> spots = spotInfoRepository.searchSpotsInMap(
-            minLat, maxLat, minLon, maxLon, keyword, sortType, pageRequest);
-        // 현재 여행 버킷
-        Set<Integer> planBucketSet = planBucketRepository.findAllSpotInfoIdsByUserId(userId);
-        // 위시리스트
-        Set<Integer> wishSet = wishListRepository.findAllSpotInfoIdsByUserId(userId);
-
-        return spots.getContent().stream()
-            .map(spot -> SpotSearchResDTO.SearchResult.fromSpotInfoEntity(spot,
-                                                             wishSet.contains(spot.getSpotInfoId()),    // 위시리스트에 있는지
-                                                             planBucketSet.contains(spot.getSpotInfoId()))  // 버킷에 있는지
-            )
-            .collect(Collectors.toList());
     }
 }
