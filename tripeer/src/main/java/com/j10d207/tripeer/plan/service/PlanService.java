@@ -74,6 +74,6 @@ public interface PlanService {
     public RootOptimizeDTO getOptimizingTime(RootOptimizeDTO rootOptimizeReqDTO) throws IOException;
 
     //지도 줌레벨 기반의 관광지 검색
-    List<SpotSearchResDTO.SearchResult> getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
+    SpotSearchResDTO getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
                                          double minLon, double maxLon, int sortType, long userId);
 }

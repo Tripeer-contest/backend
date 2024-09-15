@@ -119,7 +119,7 @@ public class PlanController {
 
     // 지도 줌레벨 기반의 관광지 검색
     @GetMapping("/spot/map")
-    public Response<List<SpotSearchResDTO.SearchResult>> getSpotsInMap(@RequestParam("planId") long planId,
+    public Response<SpotSearchResDTO> getSpotsInMap(@RequestParam("planId") long planId,
                                                           @RequestParam("keyword") String keyword,
                                                           @RequestParam("sortType") int sortType,
                                                           @RequestParam("page") int page,
@@ -128,7 +128,7 @@ public class PlanController {
                                                           @RequestParam("minLon") @Min(124) @Max(132) double minLon,
                                                           @RequestParam("maxLon") @Min(124) @Max(132) double maxLon,
                                                           @AuthenticationPrincipal CustomOAuth2User user) {
-        List<SpotSearchResDTO.SearchResult> searchResList = planService.getSpotsInMap(planId, keyword, page, minLat, maxLat,
+        SpotSearchResDTO searchResList = planService.getSpotsInMap(planId, keyword, page, minLat, maxLat,
                                                                          minLon, maxLon, sortType, user.getUserId());
         return Response.of(HttpStatus.OK, "지도 검색 완료", searchResList);
     }
