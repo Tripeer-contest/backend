@@ -81,6 +81,10 @@ dependencies {
 
 	// Spring Data MongoDB 의존성
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+	// Firebase token
+	implementation 'com.google.firebase:firebase-admin:9.2.0'
+
 }
 
 tasks.named('test') {
