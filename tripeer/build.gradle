@@ -4,7 +4,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.4'
 }
 
-group = 'j10d207'
+group = 'com.j10d207'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -22,16 +22,28 @@ repositories {
 }
 
 dependencies {
-	implementation 'com.google.code.gson:gson:2.8.8'
-	implementation 'org.springframework.boot:spring-boot-starter-mail' // Email
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	//MySQL connector
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	//Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
+	//Gson
+	implementation 'com.google.code.gson:gson:2.8.8'
+
+	// Email
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	//Spring Data JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	//Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	implementation 'mysql:mysql-connector-java:8.0.25'
 
 	//SpringSecurity
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -57,9 +69,22 @@ dependencies {
 	//JAXB Runtime
 	implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.3'
 
-	// JUnit Jupiter API 및 엔진 추가
+	//JUnit Jupiter API 및 엔진 추가
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+
+	//Validation Check
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// http 요청을 위한 webclient
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// Spring Data MongoDB 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+	// Firebase token
+	implementation 'com.google.firebase:firebase-admin:9.2.0'
+
 }
 
 tasks.named('test') {
