@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.noti.db;
+package com.j10d207.tripeer.noti.db.entity;
 
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import jakarta.persistence.*;
@@ -21,6 +21,14 @@ public class Notification {
     private enum Mark {
         CHECKED,
         UNCHECKED
+    }
+
+    public void mark() {
+        this.checked = Mark.CHECKED;
+    }
+
+    public void unMark() {
+        this.checked = Mark.UNCHECKED;
     }
 
 
