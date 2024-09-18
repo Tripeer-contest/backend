@@ -320,9 +320,6 @@ public class PlanServiceImpl implements PlanService {
 
         Page<SpotInfoEntity> spotInfoEntityPage = spotInfoRepository.searchSpotsOfOption(planId, keyword, sortType, cityId, townId, pageable);
 
-        if(spotInfoEntityPage.getTotalElements() == 0) {
-            throw new CustomException(ErrorCode.SEARCH_NULL);
-        }
         // 현재 여행 버킷
         Set<Integer> planBucketSet = planBucketRepository.findAllSpotInfoIdsByUserId(userId);
         // 위시리스트
