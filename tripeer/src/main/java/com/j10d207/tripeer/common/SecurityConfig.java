@@ -108,11 +108,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/user/name/duplicatecheck/*").hasAnyRole("VALIDATE", "USER", "ADMIN")
 
                         //일반 사용자 + ADMIN
-                        .requestMatchers(HttpMethod.GET, "/place/**", "/plan/**", "/user/**", "/history/**", "/board/notice/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/place/**", "/plan/**", "/user/**", "/history/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/place/**", "/plan/**", "/user/**", "/history/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/place/**", "/plan/**", "/user/**", "/history/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/place/**", "/plan/**", "/user/**", "/history/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/place/**", "/plan/**", "/user/**", "/history/**", "/board/notice/**", "/noti/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/place/**", "/plan/**", "/user/**", "/history/**", "/noti/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/place/**", "/plan/**", "/user/**", "/history/**", "/noti/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/place/**", "/plan/**", "/user/**", "/history/**", "/noti/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/place/**", "/plan/**", "/user/**", "/history/**", "/noti/**").hasAnyRole("USER", "ADMIN")
 
                         // only ADMIN
                         .requestMatchers(HttpMethod.POST, "/board/notice/**").hasAnyRole("ADMIN")

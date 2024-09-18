@@ -54,7 +54,6 @@ public class NotificationController {
 		);
 	}
 
-
 	@Getter
 	@RequiredArgsConstructor
 	private enum ResponseHeader {
