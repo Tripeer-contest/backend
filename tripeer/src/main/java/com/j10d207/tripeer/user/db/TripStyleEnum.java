@@ -1,5 +1,7 @@
 package com.j10d207.tripeer.user.db;
 
+import com.j10d207.tripeer.exception.CustomException;
+import com.j10d207.tripeer.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -21,12 +23,22 @@ public class TripStyleEnum {
     }
 
     // 상수 값을 이름으로 변환하는 메서드
-    public static String getNameByCode(int code) {
+    public static String getNameOfCode(int code) {
         for (TripStyleListEnum contentType : TripStyleListEnum.values()) {
             if (contentType.getCode() == code) {
                 return contentType.getName();
             }
         }
-        return null; // 매칭되는 값이 없을 경우 null 반환
+        throw new CustomException(ErrorCode.UNDEFINED_TYPE);
+    }
+
+    public static int getCodeOfName(String name) {
+        if(name == null) return 0;
+        for (TripStyleListEnum contentType : TripStyleListEnum.values()) {
+            if (contentType.getName().equals(name)) {
+                return contentType.getCode();
+            }
+        }
+        throw new CustomException(ErrorCode.UNDEFINED_TYPE);
     }
 }

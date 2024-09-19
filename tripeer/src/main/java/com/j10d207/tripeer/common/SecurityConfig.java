@@ -29,7 +29,6 @@ public class SecurityConfig {
 
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
 //    private final AuthenticationConfiguration authenticationConfiguration;
-    //JWTUtil 주입
     private final JWTUtil jwtUtil;
 
     //OAuth 로그인
@@ -60,7 +59,7 @@ public class SecurityConfig {
 
                         CorsConfiguration config = new CorsConfiguration();
 
-                        config.setAllowedOrigins(List.of("http://192.168.100.188:5173/", "http://localhost:5173/", "http://localhost:3000", "https://k10d207.p.ssafy.io/"));
+                        config.setAllowedOrigins(List.of("http://192.168.100.188:5173/", "http://localhost:5173/", "http://localhost:3000", "https://k10d207.p.ssafy.io/", "https://tripeer.co.kr/"));
                         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(List.of("*"));
@@ -92,23 +91,35 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
+
+                        // 개발용 페이지
                         .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/error", "/swagger-ui/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/user/name/duplicatecheck/*").hasAnyRole("VALIDATE", "USER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/user/signup").hasAnyRole("VALIDATE")
-                        //배포시 test 삭제 필요
+                        .requestMatchers(HttpMethod.POST, "/admin/**").permitAll()
+
+                        //비회원 포함 //배포시 test 삭제 필요
                         .requestMatchers(HttpMethod.GET, "/user/test/**", "/user/social/info", "/weather", "/history/*").hasAnyRole("NONE", "USER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/user/reissue").hasAnyRole("NONE", "USER", "ADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/place/**", "/plan/**", "/user/**", "/history/**").hasAnyRole("USER", "ADMIN")
+                        //가입대기 상태 (소셜 로그인만 된 상태)
+                        .requestMatchers(HttpMethod.POST, "/user/signup").hasAnyRole("VALIDATE")
+                        // 가입대기 + 모든 사용자 => 닉네임 중복체크
+                        .requestMatchers(HttpMethod.GET, "/user/name/duplicatecheck/*").hasAnyRole("VALIDATE", "USER", "ADMIN")
+
+                        //일반 사용자 + ADMIN
+                        .requestMatchers(HttpMethod.GET, "/place/**", "/plan/**", "/user/**", "/history/**", "/board/notice/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/place/**", "/plan/**", "/user/**", "/history/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/place/**", "/plan/**", "/user/**", "/history/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/place/**", "/plan/**", "/user/**", "/history/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/place/**", "/plan/**", "/user/**", "/history/**").hasAnyRole("USER", "ADMIN")
-//                        .requestMatchers("/").hasRole("ADMIN")
+
+                        // only ADMIN
+                        .requestMatchers(HttpMethod.POST, "/board/notice/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/board/notice/**").hasAnyRole("ADMIN")
+
+
                         .requestMatchers("/*", "/**").denyAll()
-//                        .requestMatchers("/api/**", "/api/*").permitAll() //개발 용 로그인 안했을때 postman 사용을 위해
                         .anyRequest().authenticated())
                 .exceptionHandling((exceptionConfig) ->
                         exceptionConfig.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/user/error")));

@@ -43,14 +43,14 @@ public class PublicRootDTO {
 
     private List<PublicRootDetail> publicRootDetailList;
 
-    public static PublicRootDTO JsonToDTO (JsonObject jsonObject) {
+    public static PublicRootDTO fromJson (JsonObject jsonObject) {
         JsonArray legs = jsonObject.getAsJsonArray("legs");
 
         List<PublicRootDTO.PublicRootDetail> detailList = new ArrayList<>();
 
         for (JsonElement leg : legs) {
             JsonObject legObject = leg.getAsJsonObject();
-            detailList.add(PublicRootDTO.PublicRootDetail.JsonToDTO(legObject));
+            detailList.add(PublicRootDTO.PublicRootDetail.fromJson(legObject));
         }
 
         return PublicRootDTO.builder()
@@ -63,10 +63,10 @@ public class PublicRootDTO {
                 .build();
     }
 
-    public static PublicRootDTO EntityToDTO (PublicRootEntity publicRoot, List<PublicRootDetailEntity> publicRootDetailEntityList) {
+    public static PublicRootDTO ofEntityAndDetailList (PublicRootEntity publicRoot, List<PublicRootDetailEntity> publicRootDetailEntityList) {
         List<PublicRootDTO.PublicRootDetail> detailList = new ArrayList<>();
         for (PublicRootDetailEntity publicRootDetailEntity : publicRootDetailEntityList) {
-            detailList.add(PublicRootDTO.PublicRootDetail.EntityToDTO(publicRootDetailEntity));
+            detailList.add(PublicRootDTO.PublicRootDetail.fromEntity(publicRootDetailEntity));
         }
 
         return PublicRootDTO.builder()
@@ -112,7 +112,7 @@ public class PublicRootDTO {
         private double endLat;
         private double endLon;
 
-        public static PublicRootDetail EntityToDTO (PublicRootDetailEntity publicRootDetail) {
+        public static PublicRootDetail fromEntity(PublicRootDetailEntity publicRootDetail) {
             return PublicRootDetail.builder()
                     .startName(publicRootDetail.getStartName())
                     .startLat(publicRootDetail.getStartLat())
@@ -127,7 +127,7 @@ public class PublicRootDTO {
                     .build();
         }
 
-        public static PublicRootDetail JsonToDTO (JsonObject jsonObject) {
+        public static PublicRootDetail fromJson(JsonObject jsonObject) {
 
             return PublicRootDetail.builder()
                     //구간 이동 거리 (m)

@@ -2,9 +2,9 @@ package com.j10d207.tripeer.user.db.entity;
 
 
 import com.j10d207.tripeer.user.db.TripStyleEnum;
-import com.j10d207.tripeer.user.db.dto.CustomOAuth2User;
-import com.j10d207.tripeer.user.db.vo.InfoVO;
-import com.j10d207.tripeer.user.db.vo.JoinVO;
+import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
+import com.j10d207.tripeer.user.dto.req.InfoReq;
+import com.j10d207.tripeer.user.dto.req.JoinReq;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,7 +40,7 @@ public class UserEntity {
     private String style3;
     private boolean isOnline;
 
-    public static UserEntity JoinVOToEntity(JoinVO join) {
+    public static UserEntity fromJoinReq(JoinReq join) {
 
         //소셜정보 가져오기
         SecurityContext context = SecurityContextHolder.getContext();
@@ -67,29 +67,18 @@ public class UserEntity {
                 .birth(LocalDate.parse(join.getYear() + "-" + join.getMonth() + "-" + join.getDay()))
                 .profileImage(newImg)
                 .role("ROLE_USER")
-                .style1(join.getStyle1() == null ? null : TripStyleEnum.getNameByCode(join.getStyle1()))
-                .style2(join.getStyle2() == null ? null : TripStyleEnum.getNameByCode(join.getStyle2()))
-                .style3(join.getStyle3() == null ? null : TripStyleEnum.getNameByCode(join.getStyle3()))
+                .style1(join.getStyle1() == null ? null : TripStyleEnum.getNameOfCode(join.getStyle1()))
+                .style2(join.getStyle2() == null ? null : TripStyleEnum.getNameOfCode(join.getStyle2()))
+                .style3(join.getStyle3() == null ? null : TripStyleEnum.getNameOfCode(join.getStyle3()))
                 .isOnline(false)
                 .build();
     }
 
-    public static UserEntity InfoVOToEntity(InfoVO infoVO, UserEntity userEntity) {
-
-        return UserEntity.builder()
-                .userId(userEntity.getUserId())
-                .provider(userEntity.getProvider())
-                .providerId(userEntity.getProviderId())
-                .email(infoVO.getEmail())
-                .nickname(infoVO.getNickname())
-                .birth(userEntity.getBirth())
-                .profileImage(userEntity.getProfileImage())
-                .role(userEntity.getRole())
-                .style1(TripStyleEnum.getNameByCode(infoVO.getStyle1Num()))
-                .style2(TripStyleEnum.getNameByCode(infoVO.getStyle2Num()))
-                .style3(TripStyleEnum.getNameByCode(infoVO.getStyle3Num()))
-                .isOnline(userEntity.isOnline())
-                .build();
+    public void setModifyInfo(InfoReq infoReq) {
+        this.nickname = infoReq.getNickname();
+        this.style1 = infoReq.getStyle1Num() == 0 ? null : TripStyleEnum.getNameOfCode(infoReq.getStyle1Num());
+        this.style2 = infoReq.getStyle2Num() == 0 ? null : TripStyleEnum.getNameOfCode(infoReq.getStyle2Num());
+        this.style3 = infoReq.getStyle3Num() == 0 ? null : TripStyleEnum.getNameOfCode(infoReq.getStyle3Num());
     }
 
 }

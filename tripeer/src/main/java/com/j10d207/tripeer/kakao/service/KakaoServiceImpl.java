@@ -2,6 +2,7 @@ package com.j10d207.tripeer.kakao.service;
 
 
 import com.google.gson.Gson;
+import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.j10d207.tripeer.exception.CustomException;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -36,6 +38,9 @@ public class KakaoServiceImpl implements KakaoService {
 
     @Value("${kakao.apikey}")
     private String kakaoApiKey;
+
+    @Value("${kakao.apikey2}")
+    private String kakaoApiKey2;
 
     private final ApiRequestService apiRequestService;
     private final PublicRootRepository publicRootRepository;
@@ -55,6 +60,41 @@ public class KakaoServiceImpl implements KakaoService {
         root.solve(0, 0, 0, new ArrayList<>(), startLocation);
 
         return root;
+    }
+
+    @Override
+    public BlogInfoResponse getBlogInfo(String query, String sort, int page, int size) {
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            String baseUrl = "https://dapi.kakao.com/v2/search/blog";
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                    .queryParam("query", query)
+                    .queryParam("sort", sort)
+                    .queryParam("page", page)
+                    .queryParam("size", size).encode();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "KakaoAK " + kakaoApiKey2);
+
+            HttpEntity<?> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    builder.build().toUri(),
+                    HttpMethod.GET,
+                    entity,
+                    String.class
+            );
+            Gson gson = new Gson();
+            BlogInfoResponse data = gson.fromJson(response.getBody(), BlogInfoResponse.class);
+            return data;
+
+        } catch (RuntimeException e) {
+            log.error("Kakao blog 검색중 에러 {}", e.getMessage());
+            throw new CustomException(ErrorCode.BLOG_SEARCH_ERROR);
+        } catch (Exception e) {
+            System.out.println("e.getMessage() = " + e.getMessage());
+            throw new RuntimeException();
+        }
     }
 
 

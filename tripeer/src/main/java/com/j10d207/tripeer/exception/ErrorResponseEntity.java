@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,28 @@ public class ErrorResponseEntity {
                         .name("INVALID_ARGUMENT")
                         .code(ErrorCode.INVALID_ARGUMENT.getCode())
                         .message(errorMessage)
+                        .build());
+    }
+
+    public static ResponseEntity<ErrorResponseEntity> CustomJwtExpired(ExpiredJwtException e) {
+        return ResponseEntity
+                .status(ErrorCode.EXPIRED_JWT.getHttpStatus())
+                .body(ErrorResponseEntity.builder()
+                        .status(ErrorCode.EXPIRED_JWT.getHttpStatus().value())
+                        .name("Expired_Jwt")
+                        .code(ErrorCode.EXPIRED_JWT.getCode())
+                        .message(e.getMessage())
+                        .build());
+    }
+
+    public static ResponseEntity<ErrorResponseEntity> CustomRuntime(RuntimeException e) {
+        return ResponseEntity
+                .status(ErrorCode.RUNTIME_EXCEPTION.getHttpStatus())
+                .body(ErrorResponseEntity.builder()
+                        .status(ErrorCode.RUNTIME_EXCEPTION.getHttpStatus().value())
+                        .name("RUNTIME_EXCEPTION")
+                        .code(ErrorCode.RUNTIME_EXCEPTION.getCode())
+                        .message(ErrorCode.RUNTIME_EXCEPTION.getMessage() + e.getMessage())
                         .build());
     }
 }

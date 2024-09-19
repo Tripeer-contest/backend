@@ -2,10 +2,7 @@ package com.j10d207.tripeer.user.db.entity;
 
 import com.j10d207.tripeer.plan.db.entity.PlanEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity(name = "coworker")
 @Getter
@@ -27,10 +24,28 @@ public class CoworkerEntity {
     @JoinColumn(name = "PLAN_ID")
     private PlanEntity plan;
 
-    public static CoworkerEntity MakeCoworkerEntity(UserEntity userEntity, PlanEntity planEntity) {
+    @Setter
+    private String role;
+
+    @ManyToOne
+    @JoinColumn(name = "INVITE_ID")
+    private UserEntity invite;
+
+    public static CoworkerEntity createNewEntity(UserEntity userEntity, PlanEntity planEntity) {
         return CoworkerEntity.builder()
                 .user(userEntity)
                 .plan(planEntity)
+                .role("member")
+                .invite(userEntity)
+                .build();
+    }
+
+    public static CoworkerEntity createInviteEntity(long userId, long planId, long inviteId) {
+        return CoworkerEntity.builder()
+                .user(UserEntity.builder().userId(userId).build())
+                .plan(PlanEntity.builder().planId(planId).build())
+                .role("pending")
+                .invite(UserEntity.builder().userId(inviteId).build())
                 .build();
     }
 
