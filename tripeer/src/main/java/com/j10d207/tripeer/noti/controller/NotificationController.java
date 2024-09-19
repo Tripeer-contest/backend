@@ -54,6 +54,16 @@ public class NotificationController {
 		);
 	}
 
+	@GetMapping
+	public Response<Void> test() {
+		service.test();
+		return Response.of(
+			HttpStatus.OK,
+			null,
+			null
+		);
+	}
+
 	@Getter
 	@RequiredArgsConstructor
 	private enum ResponseHeader {

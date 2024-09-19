@@ -1,16 +1,20 @@
 package com.j10d207.tripeer.noti.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.firebase.FirebaseException;
+import com.google.firebase.messaging.Message;
 import com.j10d207.tripeer.noti.db.entity.Notification;
 import com.j10d207.tripeer.noti.db.firebase.FirebasePublisher;
-import com.j10d207.tripeer.noti.db.firebase.MessageType;
+import com.j10d207.tripeer.noti.db.firebase.MessageBuilder;
 import com.j10d207.tripeer.noti.db.repository.NotificationRepository;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,10 +31,11 @@ public class NotificationService {
 
 	private final NotificationRepository notificationRepository;
 
-	private final FirebasePublisher firebasePublisher;
+	private final NotificationEventPublisher publisher;
 
 	private final UserRepository userRepository;
 
+	private final FirebasePublisher firebasePublisher;
 
 	/**
 	 * @author: 김회창
@@ -49,20 +54,22 @@ public class NotificationService {
 		notificationRepository.save(notification);
 	}
 
-	/**
-	 * @author: 김회창
-	 *
-	 * <p>
-	 *     여행 시작을 알리는 알림을 Firebase 외부 서비스를 통해 발행
-	 * </p>
-	 *
-	 * @param userId: 		 토큰이 추가될 유저 식별번호
-	 */
+	@Transactional
+	public void test() {
+		publisher.publish();
+	}
 
 	@Transactional
-	public void publishTripeerStart(final Long userId) {
-
+	public List<Notification> findAllNotificationByUser(final List<UserEntity> coworkers) {
+		return notificationRepository.findAllByUser(coworkers);
 	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void invalidFirebaseHandler(final Notification notification) {
+		log.info("invalid firebase token: {}", notification.getUser().getNickname());
+		notification.mark();
+	}
+
 
 	/**
 	 * @author: 김회창
@@ -74,10 +81,6 @@ public class NotificationService {
 	 * @param userId: 		 토큰이 추가될 유저 식별번호
 	 */
 
-	@Transactional
-	public void publishDiarySave(final Long userId) {
-
-	}
 
 	/**
 	 * @author: 김회창
