@@ -4,11 +4,13 @@ import com.j10d207.tripeer.place.db.entity.CityEntity;
 import com.j10d207.tripeer.place.db.entity.TownEntity;
 import com.j10d207.tripeer.place.db.repository.CityRepository;
 import com.j10d207.tripeer.place.db.repository.TownRepository;
+import com.j10d207.tripeer.plan.db.TimeEnum;
 import com.j10d207.tripeer.plan.dto.req.CoworkerInvitedReq;
 import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
 import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
 import com.j10d207.tripeer.plan.dto.req.TitleChangeReq;
 import com.j10d207.tripeer.plan.dto.res.*;
+import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
@@ -78,6 +80,8 @@ public class PlanServiceImpl implements PlanService {
     private final TownRepository townRepository;
 
     private final int SEARCH_PER_PAGE = 10;
+    private final int OPTION_KAKAO_CAR = 0;
+    private final int OPTION_TMAP_PUBLIC = 1;
 
     //플랜 생성
     /*
@@ -442,35 +446,17 @@ public class PlanServiceImpl implements PlanService {
     public RootOptimizeDTO getShortTime(RootOptimizeDTO rootOptimizeDTO) {
         // 장소 갯수 카운트 AtoB 이므로 2개가 아니면 throw
         int infoSize = rootOptimizeDTO.getPlaceList().size();
-        if( infoSize < 2) {
-            throw new CustomException(ErrorCode.NOT_ENOUGH_INFO);
-        } else if(infoSize > 2) {
-            throw new CustomException(ErrorCode.TOO_MANY_INFO);
-        }
-        // option 0이면 자차(택시) -> 카카오
-        if (rootOptimizeDTO.getOption() == 0) {
+        if( infoSize < 2) throw new CustomException(ErrorCode.NOT_ENOUGH_INFO);
+        else if(infoSize > 2) throw new CustomException(ErrorCode.TOO_MANY_INFO);
+
+        if (rootOptimizeDTO.getOption() == OPTION_KAKAO_CAR) {
             int resultTime = kakaoService.getDirections(rootOptimizeDTO.getPlaceList().getFirst().getLongitude(),
                     rootOptimizeDTO.getPlaceList().getFirst().getLatitude(),
                     rootOptimizeDTO.getPlaceList().getLast().getLongitude(),
                     rootOptimizeDTO.getPlaceList().getLast().getLatitude());
-            StringBuilder rootInfoBuilder = new StringBuilder();
-            List<String[]> timeList = new ArrayList<>();
-            if( resultTime == 99999 ) {
-                rootOptimizeDTO.setOption(400);
-                rootInfoBuilder.append("경로를 찾을 수 없습니다.");
-                timeList.add(new String[] {rootInfoBuilder.toString(), "2" } );
-                rootOptimizeDTO.setSpotTime(timeList);
-                return rootOptimizeDTO;
-            }
-            if(resultTime/60 > 0) {
-                rootInfoBuilder.append(resultTime/60).append("시간 ");
-            }
-            rootInfoBuilder.append(resultTime%60).append("분");
-            timeList.add(new String[] {rootInfoBuilder.toString(), String.valueOf(rootOptimizeDTO.getOption()) } );
-            rootOptimizeDTO.setSpotTime(timeList);
-            return rootOptimizeDTO;
+            return kakaoService.setCarResult(resultTime, rootOptimizeDTO);
         }
-        else if (rootOptimizeDTO.getOption() == 1) {
+        else if (rootOptimizeDTO.getOption() == OPTION_TMAP_PUBLIC) {
             return tMapService.useTMapPublic(rootOptimizeDTO);
         }
         else {
@@ -488,12 +474,10 @@ public class PlanServiceImpl implements PlanService {
         List<CoordinateDTO> coordinateDTOList = rootOptimizeDTO.getPlaceList().stream().map(CoordinateDTO::PlaceToCoordinate).toList();
 
         FindRoot root = null;
-        // 자동차
-        if ( rootOptimizeDTO.getOption() == 0 ) {
+        if ( rootOptimizeDTO.getOption() == OPTION_KAKAO_CAR ) {
             root = kakaoService.getOptimizingTime(coordinateDTOList);
         }
-        // 대중교통
-        else if ( rootOptimizeDTO.getOption() == 1 ) {
+        else if ( rootOptimizeDTO.getOption() == OPTION_TMAP_PUBLIC ) {
             root = tMapService.getOptimizingTime(coordinateDTOList);
         }
         if (root != null) {
@@ -512,7 +496,7 @@ public class PlanServiceImpl implements PlanService {
         int j = 0;
         for(Integer i : root.getResultNumbers()) {
 
-            int nowStatus = j == root.getResultNumbers().size() ? rootOptimizeDTO.getOption() : root.getTimeTable()[i][root.getResultNumbers().get(j)].getStatus();
+            int nowStatus = j == root.getResultNumbers().size() ? rootOptimizeDTO.getOption() : root.getTimeTable()[i][root.getResultNumbers().get(j)].getStatus().getCode();
             if( nowStatus > 10 & nowStatus < 15) {
                 newSpotTimeList.add(new String[]{root.rootTimeToString(j++), "0" });
             } else {

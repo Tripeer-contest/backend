@@ -3,6 +3,9 @@ package com.j10d207.tripeer.kakao.service;
 
 import com.google.gson.Gson;
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
+import com.j10d207.tripeer.plan.db.TimeEnum;
+import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
+import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.j10d207.tripeer.exception.CustomException;
@@ -30,6 +33,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -105,21 +110,19 @@ public class KakaoServiceImpl implements KakaoService {
     @Override
     public RootInfoDTO[][] getTimeTable(List<CoordinateDTO> coordinates) throws IOException {
         RootInfoDTO[][] timeTable = new RootInfoDTO[coordinates.size()][coordinates.size()];
-        for (int i = 0; i < timeTable.length; i++) {
-            for (int j = 0; j < timeTable[i].length; j++) {
-                timeTable[i][j] = new RootInfoDTO(); // TimeRootInfoDTO의 새 인스턴스를 생성하여 할당
-            }
-        }
+
+        IntStream.range(0, timeTable.length).forEach(i -> IntStream.range(0, timeTable[i].length)
+                .forEach(j ->timeTable[i][j] = new RootInfoDTO()));
         for (int i = 0; i < coordinates.size(); i++) {
             for (int j = i; j < coordinates.size(); j++) {
                 if (i == j) continue;
                 int tmp = getDirections(coordinates.get(i).getLongitude(), coordinates.get(i).getLatitude(), coordinates.get(j).getLongitude(), coordinates.get(j).getLatitude());
                 //차로 못가면 대중교통 경로 조회
-                if (tmp == 99999) {
+                if (tmp == TimeEnum.ERROR_TIME.getTime()) {
                     timeTable[i][j] = getPublicTime(coordinates.get(i).getLongitude(), coordinates.get(i).getLatitude(), coordinates.get(j).getLongitude(), coordinates.get(j).getLatitude());
                     tmp = timeTable[i][j].getTime();
                     //둘다 없으면 경로 못찾음 throw
-                    if (tmp == 99999) {
+                    if (tmp == TimeEnum.ERROR_TIME.getTime()) {
                         throw new CustomException(ErrorCode.NOT_FOUND_ROOT);
                     }
                 }
@@ -155,9 +158,9 @@ public class KakaoServiceImpl implements KakaoService {
             Gson gson = new Gson();
             RouteResponse data = gson.fromJson(response.getBody(), RouteResponse.class);
 
-            return data.getRoutes().getFirst().getSummary().getDuration() / 60;
+            return data.getRoutes().getFirst().getSummary().getDuration() / TimeEnum.MIN_PER_SECOND.getTime();
         } catch (Exception e) {
-            return 99999;
+            return TimeEnum.ERROR_TIME.getTime();
         }
     }
 
@@ -168,24 +171,24 @@ public class KakaoServiceImpl implements KakaoService {
      */
     private RootInfoDTO getPublicTime(double SX, double SY, double EX, double EY) {
         Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
-        RootInfoDTO rootInfoDTO = new RootInfoDTO();
-        rootInfoDTO.setLocation(SX, SY, EX, EY);
-        if (optionalPublicRoot.isPresent()) {
+        RootInfoDTO rootInfoDTO = RootInfoDTO.createOfLocation(SX, SY, EX, EY);
+
+        return optionalPublicRoot.map(publicRoot -> {
             rootInfoDTO.setPublicRoot(apiRequestService.getRootDTO(optionalPublicRoot.get()));
             rootInfoDTO.setTime(rootInfoDTO.getPublicRoot().getTotalTime());
             return rootInfoDTO;
-        } else {
+        }).orElseGet(() -> {
             // A에서 B로 가는 경로의 정보를 조회
             JsonObject result = apiRequestService.getResult(SX, SY, EX, EY);
-            if (result.getAsJsonObject().has("result")) {
-                rootInfoDTO.setTime(99999);
-                return rootInfoDTO;
-            } else {
-                // result.getAsJsonObject().has("metaData")
-                return ApiResponseHasRoot(result.getAsJsonObject("metaData"), rootInfoDTO);
-            }
 
-        }
+            return Optional.of(result.getAsJsonObject())
+                    .filter(json -> json.has("result"))
+                    .map(json -> {
+                        rootInfoDTO.setTime(TimeEnum.ERROR_TIME.getTime());
+                        return rootInfoDTO;
+                    })
+                    .orElseGet(() -> ApiResponseHasRoot(result.getAsJsonObject("metaData"), rootInfoDTO));
+        });
 
     }
 
@@ -194,13 +197,13 @@ public class KakaoServiceImpl implements KakaoService {
         JsonElement bestRoot = apiRequestService.getBestTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries"));
         //모든 경로가 백트래킹 됨
         if(bestRoot.getAsJsonObject().size() == 0) {
-            rootInfoDTO.setStatus(414);
-            rootInfoDTO.setTime(99999);
+            rootInfoDTO.setStatus(TmapErrorCode.NO_PUBLIC_AND_CAR_TRANSPORT_ROUTE);
+            rootInfoDTO.setTime(TimeEnum.ERROR_TIME.getTime());
             return rootInfoDTO;
         }
         //반환 정보 생성
         int totalTime = bestRoot.getAsJsonObject().get("totalTime").getAsInt();
-        rootInfoDTO.setTime(totalTime / 60);
+        rootInfoDTO.setTime(totalTime / TimeEnum.MIN_PER_SECOND.getTime());
         rootInfoDTO.setRootInfo(bestRoot);
 
         apiRequestService.saveRootInfo(bestRoot,
@@ -208,9 +211,29 @@ public class KakaoServiceImpl implements KakaoService {
                 rootInfoDTO.getStartLongitude(),
                 rootInfoDTO.getEndLatitude(),
                 rootInfoDTO.getEndLongitude(),
-                totalTime/60);
+                totalTime/TimeEnum.MIN_PER_SECOND.getTime());
 
         return rootInfoDTO;
+    }
+
+    @Override
+    public RootOptimizeDTO setCarResult(int resultTime, RootOptimizeDTO rootOptimizeDTO) {
+        StringBuilder rootInfoBuilder = new StringBuilder();
+        List<String[]> timeList = new ArrayList<>();
+        if( resultTime == TimeEnum.ERROR_TIME.getTime()) {
+            rootOptimizeDTO.setOption(TmapErrorCode.NO_CAR_AND_PUBLIC_TRANSPORT_ROUTE.getCode());
+            rootInfoBuilder.append("경로를 찾을 수 없습니다.");
+            timeList.add(new String[] {rootInfoBuilder.toString(), "2" } );
+            rootOptimizeDTO.setSpotTime(timeList);
+            return rootOptimizeDTO;
+        }
+        if(resultTime/TimeEnum.HOUR_PER_MIN.getTime() > 0) {
+            rootInfoBuilder.append(resultTime/TimeEnum.HOUR_PER_MIN.getTime()).append("시간 ");
+        }
+        rootInfoBuilder.append(resultTime%TimeEnum.HOUR_PER_MIN.getTime()).append("분");
+        timeList.add(new String[] {rootInfoBuilder.toString(), String.valueOf(rootOptimizeDTO.getOption()) } );
+        rootOptimizeDTO.setSpotTime(timeList);
+        return rootOptimizeDTO;
     }
 
 }
