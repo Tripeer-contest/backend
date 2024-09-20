@@ -8,7 +8,9 @@ import com.j10d207.tripeer.place.db.repository.TownRepository;
 import com.j10d207.tripeer.plan.db.TimeEnum;
 import com.j10d207.tripeer.plan.dto.req.*;
 import com.j10d207.tripeer.plan.dto.res.*;
+import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
+import com.j10d207.tripeer.tmap.db.dto.RootInfoDTO;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
@@ -466,7 +468,6 @@ public class PlanServiceImpl implements PlanService {
         int infoSize = placeListReq.getPlaceList().size();
         if( infoSize < 2) throw new CustomException(ErrorCode.NOT_ENOUGH_INFO);
         else if(infoSize > 2) throw new CustomException(ErrorCode.TOO_MANY_INFO);
-        return null;
 
         List<String> resultTime = new ArrayList<>();
         List<PublicRootDTO> resultRootDTO = new ArrayList<>();
@@ -482,10 +483,39 @@ public class PlanServiceImpl implements PlanService {
         } else {
             resultTime.add(CommonMethod.timeToString(carTime));
         }
+        resultRootDTO.add(null);
+
+        List<RootInfoDTO> publicRootList = tMapService.useTMapPublic3(placeListReq);
 
         // 2. 대중교통
+        RootInfoDTO publicRoot = publicRootList.getFirst();
+        if (publicRoot.getStatus().getCode() < 11) {
+            resultTime.add(publicRoot.timeToString());
+            resultRootDTO.add(publicRoot.getPublicRoot());
+        } else {
+            resultTime.add(publicRoot.getStatus().getMessage());
+            resultRootDTO.add(null);
+        }
 
-        resultRootDTO.add(null);
+        // 3. 항공
+        RootInfoDTO AirRoot = publicRootList.get(1);
+        if (AirRoot.getStatus().getCode() < 11) {
+            resultTime.add(AirRoot.timeToString());
+            resultRootDTO.add(AirRoot.getPublicRoot());
+        } else {
+            resultTime.add(AirRoot.getStatus().getMessage());
+            resultRootDTO.add(null);
+        }
+
+        // 4. 해운
+        RootInfoDTO FerryRoot = publicRootList.get(2);
+        if (FerryRoot.getStatus().getCode() < 11) {
+            resultTime.add(FerryRoot.timeToString());
+            resultRootDTO.add(FerryRoot.getPublicRoot());
+        } else {
+            resultTime.add(FerryRoot.getStatus().getMessage());
+            resultRootDTO.add(null);
+        }
 
 
         result.setTime(resultTime);
@@ -511,6 +541,29 @@ public class PlanServiceImpl implements PlanService {
         }
         if (root != null) {
             return refactorResult(root, rootRes);
+        }
+        // root 가 null 경우 -1 set 지웠음 (모순이긴 해서)
+        return null;
+    }
+
+    //플랜 최단거리 조정
+    @Override
+    public OptimizingRes getOptimizingTime2(PlaceListReq placeListReq) throws IOException {
+        if(placeListReq.getPlaceList().size() < 3) {
+            throw new CustomException(ErrorCode.NOT_ENOUGH_INFO);
+        }
+        // 전달 받은 정보를 기반으로 좌표 리스트 생성
+        List<CoordinateDTO> coordinateDTOList = placeListReq.getPlaceList().stream().map(CoordinateDTO::PlaceToCoordinate2).toList();
+
+        FindRoot root = null;
+        if ( placeListReq.getOption() == OPTION_KAKAO_CAR ) {
+            root = kakaoService.getOptimizingTime(coordinateDTOList);
+        }
+        else if ( placeListReq.getOption() == OPTION_TMAP_PUBLIC ) {
+            root = tMapService.getOptimizingTime(coordinateDTOList);
+        }
+        if (root != null) {
+            return refactorResult2(root, placeListReq);
         }
         // root 가 null 경우 -1 set 지웠음 (모순이긴 해서)
         return null;
@@ -554,10 +607,40 @@ public class PlanServiceImpl implements PlanService {
 
     }
 
-//    private RootRes refactorResult2 (FindRoot root, RootRes rootRes) {
-//        RootRes result = new RootRes();
-//        result.setOption(rootRes.getOption());
-//    }
+    private OptimizingRes refactorResult2 (FindRoot root, PlaceListReq placeListReq) {
+        List<OptimizingRes.Place> newPlaceList = new ArrayList<>();
+        List<AtoBRes> atoBResList = new ArrayList<>();
+
+        List<Integer> resultNumbers = root.getResultNumbers();
+
+        for(int i = 0; i < resultNumbers.size(); i++) {
+            OptimizingRes.Place newPlace = OptimizingRes.Place.fromReq(placeListReq.getPlaceList().get(resultNumbers.get(i)));
+            newPlaceList.add(newPlace);
+        }
+
+        for (int i = 1; i< resultNumbers.size(); i++) {
+            RootInfoDTO selectInfo = root.getTimeTable()[resultNumbers.get(i-1)][resultNumbers.get(i)];
+
+
+            PlaceListReq tmpPlaceList = PlaceListReq.builder().
+                    placeList(List.of(placeListReq.getPlaceList().get(resultNumbers.get(i-1)),
+                                        placeListReq.getPlaceList().get(resultNumbers.get(i))))
+                    .build();
+            AtoBRes newAtoB = getShortTime2(tmpPlaceList);
+
+            newAtoB.setOption(selectInfo.getStatus().getCode());
+            atoBResList.add(newAtoB);
+
+        }
+
+
+        return OptimizingRes.builder()
+                .placeList(newPlaceList)
+                .optimizing(atoBResList)
+                .build();
+    }
+
+
 
     private RootRes MakeRootInfo(RootRes rootRes, JsonElement rootInfo) {
         if(rootInfo == null) {

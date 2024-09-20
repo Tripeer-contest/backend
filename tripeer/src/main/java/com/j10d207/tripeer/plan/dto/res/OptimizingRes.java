@@ -1,14 +1,16 @@
 package com.j10d207.tripeer.plan.dto.res;
 
 import com.j10d207.tripeer.plan.dto.req.PlaceListReq;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
-public class OptimzingRes {
+@NoArgsConstructor
+@AllArgsConstructor
+public class OptimizingRes {
 
     private List<Place> placeList;
     private List<AtoBRes> optimizing;
@@ -31,8 +33,6 @@ public class OptimzingRes {
         private String title;
         private int userId;
         private boolean wishlist;
-
-        private String movingRoot;
 
         public static Place fromReq(PlaceListReq.PlaceReq placeReq) {
             return Place.builder()

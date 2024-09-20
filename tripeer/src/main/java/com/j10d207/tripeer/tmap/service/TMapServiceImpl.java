@@ -2,6 +2,7 @@ package com.j10d207.tripeer.tmap.service;
 
 
 import com.j10d207.tripeer.plan.db.TimeEnum;
+import com.j10d207.tripeer.plan.dto.req.PlaceListReq;
 import com.j10d207.tripeer.plan.dto.res.RootRes;
 import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
@@ -72,11 +73,24 @@ public class TMapServiceImpl implements TMapService {
                 timeTable[i][j].setStartTitle(coordinates.get(i).getTitle());
                 timeTable[i][j].setEndTitle(coordinates.get(j).getTitle());
                 //경로 추적
-                timeTable[i][j] = getPublicTime(coordinates.get(i).getLongitude(),
+//                timeTable[i][j] = getPublicTime(coordinates.get(i).getLongitude(),
+//                        coordinates.get(i).getLatitude(),
+//                        coordinates.get(j).getLongitude(),
+//                        coordinates.get(j).getLatitude(),
+//                        timeTable[i][j]);
+
+                List<RootInfoDTO> tmp = getPublicTime3(coordinates.get(i).getLongitude(),
                         coordinates.get(i).getLatitude(),
                         coordinates.get(j).getLongitude(),
                         coordinates.get(j).getLatitude(),
                         timeTable[i][j]);
+
+                int minTime = Math.min(Math.min(tmp.get(0).getTime(), tmp.get(1).getTime()), tmp.get(2).getTime());
+                if (minTime == 0)System.out.println("0 감지");
+                if(minTime == tmp.get(0).getTime()) timeTable[i][j] = tmp.get(0);
+                else if(minTime == tmp.get(1).getTime()) timeTable[i][j] = tmp.get(1);
+                else if(minTime == tmp.get(2).getTime()) timeTable[i][j] = tmp.get(2);
+
             }
         }
         return timeTable;
@@ -109,6 +123,50 @@ public class TMapServiceImpl implements TMapService {
                 });
     }
 
+    @Override
+    public RootInfoDTO getPublicTime2(double SX, double SY, double EX, double EY, RootInfoDTO rootInfoDTO) {
+        Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
+        rootInfoDTO.setLocation(SX, SY, EX, EY);
+        return optionalPublicRoot
+                //최근에 조회한 경로가 있는경우
+                .map(publicRoot -> {
+                    rootInfoDTO.setStatus(TmapErrorCode.SUCCESS);
+                    rootInfoDTO.setPublicRoot(apiRequestService.getRootDTO(publicRoot));
+                    rootInfoDTO.setTime(rootInfoDTO.getPublicRoot().getTotalTime());
+                    return rootInfoDTO;
+                })
+                .orElseGet(() -> {
+                    // A에서 B로 가는 경로의 정보를 조회
+                    JsonObject result = apiRequestService.getResult(SX, SY, EX, EY);
+                    // 조회 결과에 따라 적절한 응답 반환
+                    return result.getAsJsonObject().has("result")
+                            ? ApiResponseHasNonRoot2(result.getAsJsonObject("result").get("status").getAsInt(), rootInfoDTO)
+                            : ApiResponseHasRoot2(result.getAsJsonObject("metaData"), rootInfoDTO);
+                });
+    }
+
+    @Override
+    public List<RootInfoDTO> getPublicTime3(double SX, double SY, double EX, double EY, RootInfoDTO rootInfoDTO) {
+        Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
+        rootInfoDTO.setLocation(SX, SY, EX, EY);
+        return optionalPublicRoot
+                //최근에 조회한 경로가 있는경우
+                .map(publicRoot -> {
+                    rootInfoDTO.setStatus(TmapErrorCode.SUCCESS);
+                    rootInfoDTO.setPublicRoot(apiRequestService.getRootDTO(publicRoot));
+                    rootInfoDTO.setTime(rootInfoDTO.getPublicRoot().getTotalTime());
+                    return List.of(rootInfoDTO);
+                })
+                .orElseGet(() -> {
+                    // A에서 B로 가는 경로의 정보를 조회
+                    JsonObject result = apiRequestService.getResult(SX, SY, EX, EY);
+                    // 조회 결과에 따라 적절한 응답 반환
+                    return result.getAsJsonObject().has("result")
+                            ? ApiResponseHasNonRoot3(result.getAsJsonObject("result").get("status").getAsInt())
+                            : ApiResponseHasRoot3(result.getAsJsonObject("metaData"));
+                });
+    }
+
     /*
     대중교통 길찾기를 사용하기 위해 TMap API 를 요청하는 메소드
     입력 파라미터로 출발지와 목적지의 정보를 담은 DTO 를 입력받는다.
@@ -132,6 +190,32 @@ public class TMapServiceImpl implements TMapService {
             rootRes.setSpotTime(tMapApiErrorCodeFilter(result.getStatus()));
             return rootRes;
         }
+    }
+
+    @Override
+    public RootInfoDTO useTMapPublic2 (PlaceListReq placeListReq) {
+        RootInfoDTO baseInfo = RootInfoDTO.builder()
+                .startTitle(placeListReq.getPlaceList().getFirst().getTitle())
+                .endTitle(placeListReq.getPlaceList().getLast().getTitle())
+                .build();
+
+        return getPublicTime2(placeListReq.getPlaceList().getFirst().getLongitude(),
+                placeListReq.getPlaceList().getFirst().getLatitude(),
+                placeListReq.getPlaceList().getLast().getLongitude(),
+                placeListReq.getPlaceList().getLast().getLatitude(), baseInfo);
+    }
+
+    @Override
+    public List<RootInfoDTO> useTMapPublic3 (PlaceListReq placeListReq) {
+        RootInfoDTO baseInfo = RootInfoDTO.builder()
+                .startTitle(placeListReq.getPlaceList().getFirst().getTitle())
+                .endTitle(placeListReq.getPlaceList().getLast().getTitle())
+                .build();
+
+        return getPublicTime3(placeListReq.getPlaceList().getFirst().getLongitude(),
+                placeListReq.getPlaceList().getFirst().getLatitude(),
+                placeListReq.getPlaceList().getLast().getLongitude(),
+                placeListReq.getPlaceList().getLast().getLatitude(), baseInfo);
     }
 
     /*
@@ -215,6 +299,17 @@ public class TMapServiceImpl implements TMapService {
         return rootInfoDTO;
     }
 
+    private RootInfoDTO ApiResponseHasNonRoot2(int status, RootInfoDTO rootInfoDTO) {
+        rootInfoDTO.setStatus(TmapErrorCode.fromCode(status));
+        return rootInfoDTO;
+    }
+
+    private List<RootInfoDTO> ApiResponseHasNonRoot3(int status) {
+        return List.of(RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).build(),
+                RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).build(),
+                RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).build());
+    }
+
     /*
     조회된 경로들 중 비현실적인 수단을 백트래킹하고, 남은 경로중 가장 시간이 적은 경로를 선택한 후
     정보들을 정제하여 반환하는 메소드
@@ -234,12 +329,82 @@ public class TMapServiceImpl implements TMapService {
         rootInfoDTO.setRootInfo(bestRoot);
         rootInfoDTO.setStatus(TmapErrorCode.SUCCESS);
 
-        apiRequestService.saveRootInfo(bestRoot,
-                rootInfoDTO.getStartLatitude(),
-                rootInfoDTO.getStartLongitude(),
-                rootInfoDTO.getEndLatitude(),
-                rootInfoDTO.getEndLongitude(),
-                totalTime / TimeEnum.HOUR_PER_MIN.getTime());
+//        apiRequestService.saveRootInfo(bestRoot,
+//                rootInfoDTO.getStartLatitude(),
+//                rootInfoDTO.getStartLongitude(),
+//                rootInfoDTO.getEndLatitude(),
+//                rootInfoDTO.getEndLongitude(),
+//                totalTime / TimeEnum.HOUR_PER_MIN.getTime());
+
+        return rootInfoDTO;
+    }
+
+    /*
+    조회된 경로들 중 비현실적인 수단을 백트래킹하고, 남은 경로중 가장 시간이 적은 경로를 선택한 후
+    정보들을 정제하여 반환하는 메소드
+     */
+
+    private List<RootInfoDTO> ApiResponseHasRoot3 (JsonObject routeInfo) {
+        List<RootInfoDTO> rootInfoDTOList = new ArrayList<>();
+        //경로 정보중 제일 좋은 경로를 가져옴
+        JsonElement bestRoot = apiRequestService.getBestTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries"));
+        //경로 정보중 제일 좋은 경로를 가져옴
+        JsonElement bestAirRoot = apiRequestService.getBestAirTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries"));
+        //경로 정보중 제일 좋은 경로를 가져옴
+        JsonElement bestFerryRoot = apiRequestService.getBestFerryTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries"));
+
+        rootInfoDTOList.add(RootJsonRefactor(bestRoot, 1));
+        rootInfoDTOList.add(RootJsonRefactor(bestAirRoot, 2));
+        rootInfoDTOList.add(RootJsonRefactor(bestFerryRoot, 3));
+        return rootInfoDTOList;
+    }
+    private RootInfoDTO ApiResponseHasRoot2(JsonObject routeInfo, RootInfoDTO rootInfoDTO) {
+        //경로 정보중 제일 좋은 경로를 가져옴
+        JsonElement bestRoot = apiRequestService.getBestTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries"));
+        //모든 경로가 백트래킹 됨
+        if(bestRoot.getAsJsonObject().size() == 0) {
+            rootInfoDTO.setStatus(TmapErrorCode.NO_PUBLIC_AND_CAR_TRANSPORT_ROUTE);
+            rootInfoDTO.setTime(TimeEnum.ERROR_TIME.getTime());
+            return rootInfoDTO;
+        }
+        //반환 정보 생성
+        int totalTime = bestRoot.getAsJsonObject().get("totalTime").getAsInt();
+        rootInfoDTO.setTime(totalTime / TimeEnum.HOUR_PER_MIN.getTime());
+//        rootInfoDTO.setRootInfo(bestRoot);
+        rootInfoDTO.setPublicRoot(PublicRootDTO.fromJson(bestRoot.getAsJsonObject()));
+        rootInfoDTO.setStatus(TmapErrorCode.SUCCESS);
+
+//        apiRequestService.saveRootInfo(bestRoot,
+//                rootInfoDTO.getStartLatitude(),
+//                rootInfoDTO.getStartLongitude(),
+//                rootInfoDTO.getEndLatitude(),
+//                rootInfoDTO.getEndLongitude(),
+//                totalTime / TimeEnum.HOUR_PER_MIN.getTime());
+
+        return rootInfoDTO;
+    }
+
+    private RootInfoDTO RootJsonRefactor(JsonElement root, int option) {
+        RootInfoDTO rootInfoDTO = new RootInfoDTO();
+        //모든 경로가 백트래킹 됨
+        if(root.getAsJsonObject().size() == 0) {
+            rootInfoDTO.setStatus(TmapErrorCode.NO_PUBLIC_TRANSPORT_ROUTE);
+            rootInfoDTO.setTime(TimeEnum.ERROR_TIME.getTime());
+            return rootInfoDTO;
+        }
+        //반환 정보 생성
+        int totalTime = root.getAsJsonObject().get("totalTime").getAsInt();
+        rootInfoDTO.setTime(totalTime / TimeEnum.HOUR_PER_MIN.getTime());
+//        rootInfoDTO.setRootInfo(bestRoot);
+        rootInfoDTO.setPublicRoot(PublicRootDTO.fromJson(root.getAsJsonObject()));
+        rootInfoDTO.setStatus(TmapErrorCode.fromCode(option));
+
+//        apiRequestService.saveRootInfo(bestRoot,
+//                rootInfoDTO.getStartLatitude(),
+//                rootInfoDTO.getStartLongitude(),
+//                rootInfoDTO.getEndLatitude(),
+//                rootInfoDTO.getEndLongitude(),
+//                totalTime / TimeEnum.HOUR_PER_MIN.getTime());
 
         return rootInfoDTO;
     }

@@ -66,6 +66,9 @@ public interface PlanService {
     //플랜 최단거리 조정
     public RootRes getOptimizingTime(RootRes rootOptimizeReqDTO) throws IOException;
 
+    //플랜 최단거리 조정
+    public OptimizingRes getOptimizingTime2(PlaceListReq placeListReq) throws IOException;
+
     //지도 줌레벨 기반의 관광지 검색
     SpotSearchResDTO getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
                                          double minLon, double maxLon, int sortType, long userId);

@@ -12,13 +12,17 @@ import java.util.Arrays;
 public enum TmapErrorCode {
 
     SUCCESS(0, "성공"),
+    SUCCESS_CAR(1, "차량 경로 성공"),
+    SUCCESS_PUBLIC(2, "대중교통 경로 성공"),
+    SUCCESS_AIR(3, "항공 경로 성공"),
+    SUCCESS_FERRY(4, "항해 경로 성공"),
     NO_PUBLIC_ROUTE_START_END_NEAR(11, "출발지/도착지 간 거리가 가까워서 탐색된 경로 없음"),
     NO_PUBLIC_AND_CAR_ROUTE_START_END_NEAR(411, "차로 우회해도, 출발지/도착지 간 거리가 가까워서 탐색된 경로 없음"),
     NO_PUBLIC_ROUTE_FROM_START_POINT(12, "출발지에서 검색된 정류장이 없어서 탐색된 경로 없음"),
     NO_PUBLIC_AND_CAR_ROUTE_FROM_START_POINT(412, "차로 우회해도, 출발지에서 검색된 정류장이 없어서 탐색된 경로 없음"),
     NO_PUBLIC_ROUTE_FROM_END_POINT(13, "도착지에서 검색된 정류장이 없어서 탐색된 경로 없음"),
     NO_PUBLIC_AND_CAR_ROUTE_FROM_END_POINT(413, "차로 우회해도, 도착지에서 검색된 정류장이 없어서 탐색된 경로 없음"),
-    NO_PUBLIC_TRANSPORT_ROUTE(14, "출발지/도착지 간 탐색된 대중교통 경로가 없음"),
+    NO_PUBLIC_TRANSPORT_ROUTE(14, "출발지/도착지 간 탐색된 해당 수단의 경로가 없음"),
     NO_PUBLIC_AND_CAR_TRANSPORT_ROUTE(414, "차로 우회해도, 출발지/도착지 간 탐색된 대중교통 경로가 없음"),
 
     NO_CAR_AND_PUBLIC_TRANSPORT_ROUTE(400, "대중교통으로 우회해도, 자동차 경로가 없음");

@@ -54,6 +54,7 @@ public class PublicRootDTO {
         }
 
         return PublicRootDTO.builder()
+                .totalTime(jsonObject.get("totalTime").getAsInt())
                 .totalDistance(jsonObject.get("totalDistance").getAsInt())
                 .totalWalkTime(jsonObject.get("totalWalkTime").getAsInt())
                 .totalWalkDistance(jsonObject.get("totalWalkDistance").getAsInt())
@@ -70,6 +71,7 @@ public class PublicRootDTO {
         }
 
         return PublicRootDTO.builder()
+                .totalTime(publicRoot.getTotalTime())
                 .totalDistance(publicRoot.getTotalDistance())
                 .totalWalkTime(publicRoot.getTotalWalkTime())
                 .totalWalkDistance(publicRoot.getTotalWalkDistance())

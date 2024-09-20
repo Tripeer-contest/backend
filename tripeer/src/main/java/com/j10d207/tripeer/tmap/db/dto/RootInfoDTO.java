@@ -27,7 +27,6 @@ public class RootInfoDTO {
 
 //    private int status;
     private TmapErrorCode status;
-    private StringBuilder tmi;
 
     public String timeToString () {
         StringBuilder timeString = new StringBuilder();

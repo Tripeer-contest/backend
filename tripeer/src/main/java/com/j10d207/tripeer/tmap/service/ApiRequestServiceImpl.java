@@ -68,6 +68,48 @@ public class ApiRequestServiceImpl implements ApiRequestService {
         return  bestJson;
     }
 
+    //경로 리스트 중에서 제일 좋은 경로 하나를 선정해서 반환 ( 시간 우선 )
+    @Override
+    public JsonElement getBestAirTime(JsonArray itineraries) {
+        int minTime = Integer.MAX_VALUE;
+        JsonElement bestJson = new JsonObject();
+        for (JsonElement itinerary : itineraries) {
+            int tmpTime = itinerary.getAsJsonObject().get("totalTime").getAsInt();
+            int tmpPathType = itinerary.getAsJsonObject().get("pathType").getAsInt();
+            // 이동수단이 6-항공 인 경우 만
+            if( tmpPathType != 6) {
+                continue;
+            }
+
+            if ( minTime > tmpTime ) {
+                minTime = tmpTime;
+                bestJson = itinerary;
+            }
+        }
+        return  bestJson;
+    }
+
+    //경로 리스트 중에서 제일 좋은 경로 하나를 선정해서 반환 ( 시간 우선 )
+    @Override
+    public JsonElement getBestFerryTime(JsonArray itineraries) {
+        int minTime = Integer.MAX_VALUE;
+        JsonElement bestJson = new JsonObject();
+        for (JsonElement itinerary : itineraries) {
+            int tmpTime = itinerary.getAsJsonObject().get("totalTime").getAsInt();
+            int tmpPathType = itinerary.getAsJsonObject().get("pathType").getAsInt();
+            // 이동수단이 6-항공 인 경우 만
+            if( tmpPathType != 7) {
+                continue;
+            }
+
+            if ( minTime > tmpTime ) {
+                minTime = tmpTime;
+                bestJson = itinerary;
+            }
+        }
+        return  bestJson;
+    }
+
     //저장된 결과를 가져와서 DTO로 변환
     @Override
     public PublicRootDTO getRootDTO (PublicRootEntity publicRootEntity) {

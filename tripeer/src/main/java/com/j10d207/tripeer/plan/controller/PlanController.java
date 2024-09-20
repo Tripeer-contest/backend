@@ -3,6 +3,7 @@ package com.j10d207.tripeer.plan.controller;
 import com.j10d207.tripeer.plan.dto.req.*;
 import com.j10d207.tripeer.plan.dto.res.*;
 import com.j10d207.tripeer.plan.service.PlanService;
+import com.j10d207.tripeer.plan.service.PlanServiceImpl;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import jakarta.validation.Valid;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class PlanController {
 
     private final PlanService planService;
+
     //플랜 생성
     @PostMapping
     public Response<PlanDetailMainDTO.CreateResultInfo> createPlan(@RequestBody @Valid PlanCreateInfoReq createInfo,
@@ -170,23 +172,30 @@ public class PlanController {
         return Response.of(HttpStatus.OK, "플랜 디테일 전체 조회 완료", result);
     }
 
-    //목적지간 최단 루트 계산
+//    //목적지간 최단 루트 계산
+//    @PostMapping("/optimizing/short")
+//    public Response<RootRes> getShortTime(@RequestBody PlaceListReq placeListReq) {
+//        RootRes rootRes = RootRes.ofPlaceListReq(placeListReq);
+//        return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime(rootRes));
+//    }
+
     @PostMapping("/optimizing/short")
-    public Response<RootRes> getShortTime(@RequestBody PlaceListReq placeListReq) {
-        RootRes rootRes = RootRes.ofPlaceListReq(placeListReq);
-        return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime(rootRes));
+    public Response<AtoBRes> getShortTime2(@RequestBody PlaceListReq placeListReq) {
+        return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.2", planService.getShortTime2(placeListReq));
     }
 
-    @PostMapping("/optimizing/short2")
-    public Response<AtoBRes> getShortTime2(@RequestBody PlaceListReq placeListReq) {
-        return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime2(placeListReq));
-    }
+//    //플랜 최단거리 조정
+//    @PostMapping("/optimizing")
+//    public Response<RootRes> getOptimizedPlan(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
+//        RootRes rootRes = RootRes.ofPlaceListReq(placeListReq);
+//        RootRes result = planService.getOptimizingTime(rootRes);
+//        return Response.of(HttpStatus.OK, "목적지 리스트 최적화 완료", result);
+//    }
 
     //플랜 최단거리 조정
     @PostMapping("/optimizing")
-    public Response<RootRes> getOptimizedPlan(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
-        RootRes rootRes = RootRes.ofPlaceListReq(placeListReq);
-        RootRes result = planService.getOptimizingTime(rootRes);
-        return Response.of(HttpStatus.OK, "목적지 리스트 최적화 완료", result);
+    public Response<OptimizingRes> getOptimizedPlan2(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
+        OptimizingRes result = planService.getOptimizingTime2(placeListReq);
+        return Response.of(HttpStatus.OK, "목적지 리스트 최적화 완료2", result);
     }
 }

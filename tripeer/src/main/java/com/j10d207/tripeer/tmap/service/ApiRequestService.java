@@ -14,6 +14,12 @@ public interface ApiRequestService {
     //경로 리스트 중에서 제일 좋은 경로 하나를 선정해서 반환 ( 시간 우선 )
     public JsonElement getBestTime(JsonArray itineraries);
 
+    //경로 리스트 중에서 제일 좋은 경로 하나를 선정해서 반환 ( 시간 우선 )
+    public JsonElement getBestAirTime(JsonArray itineraries);
+
+    //경로 리스트 중에서 제일 좋은 경로 하나를 선정해서 반환 ( 시간 우선 )
+    public JsonElement getBestFerryTime(JsonArray itineraries);
+
     // 경로 조회하기
     public JsonObject getResult(double SX, double SY, double EX, double EY);
 
