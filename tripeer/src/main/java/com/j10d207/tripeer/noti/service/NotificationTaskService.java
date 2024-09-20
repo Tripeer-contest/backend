@@ -1,6 +1,5 @@
 package com.j10d207.tripeer.noti.service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,14 +11,18 @@ import com.google.firebase.messaging.Message;
 import com.j10d207.tripeer.noti.db.entity.Notification;
 import com.j10d207.tripeer.noti.db.entity.NotificationTask;
 import com.j10d207.tripeer.noti.db.firebase.FirebasePublisher;
+import com.j10d207.tripeer.noti.db.firebase.MessageBody;
 import com.j10d207.tripeer.noti.db.firebase.MessageBuilder;
 import com.j10d207.tripeer.noti.db.firebase.MessageType;
 import com.j10d207.tripeer.noti.db.repository.NotificationTaskRepository;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationTaskService {
 
 	private final NotificationTaskRepository notificationTaskRepository;
@@ -27,6 +30,8 @@ public class NotificationTaskService {
 	private final NotificationService notificationService;
 
 	private final FirebasePublisher firebasePublisher;
+
+	private final EntityManager em;
 
 	public List<NotificationTask> createTasks(
 		final String planTitle,
@@ -55,15 +60,27 @@ public class NotificationTaskService {
 	}
 
 	@Transactional
+	public void updateStateToSent(final NotificationTask task) {
+		final NotificationTask mergedTaskEntity = em.merge(task);
+		mergedTaskEntity.toSENT();
+	}
+
+
+	@Transactional
 	public void processingMessageTask (final NotificationTask task) {
+
 		final Notification notification = task.getToken();
 		final MessageBody messageBody = new MessageBody(task.getTitle(), task.getContent(), task.getMsgType());
-		final Message fcmMessage = MessageBuilder.toFirebaseMessage(messageBody, notification.getToken());
 		try {
-			task.toSENT();
+			final Message fcmMessage = MessageBuilder.toFirebaseMessage(messageBody, notification.getToken());
 			firebasePublisher.sendFirebaseMessage(fcmMessage);
 		} catch (FirebaseException e) {
 			notificationService.invalidFirebaseHandler(notification);
 		}
+	}
+
+	@Transactional
+	public List<NotificationTask> getUnsentNotificationTasks() {
+		return notificationTaskRepository.findAllWithUnsent();
 	}
 }

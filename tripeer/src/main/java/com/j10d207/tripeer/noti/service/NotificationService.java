@@ -6,15 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.firebase.FirebaseException;
-import com.google.firebase.messaging.Message;
 import com.j10d207.tripeer.noti.db.entity.Notification;
 import com.j10d207.tripeer.noti.db.firebase.FirebasePublisher;
-import com.j10d207.tripeer.noti.db.firebase.MessageBuilder;
 import com.j10d207.tripeer.noti.db.repository.NotificationRepository;
+import com.j10d207.tripeer.plan.event.CoworkerDto;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.repository.UserRepository;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,11 +30,9 @@ public class NotificationService {
 
 	private final NotificationRepository notificationRepository;
 
-	private final NotificationEventPublisher publisher;
-
 	private final UserRepository userRepository;
 
-	private final FirebasePublisher firebasePublisher;
+	private final EntityManager em;
 
 	/**
 	 * @author: 김회창
@@ -54,48 +51,24 @@ public class NotificationService {
 		notificationRepository.save(notification);
 	}
 
+
 	@Transactional
-	public void test() {
-		publisher.publish();
+	public List<Notification> findAllNotificationByUsers(final List<CoworkerDto> coworkers) {
+		List<Long> userIdList = coworkers.stream().map(CoworkerDto::getId).toList();
+		List<UserEntity> users = userRepository.findAllById(userIdList);
+		return notificationRepository.findAllByUser(users);
 	}
 
 	@Transactional
-	public List<Notification> findAllNotificationByUser(final List<UserEntity> coworkers) {
-		return notificationRepository.findAllByUser(coworkers);
+	public List<Notification> findAllNotificationByUser(final CoworkerDto coworker) {
+		UserEntity user = userRepository.findByUserId(coworker.getId());
+		return notificationRepository.findAllByUser(List.of(user));
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void invalidFirebaseHandler(final Notification notification) {
+		final Notification mergedNotificationEntity = em.merge(notification);
 		log.info("invalid firebase token: {}", notification.getUser().getNickname());
-		notification.mark();
+		mergedNotificationEntity.mark();
 	}
-
-
-	/**
-	 * @author: 김회창
-	 *
-	 * <p>
-	 *     다이어리 저장 알림을 Firbase 외부 서비스를 통해 발행
-	 * </p>
-	 *
-	 * @param userId: 		 토큰이 추가될 유저 식별번호
-	 */
-
-
-	/**
-	 * @author: 김회창
-	 *
-	 * <p>
-	 *     사용자 초대 알림을 Firbase 외부 서비스를 통해 발행
-	 * </p>
-	 *
-	 * @param userId: 		 토큰이 추가될 유저 식별번호
-	 */
-
-	@Transactional
-	public void publishInvited(final Long userId) {
-
-	}
-
-
 }

@@ -1,7 +1,6 @@
 package com.j10d207.tripeer.noti.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.j10d207.tripeer.noti.service.NotificationEventTestPublisher;
 import com.j10d207.tripeer.noti.service.NotificationService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class NotificationController {
 
 	private final NotificationService service;
+	private final NotificationEventTestPublisher pub;
 
 	/**
 	 * @author: 김회창
@@ -56,7 +57,7 @@ public class NotificationController {
 
 	@GetMapping
 	public Response<Void> test() {
-		service.test();
+		pub.publish();
 		return Response.of(
 			HttpStatus.OK,
 			null,

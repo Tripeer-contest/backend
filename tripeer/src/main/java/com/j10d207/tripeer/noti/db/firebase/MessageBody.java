@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.noti.service;
+package com.j10d207.tripeer.noti.db.firebase;
 
 import java.util.Collections;
 import java.util.HashMap;

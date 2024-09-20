@@ -1,10 +1,7 @@
 package com.j10d207.tripeer.noti.db.firebase;
 
-import java.util.Map;
-
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.WebpushConfig;
-import com.j10d207.tripeer.noti.service.MessageBody;
 
 public class MessageBuilder {
 

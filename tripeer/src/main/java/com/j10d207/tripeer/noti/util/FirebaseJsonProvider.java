@@ -28,24 +28,6 @@ public class FirebaseJsonProvider {
     private final String clientX509CertUrl;
     private final String universeDomain;
 
-
-    @Override
-    public String toString() {
-        return "FirebaseJsonProvider{" +
-                "type='" + type + '\'' +
-                ", projectId='" + projectId + '\'' +
-                ", privateKeyId='" + privateKeyId + '\'' +
-                ", privateKey='" + privateKey + '\'' +
-                ", clientEmail='" + clientEmail + '\'' +
-                ", clientId='" + clientId + '\'' +
-                ", authUri='" + authUri + '\'' +
-                ", tokenUri='" + tokenUri + '\'' +
-                ", authProviderX509CertUrl='" + authProviderX509CertUrl + '\'' +
-                ", clientX509CertUrl='" + clientX509CertUrl + '\'' +
-                ", universeDomain='" + universeDomain + '\'' +
-                '}';
-    }
-
     public FirebaseJsonProvider(
         @Value("${firebase.type}") String type,
         @Value("${firebase.project.id}") String projectId,
@@ -92,7 +74,6 @@ public class FirebaseJsonProvider {
 
     private void makeFirebaseJson(JsonGenerator generator) {
         try {
-            System.out.println(toString());
             generator.writeStartObject();
             generator.writeStringField("type", type);
             generator.writeStringField("project_id", projectId);

@@ -1,10 +1,9 @@
 package com.j10d207.tripeer.noti.db.entity;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 import com.j10d207.tripeer.noti.db.firebase.MessageType;
-import com.j10d207.tripeer.noti.service.MessageBody;
+import com.j10d207.tripeer.noti.db.firebase.MessageBody;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,7 +31,7 @@ public class NotificationTask {
 	private Long id;
 
 	@OneToOne
-	@JoinColumn(name = "id")
+	@JoinColumn(name = "token_id")
 	private Notification token;
 
 	private String title;
