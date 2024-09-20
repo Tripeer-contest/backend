@@ -1,21 +1,11 @@
 package com.j10d207.tripeer.plan.service;
 
-import com.j10d207.tripeer.plan.dto.req.CoworkerInvitedReq;
-import com.j10d207.tripeer.plan.dto.req.PlanCreateInfoReq;
-import com.j10d207.tripeer.plan.dto.req.PlanDetailReq;
-import com.j10d207.tripeer.plan.dto.req.TitleChangeReq;
-import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
-import com.j10d207.tripeer.plan.dto.res.PlanMemberDto;
-import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
-import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
-import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
+import com.j10d207.tripeer.plan.dto.req.*;
+import com.j10d207.tripeer.plan.dto.res.*;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RequestParam;
 
 public interface PlanService {
 
@@ -68,10 +58,13 @@ public interface PlanService {
     public PlanDetailMainDTO.PlanCoworker getPlanMyInfo(long planId, long userId);
 
     //목적지간 최단 루트 계산
-    public RootOptimizeDTO getShortTime(RootOptimizeDTO rootOptimizeDTO);
+    public RootRes getShortTime(RootRes rootRes);
+
+    //목적지간 최단 루트 계산
+    public AtoBRes getShortTime2(PlaceListReq placeListReq);
 
     //플랜 최단거리 조정
-    public RootOptimizeDTO getOptimizingTime(RootOptimizeDTO rootOptimizeReqDTO) throws IOException;
+    public RootRes getOptimizingTime(RootRes rootOptimizeReqDTO) throws IOException;
 
     //지도 줌레벨 기반의 관광지 검색
     SpotSearchResDTO getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,

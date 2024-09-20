@@ -1,6 +1,6 @@
 package com.j10d207.tripeer.tmap.db.dto;
 
-import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
+import com.j10d207.tripeer.plan.dto.res.RootRes;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,7 +15,7 @@ public class CoordinateDTO {
     private double longitude;
     private String title;
 
-    public static CoordinateDTO PlaceToCoordinate (RootOptimizeDTO.place place) {
+    public static CoordinateDTO PlaceToCoordinate (RootRes.Place place) {
         return CoordinateDTO.builder()
                 .title(place.getTitle())
                 .latitude(place.getLatitude())

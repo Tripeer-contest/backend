@@ -1,10 +1,7 @@
 package com.j10d207.tripeer.plan.controller;
 
 import com.j10d207.tripeer.plan.dto.req.*;
-import com.j10d207.tripeer.plan.dto.res.PlanDetailMainDTO;
-import com.j10d207.tripeer.plan.dto.res.PlanMemberDto;
-import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
-import com.j10d207.tripeer.plan.dto.res.SpotSearchResDTO;
+import com.j10d207.tripeer.plan.dto.res.*;
 import com.j10d207.tripeer.plan.service.PlanService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
@@ -175,16 +172,21 @@ public class PlanController {
 
     //목적지간 최단 루트 계산
     @PostMapping("/optimizing/short")
-    public Response<RootOptimizeDTO> getShortTime(@RequestBody RootOptimizeDTO rootOptimizeDTO) {
-//        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.ofPlaceListReq(placeListReq);
-        return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime(rootOptimizeDTO));
+    public Response<RootRes> getShortTime(@RequestBody PlaceListReq placeListReq) {
+        RootRes rootRes = RootRes.ofPlaceListReq(placeListReq);
+        return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime(rootRes));
+    }
+
+    @PostMapping("/optimizing/short2")
+    public Response<AtoBRes> getShortTime2(@RequestBody PlaceListReq placeListReq) {
+        return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime2(placeListReq));
     }
 
     //플랜 최단거리 조정
     @PostMapping("/optimizing")
-    public Response<RootOptimizeDTO> getOptimizedPlan(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
-        RootOptimizeDTO rootOptimizeDTO = RootOptimizeDTO.ofPlaceListReq(placeListReq);
-        RootOptimizeDTO result = planService.getOptimizingTime(rootOptimizeDTO);
+    public Response<RootRes> getOptimizedPlan(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
+        RootRes rootRes = RootRes.ofPlaceListReq(placeListReq);
+        RootRes result = planService.getOptimizingTime(rootRes);
         return Response.of(HttpStatus.OK, "목적지 리스트 최적화 완료", result);
     }
 }

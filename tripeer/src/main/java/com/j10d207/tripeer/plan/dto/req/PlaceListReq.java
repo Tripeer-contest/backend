@@ -11,9 +11,10 @@ public class PlaceListReq {
     @NotNull(message = "${validatedValue} is null")
     private int option;
     @NotNull (message = "${validatedValue} is null")
-    private List<place> placeList;
+    private List<PlaceReq> placeList;
 
-    public static class place {
+    @Getter
+    public static class PlaceReq {
 
         private String addr;
         private String contentType;

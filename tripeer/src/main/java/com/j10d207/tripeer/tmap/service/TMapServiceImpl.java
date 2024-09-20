@@ -2,7 +2,7 @@ package com.j10d207.tripeer.tmap.service;
 
 
 import com.j10d207.tripeer.plan.db.TimeEnum;
-import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
+import com.j10d207.tripeer.plan.dto.res.RootRes;
 import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
@@ -14,7 +14,6 @@ import com.j10d207.tripeer.tmap.db.dto.CoordinateDTO;
 import com.j10d207.tripeer.tmap.db.dto.RootInfoDTO;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 import com.j10d207.tripeer.tmap.db.repository.PublicRootRepository;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -115,23 +114,23 @@ public class TMapServiceImpl implements TMapService {
     입력 파라미터로 출발지와 목적지의 정보를 담은 DTO 를 입력받는다.
      */
     @Override
-    public RootOptimizeDTO useTMapPublic (RootOptimizeDTO rootOptimizeDTO) {
+    public RootRes useTMapPublic (RootRes rootRes) {
         RootInfoDTO baseInfo = RootInfoDTO.builder()
-                .startTitle(rootOptimizeDTO.getPlaceList().getFirst().getTitle())
-                .endTitle(rootOptimizeDTO.getPlaceList().getLast().getTitle())
+                .startTitle(rootRes.getPlaceList().getFirst().getTitle())
+                .endTitle(rootRes.getPlaceList().getLast().getTitle())
                 .build();
 
-        RootInfoDTO result = getPublicTime(rootOptimizeDTO.getPlaceList().getFirst().getLongitude(),
-                rootOptimizeDTO.getPlaceList().getFirst().getLatitude(),
-                rootOptimizeDTO.getPlaceList().getLast().getLongitude(),
-                rootOptimizeDTO.getPlaceList().getLast().getLatitude(), baseInfo);
+        RootInfoDTO result = getPublicTime(rootRes.getPlaceList().getFirst().getLongitude(),
+                rootRes.getPlaceList().getFirst().getLatitude(),
+                rootRes.getPlaceList().getLast().getLongitude(),
+                rootRes.getPlaceList().getLast().getLatitude(), baseInfo);
 
         if (result.getStatus() == TmapErrorCode.SUCCESS) {
-            return tMapApiSuccessCode(rootOptimizeDTO, result);
+            return tMapApiSuccessCode(rootRes, result);
         } else {
-            rootOptimizeDTO.setOption(result.getStatus().getCode());
-            rootOptimizeDTO.setSpotTime(tMapApiErrorCodeFilter(result.getStatus()));
-            return rootOptimizeDTO;
+            rootRes.setOption(result.getStatus().getCode());
+            rootRes.setSpotTime(tMapApiErrorCodeFilter(result.getStatus()));
+            return rootRes;
         }
     }
 
@@ -172,16 +171,16 @@ public class TMapServiceImpl implements TMapService {
     /*
     TMap Api 요청시 이미 조회된 경로와 아닌경우를 분류해서 DTO 로 변환하는 메소드
      */
-    private RootOptimizeDTO tMapApiSuccessCode(RootOptimizeDTO rootOptimizeDTO, RootInfoDTO rootInfoDTO) {
-        rootOptimizeDTO.setSpotTime(Collections.singletonList(new String[]{rootInfoDTO.timeToString(), String.valueOf(rootOptimizeDTO.getOption())}));
+    private RootRes tMapApiSuccessCode(RootRes rootRes, RootInfoDTO rootInfoDTO) {
+        rootRes.setSpotTime(Collections.singletonList(new String[]{rootInfoDTO.timeToString(), String.valueOf(rootRes.getOption())}));
 
         if (rootInfoDTO.getPublicRoot() != null ) {
             List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
             publicRootDTOList.add(rootInfoDTO.getPublicRoot());
-            rootOptimizeDTO.setPublicRootList(publicRootDTOList);
-            return rootOptimizeDTO;
+            rootRes.setPublicRootList(publicRootDTOList);
+            return rootRes;
         } else {
-            return MakeRootInfo(rootOptimizeDTO, rootInfoDTO.getRootInfo());
+            return MakeRootInfo(rootRes, rootInfoDTO.getRootInfo());
         }
     }
 
@@ -233,6 +232,7 @@ public class TMapServiceImpl implements TMapService {
         int totalTime = bestRoot.getAsJsonObject().get("totalTime").getAsInt();
         rootInfoDTO.setTime(totalTime / TimeEnum.HOUR_PER_MIN.getTime());
         rootInfoDTO.setRootInfo(bestRoot);
+        rootInfoDTO.setStatus(TmapErrorCode.SUCCESS);
 
         apiRequestService.saveRootInfo(bestRoot,
                 rootInfoDTO.getStartLatitude(),
@@ -247,15 +247,15 @@ public class TMapServiceImpl implements TMapService {
     /*
     Json 정제
      */
-    private RootOptimizeDTO MakeRootInfo(RootOptimizeDTO rootOptimizeDTO, JsonElement rootInfo) {
+    private RootRes MakeRootInfo(RootRes rootRes, JsonElement rootInfo) {
         if(rootInfo == null) {
             List<PublicRootDTO> rootList = new ArrayList<>();
-            if(rootOptimizeDTO.getPublicRootList() != null) {
-                rootList = rootOptimizeDTO.getPublicRootList();
+            if(rootRes.getPublicRootList() != null) {
+                rootList = rootRes.getPublicRootList();
             }
             rootList.add(null);
-            rootOptimizeDTO.setPublicRootList(rootList);
-            return rootOptimizeDTO;
+            rootRes.setPublicRootList(rootList);
+            return rootRes;
         }
         JsonObject infoObject = rootInfo.getAsJsonObject();
 
@@ -263,13 +263,13 @@ public class TMapServiceImpl implements TMapService {
 
 
         List<PublicRootDTO> rootList = new ArrayList<>();
-        if(rootOptimizeDTO.getPublicRootList() != null) {
-            rootList = rootOptimizeDTO.getPublicRootList();
+        if(rootRes.getPublicRootList() != null) {
+            rootList = rootRes.getPublicRootList();
         }
         rootList.add(publicRoot);
-        rootOptimizeDTO.setPublicRootList(rootList);
+        rootRes.setPublicRootList(rootList);
 
-        return rootOptimizeDTO;
+        return rootRes;
     }
 
 

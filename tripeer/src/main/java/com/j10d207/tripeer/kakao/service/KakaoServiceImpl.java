@@ -4,7 +4,7 @@ package com.j10d207.tripeer.kakao.service;
 import com.google.gson.Gson;
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.plan.db.TimeEnum;
-import com.j10d207.tripeer.plan.dto.res.RootOptimizeDTO;
+import com.j10d207.tripeer.plan.dto.res.RootRes;
 import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
@@ -25,7 +25,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -217,23 +215,23 @@ public class KakaoServiceImpl implements KakaoService {
     }
 
     @Override
-    public RootOptimizeDTO setCarResult(int resultTime, RootOptimizeDTO rootOptimizeDTO) {
+    public RootRes setCarResult(int resultTime, RootRes rootRes) {
         StringBuilder rootInfoBuilder = new StringBuilder();
         List<String[]> timeList = new ArrayList<>();
         if( resultTime == TimeEnum.ERROR_TIME.getTime()) {
-            rootOptimizeDTO.setOption(TmapErrorCode.NO_CAR_AND_PUBLIC_TRANSPORT_ROUTE.getCode());
+            rootRes.setOption(TmapErrorCode.NO_CAR_AND_PUBLIC_TRANSPORT_ROUTE.getCode());
             rootInfoBuilder.append("경로를 찾을 수 없습니다.");
             timeList.add(new String[] {rootInfoBuilder.toString(), "2" } );
-            rootOptimizeDTO.setSpotTime(timeList);
-            return rootOptimizeDTO;
+            rootRes.setSpotTime(timeList);
+            return rootRes;
         }
         if(resultTime/TimeEnum.HOUR_PER_MIN.getTime() > 0) {
             rootInfoBuilder.append(resultTime/TimeEnum.HOUR_PER_MIN.getTime()).append("시간 ");
         }
         rootInfoBuilder.append(resultTime%TimeEnum.HOUR_PER_MIN.getTime()).append("분");
-        timeList.add(new String[] {rootInfoBuilder.toString(), String.valueOf(rootOptimizeDTO.getOption()) } );
-        rootOptimizeDTO.setSpotTime(timeList);
-        return rootOptimizeDTO;
+        timeList.add(new String[] {rootInfoBuilder.toString(), String.valueOf(rootRes.getOption()) } );
+        rootRes.setSpotTime(timeList);
+        return rootRes;
     }
 
 }
