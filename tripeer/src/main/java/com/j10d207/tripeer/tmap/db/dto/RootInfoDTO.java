@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.tmap.db.dto;
 
+import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import lombok.*;
 
@@ -9,6 +10,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+/*
+tmapAPI 요청 결과를 저장하기 위한 DTO
+ */
 public class RootInfoDTO {
 
     private int time;
@@ -21,8 +25,8 @@ public class RootInfoDTO {
     private JsonElement rootInfo;
     private PublicRootDTO publicRoot;
 
-    private int status;
-    private StringBuilder tmi;
+//    private int status;
+    private TmapErrorCode status;
 
     public String timeToString () {
         StringBuilder timeString = new StringBuilder();
@@ -39,6 +43,15 @@ public class RootInfoDTO {
         this.startLongitude = SY;
         this.endLatitude = EX;
         this.endLongitude = EY;
+    }
+
+    public static RootInfoDTO createOfLocation(double SX, double SY, double EX, double EY) {
+        return RootInfoDTO.builder()
+                .startLatitude(SX)
+                .startLongitude(SY)
+                .endLatitude(EX)
+                .endLongitude(EY)
+                .build();
     }
 
 }

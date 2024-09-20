@@ -1,19 +1,26 @@
 package com.j10d207.tripeer.plan.dto.req;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PlaceListReq {
 
     @NotNull(message = "${validatedValue} is null")
     private int option;
     @NotNull (message = "${validatedValue} is null")
-    private List<place> placeList;
+    private List<PlaceReq> placeList;
 
-    public static class place {
+    @Getter
+    public static class PlaceReq {
 
         private String addr;
         private String contentType;
@@ -30,6 +37,5 @@ public class PlaceListReq {
         private int userId;
         private boolean wishlist;
 
-        private String movingRoot;
     }
 }

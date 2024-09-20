@@ -14,6 +14,9 @@ import java.util.List;
 @Setter
 @Builder
 @ToString
+/*
+반환받은 Json 정보를 정제한 값을들 담기 위한 DTO
+ */
 public class PublicRootDTO {
 
     //총 소요 시간(min)
@@ -51,6 +54,7 @@ public class PublicRootDTO {
         }
 
         return PublicRootDTO.builder()
+                .totalTime(jsonObject.get("totalTime").getAsInt())
                 .totalDistance(jsonObject.get("totalDistance").getAsInt())
                 .totalWalkTime(jsonObject.get("totalWalkTime").getAsInt())
                 .totalWalkDistance(jsonObject.get("totalWalkDistance").getAsInt())
@@ -67,6 +71,7 @@ public class PublicRootDTO {
         }
 
         return PublicRootDTO.builder()
+                .totalTime(publicRoot.getTotalTime())
                 .totalDistance(publicRoot.getTotalDistance())
                 .totalWalkTime(publicRoot.getTotalWalkTime())
                 .totalWalkDistance(publicRoot.getTotalWalkDistance())

@@ -41,12 +41,7 @@ public class ApiRequestServiceImpl implements ApiRequestService {
         headers.set("appKey", apikey);
         headers.set("Content-Type", "application/json");
         headers.set("Accept", "*/*");
-        RouteReqDTO route = RouteReqDTO.builder()
-                .startX(String.valueOf(SX))
-                .startY(String.valueOf(SY))
-                .endX(String.valueOf(EX))
-                .endY(String.valueOf(EY))
-                .build();
+        RouteReqDTO route = RouteReqDTO.doubleConvertString(SX, SY, EX, EY);
         HttpEntity<RouteReqDTO> request = new HttpEntity<>(route, headers);
         String result = restTemplate.postForObject("https://apis.openapi.sk.com/transit/routes", request, String.class);
         return JsonParser.parseString(result).getAsJsonObject();
@@ -62,6 +57,48 @@ public class ApiRequestServiceImpl implements ApiRequestService {
             int tmpPathType = itinerary.getAsJsonObject().get("pathType").getAsInt();
             // 이동수단이 6-항공일 경우 제외
             if( tmpPathType == 6) {
+                continue;
+            }
+
+            if ( minTime > tmpTime ) {
+                minTime = tmpTime;
+                bestJson = itinerary;
+            }
+        }
+        return  bestJson;
+    }
+
+    //경로 리스트 중에서 제일 좋은 경로 하나를 선정해서 반환 ( 시간 우선 )
+    @Override
+    public JsonElement getBestAirTime(JsonArray itineraries) {
+        int minTime = Integer.MAX_VALUE;
+        JsonElement bestJson = new JsonObject();
+        for (JsonElement itinerary : itineraries) {
+            int tmpTime = itinerary.getAsJsonObject().get("totalTime").getAsInt();
+            int tmpPathType = itinerary.getAsJsonObject().get("pathType").getAsInt();
+            // 이동수단이 6-항공 인 경우 만
+            if( tmpPathType != 6) {
+                continue;
+            }
+
+            if ( minTime > tmpTime ) {
+                minTime = tmpTime;
+                bestJson = itinerary;
+            }
+        }
+        return  bestJson;
+    }
+
+    //경로 리스트 중에서 제일 좋은 경로 하나를 선정해서 반환 ( 시간 우선 )
+    @Override
+    public JsonElement getBestFerryTime(JsonArray itineraries) {
+        int minTime = Integer.MAX_VALUE;
+        JsonElement bestJson = new JsonObject();
+        for (JsonElement itinerary : itineraries) {
+            int tmpTime = itinerary.getAsJsonObject().get("totalTime").getAsInt();
+            int tmpPathType = itinerary.getAsJsonObject().get("pathType").getAsInt();
+            // 이동수단이 6-항공 인 경우 만
+            if( tmpPathType != 7) {
                 continue;
             }
 
