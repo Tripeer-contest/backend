@@ -11,11 +11,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SpotInfoRepository extends JpaRepository <SpotInfoEntity, Integer > {
 
-    List<SpotInfoEntity> findByTitleContains(String title);
     List<SpotInfoEntity> findByContentTypeIdAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(int contentTypeId, int cityId, int townId, Pageable pageable);
 
     List<SpotInfoEntity> findByContentTypeIdNotInAndTown_TownPK_City_CityIdAndTown_TownPK_TownId(List<Integer> contentTypeIds, int cityId, int townId, Pageable pageable);
@@ -27,9 +27,6 @@ public interface SpotInfoRepository extends JpaRepository <SpotInfoEntity, Integ
     List<SpotInfoEntity> findByContentTypeId(Integer contentTypeId, Pageable pageable);
 
     List<SpotInfoEntity> findByContentTypeIdNotIn(List<Integer> contentTypeId, Pageable pageable);
-
-
-    List<SpotInfoEntity> findAll(Specification<SpotInfoEntity> spec, Pageable pageable);
 
     SpotInfoEntity findBySpotInfoId(int spotInfoId);
 
@@ -57,4 +54,12 @@ public interface SpotInfoRepository extends JpaRepository <SpotInfoEntity, Integ
     Page<SpotInfoEntity> searchSpotsInMap(@Param("minLat") double minLat, @Param("maxLat") double maxLat,@Param("minLon") double minLon,
                                           @Param("maxLon") double maxLon, @Param("keyword") String keyword, @Param("sortType") int sortType,
                                            Pageable pageable);
+
+    @Query("SELECT s FROM spot_info s WHERE " +
+            "s.latitude BETWEEN :minLat AND :maxLat " +
+            "AND s.longitude BETWEEN :minLon AND :maxLon " +
+            "AND s.title LIKE %:title%")
+    Optional<SpotInfoEntity> searchNearSpot(@Param("title") String title,
+                                            @Param("minLat") double minLat, @Param("maxLat") double maxLat,
+                                            @Param("minLon") double minLon, @Param("maxLon") double maxLon);
 }

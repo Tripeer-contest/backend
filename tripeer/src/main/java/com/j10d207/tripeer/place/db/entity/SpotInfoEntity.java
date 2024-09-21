@@ -75,9 +75,8 @@ public class SpotInfoEntity {
 			.contentTypeId(spotAddReq.getContentTypeId())
 			.title(spotAddReq.getTitle())
 			.addr1(newAddr)
-			.tel(spotAddReq.getTel())
-			.firstImage(spotAddReq.getFirstImage())
-			.firstImage2(spotAddReq.getSecondImage())
+				//default image URL
+			.firstImage("https://tripeer207.s3.ap-northeast-2.amazonaws.com/front/static/default1.png")
 			.latitude(spotAddReq.getLatitude())
 			.longitude(spotAddReq.getLongitude())
 			.build();

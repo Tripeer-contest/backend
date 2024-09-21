@@ -48,6 +48,7 @@ public enum ErrorCode {
     SPOT_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-003", "스팟을 찾을 수 없습니다."),
     UNDEFINED_TYPE(HttpStatus.NOT_FOUND, "PLACE-004", "정의되지 않은 타입입니다."),
     BLOG_SEARCH_ERROR(HttpStatus.BAD_REQUEST, "PLACE-005", "블로그 검색 중 마지막 페이지를 넘었거나 오류가 발생했습니다."),
+    FOUND_SPOT(HttpStatus.BAD_REQUEST, "PLACE-006", "이미 서비스에 존재하는 장소입니다."),
 
     //root
     NOT_FOUND_ROOT(HttpStatus.BAD_REQUEST, "ROOT-001", "대중교통 수단이 없습니다."),
