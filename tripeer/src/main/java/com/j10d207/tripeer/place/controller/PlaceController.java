@@ -2,6 +2,7 @@ package com.j10d207.tripeer.place.controller;
 
 import com.j10d207.tripeer.kakao.db.entity.BlogInfoResponse;
 import com.j10d207.tripeer.place.dto.req.ReviewReq;
+import com.j10d207.tripeer.place.dto.req.SpotAddReq;
 import com.j10d207.tripeer.place.dto.res.RecommendDTO;
 import com.j10d207.tripeer.place.dto.res.RecommendSearchDTO;
 import com.j10d207.tripeer.place.dto.res.ReviewDto;
@@ -61,11 +62,11 @@ public class PlaceController {
     /*
      * 스팟 생성 새 장소 등록 코드, 원본 작성자 퇴사 + 리뉴얼 제작성 하는걸로 자체 결정, 새로 쓸때 참고용으로 주석처리 해둠
      * */
-//    @PostMapping("/spot/create")
-//    public Response<SpotDTO.SpotAddResDTO> createNewSpot(@RequestBody @Valid SpotAddReq spotAddReq, @AuthenticationPrincipal CustomOAuth2User user) {
-//
-//        return Response.of(HttpStatus.OK, "새로운 스팟 생성", spotService.createNewSpot(spotAddReq, user.getUserId()));
-//    }
+    @PostMapping("/spot/create")
+    public Response<SpotDTO.SpotAddResDTO> createNewSpot(@RequestBody @Valid SpotAddReq spotAddReq, @AuthenticationPrincipal CustomOAuth2User user) {
+
+        return Response.of(HttpStatus.OK, "새로운 스팟 생성", spotService.createNewSpot(spotAddReq, user.getUserId()));
+    }
 
     /*
     리뷰 작성하기 + 별점

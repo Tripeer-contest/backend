@@ -8,12 +8,16 @@ import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.*;
 import com.j10d207.tripeer.place.db.repository.*;
 import com.j10d207.tripeer.place.db.repository.additional.AdditionalBaseRepository;
+import com.j10d207.tripeer.place.dto.req.SpotAddReq;
 import com.j10d207.tripeer.place.dto.res.AdditionalDto;
 import com.j10d207.tripeer.place.dto.res.ReviewDto;
 import com.j10d207.tripeer.place.dto.res.SpotDTO;
 import com.j10d207.tripeer.place.dto.res.SpotDetailPageDto;
+import com.j10d207.tripeer.user.db.entity.UserEntity;
+import com.j10d207.tripeer.user.db.repository.UserRepository;
 import com.j10d207.tripeer.user.db.repository.WishListRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,6 +41,10 @@ public class SpotServiceImpl implements SpotService{
     private final WishListRepository wishListRepository;
     private final AdditionalBaseRepository additionalBaseRepository;
     private final SpotCollectionRepository spotCollectionRepository;
+    private final CityRepository cityRepository;
+    private final TownRepository townRepository;
+    private final SpotDetailRepository spotDetailRepository;
+    private final UserRepository userRepository;
 
     private static final int ALL = -1;
     private static final int SPOT_SEARCH_PER_PAGE = 15;
@@ -170,12 +178,13 @@ public class SpotServiceImpl implements SpotService{
                 .toList();
     }
 
-/* 새 장소 등록 코드, 원본 작성자 퇴사 + 리뉴얼 제작성 하는걸로 자체 결정, 새로 쓸때 참고용으로 주석처리 해둠
     @Override
     @Transactional
     public SpotDTO.SpotAddResDTO createNewSpot(SpotAddReq spotAddReq, long userId) {
+        //중복 장소 검증
+        checkNearSpot(spotAddReq.getTitle(), spotAddReq.getLatitude(), spotAddReq.getLongitude());
 //        1. city 찾기
-        String[] splitAddr = spotAddReq.getAddr1().split(" ");
+        String[] splitAddr = spotAddReq.getAddr().split(" ");
         CityEntity cityEntity = getCityEntity(splitAddr[0]);
         TownEntity townEntity = null;
 
@@ -183,18 +192,16 @@ public class SpotServiceImpl implements SpotService{
         if (townEntityOptional.isPresent()) {
             townEntity = townEntityOptional.get();
         } else {
-            townRepository.save(TownEntity.MakeNewSpotTownEntity(spotAddReq, splitAddr[1], new TownPK(townRepository.findMaxTownId() + 1, cityEntity)));
+            townRepository.save(TownEntity.ofSpotAddReq(spotAddReq, splitAddr[1], new TownPK(townRepository.findMaxTownId() + 1, cityEntity)));
         }
 
-        SpotInfoEntity spotInfo = SpotInfoEntity.MakeNewSpotEntity(spotAddReq, townEntity, MakeNewAddr(cityEntity.getCityName(), townEntity.getTownName(), splitAddr).toString());
+        SpotInfoEntity spotInfo = SpotInfoEntity.ofReq(spotAddReq, townEntity, MakeNewAddr(cityEntity.getCityName(), townEntity.getTownName(), splitAddr).toString());
         SpotInfoEntity newSpotInfo = spotInfoRepository.save(spotInfo);
         createNewDescrip(newSpotInfo, spotAddReq);
 
-        if(spotAddReq.isAddPlanCheck()) {
-            planService.addPlanSpot(spotAddReq.getPlanId(), newSpotInfo.getSpotInfoId(), userId);
-        }
 
-        return SpotDTO.SpotAddResDTO.EntityToDTO(spotInfo, spotAddReq.isAddPlanCheck());
+        UserEntity user = userRepository.findByUserId(userId);
+        return SpotDTO.SpotAddResDTO.ofEntity(spotInfo, user, spotAddReq.getOrder());
     }
 
     private StringBuilder MakeNewAddr (String cityName, String TownName, String[] splitAddr) {
@@ -265,7 +272,7 @@ public class SpotServiceImpl implements SpotService{
     private void createNewDescrip(SpotInfoEntity spotInfoEntity, SpotAddReq spotAddReq) {
         SpotDescriptionEntity build = SpotDescriptionEntity.builder()
                 .spotInfo(spotInfoEntity)
-                .overview(spotAddReq.getOverview())
+                .overview(spotAddReq.getDescription())
                 .build();
         spotDescriptionRepository.save(build);
         createNewDetail(spotInfoEntity, spotAddReq);
@@ -273,7 +280,7 @@ public class SpotServiceImpl implements SpotService{
 
     //    @Override
     @Transactional
-    public void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddReq spotAddReq) {
+    private void createNewDetail(SpotInfoEntity spotInfoEntity, SpotAddReq spotAddReq) {
 
         String cat1 = null;
         String cat2 = null;
@@ -299,9 +306,18 @@ public class SpotServiceImpl implements SpotService{
             }
         }
 
-        spotDetailRepository.save(SpotDetailEntity.MakeNewSpotDetailEntity(spotInfoEntity, cat1, cat2, cat3));
+        spotDetailRepository.save(SpotDetailEntity.ofInfoEntity(spotInfoEntity, cat1, cat2, cat3));
     }
-*/
+
+    private void checkNearSpot(String title, double latitude, double longitude) {
+        double nearRange = 0.001;
+        if (spotInfoRepository.searchNearSpot(title, latitude-nearRange, longitude+nearRange,
+                longitude-nearRange,longitude+nearRange).isPresent() ) {
+            throw new CustomException(ErrorCode.FOUND_SPOT);
+        } else {
+            return;
+        }
+    }
 
     private List<BlogInfoResponse.Document> getBlogSearchInfo(String query, int page) {
         return kakaoService.getBlogInfo(query, "accuracy", page, BLOG_PER_PAGE).getDocuments();

@@ -5,6 +5,7 @@ import com.j10d207.tripeer.place.db.entity.SpotDescriptionEntity;
 import com.j10d207.tripeer.place.db.entity.SpotInfoEntity;
 import com.j10d207.tripeer.place.db.entity.SpotReviewEntity;
 
+import com.j10d207.tripeer.user.db.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,12 @@ public class SpotDTO {
     @Getter
     @Builder
     public static class SpotAddResDTO {
+
+        private String nickname;
+        private String profileImage;
+        private long userId;
+        private int order;
+
         private int spotInfoId;    // 장소 정보 ID
         private String title;       // 장소 제목
         private String contentType; // 컨텐츠 타입
@@ -23,12 +30,15 @@ public class SpotDTO {
         private double latitude;    // 위도
         private double longitude;   // 경도
         private String img;         // 이미지 URL
-        private boolean spot;       // 스팟 여부
         private boolean wishlist;   // 위시리스트에 추가되었는지 여부
 
-        public static SpotAddResDTO EntityToDTO (SpotInfoEntity spotInfo, boolean isSpot) {
+        public static SpotAddResDTO ofEntity (SpotInfoEntity spotInfo, UserEntity userEntity, int order) {
 
             return SpotAddResDTO.builder()
+                    .userId(userEntity.getUserId())
+                    .profileImage(userEntity.getProfileImage())
+                    .nickname(userEntity.getNickname())
+                    .order(order)
                     .spotInfoId(spotInfo.getSpotInfoId())
                     .title(spotInfo.getTitle())
                     .contentType(ContentTypeEnum.getNameByCode(spotInfo.getContentTypeId()))
@@ -36,7 +46,6 @@ public class SpotDTO {
                     .latitude(spotInfo.getLatitude())
                     .longitude(spotInfo.getLongitude())
                     .img(spotInfo.getFirstImage())
-                    .spot(isSpot)
                     .wishlist(false)
                     .build();
 
