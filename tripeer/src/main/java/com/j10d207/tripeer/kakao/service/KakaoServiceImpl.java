@@ -117,12 +117,9 @@ public class KakaoServiceImpl implements KakaoService {
                 int tmp = getDirections(coordinates.get(i).getLongitude(), coordinates.get(i).getLatitude(), coordinates.get(j).getLongitude(), coordinates.get(j).getLatitude());
                 //차로 못가면 대중교통 경로 조회
                 if (tmp == TimeEnum.ERROR_TIME.getTime()) {
-                    timeTable[i][j] = getPublicTime(coordinates.get(i).getLongitude(), coordinates.get(i).getLatitude(), coordinates.get(j).getLongitude(), coordinates.get(j).getLatitude());
-                    tmp = timeTable[i][j].getTime();
-                    //둘다 없으면 경로 못찾음 throw
-                    if (tmp == TimeEnum.ERROR_TIME.getTime()) {
-                        throw new CustomException(ErrorCode.NOT_FOUND_ROOT);
-                    }
+                    timeTable[i][j].setStatus(TmapErrorCode.NO_PUBLIC_TRANSPORT_ROUTE);
+                } else {
+                    timeTable[i][j].setStatus(TmapErrorCode.SUCCESS);
                 }
                 timeTable[i][j].setTime(tmp);
                 timeTable[j][i] = timeTable[i][j];
@@ -182,7 +179,8 @@ public class KakaoServiceImpl implements KakaoService {
             return Optional.of(result.getAsJsonObject())
                     .filter(json -> json.has("result"))
                     .map(json -> {
-                        rootInfoDTO.setTime(TimeEnum.ERROR_TIME.getTime());
+                        //임시, 종류가 많아질경우 Tmap에서 rename 하는게 좋아보임
+                        rootInfoDTO.setStatus(TmapErrorCode.NO_CAR_AND_PUBLIC_TRANSPORT_ROUTE);
                         return rootInfoDTO;
                     })
                     .orElseGet(() -> ApiResponseHasRoot(result.getAsJsonObject("metaData"), rootInfoDTO));
@@ -201,6 +199,7 @@ public class KakaoServiceImpl implements KakaoService {
         }
         //반환 정보 생성
         int totalTime = bestRoot.getAsJsonObject().get("totalTime").getAsInt();
+        rootInfoDTO.setStatus(TmapErrorCode.SUCCESS);
         rootInfoDTO.setTime(totalTime / TimeEnum.MIN_PER_SECOND.getTime());
         rootInfoDTO.setRootInfo(bestRoot);
 
