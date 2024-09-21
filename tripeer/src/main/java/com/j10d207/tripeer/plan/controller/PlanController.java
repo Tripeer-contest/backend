@@ -180,7 +180,7 @@ public class PlanController {
 //    }
 
     @PostMapping("/optimizing/short")
-    public Response<AtoBRes> getShortTime2(@RequestBody PlaceListReq placeListReq) {
+    public Response<AtoBRes> getShortTime(@RequestBody PlaceListReq placeListReq) {
         return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.2", planService.getShortTime2(placeListReq));
     }
 
@@ -194,7 +194,7 @@ public class PlanController {
 
     //플랜 최단거리 조정
     @PostMapping("/optimizing")
-    public Response<OptimizingRes> getOptimizedPlan2(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
+    public Response<OptimizingRes> getOptimizedPlan(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
         OptimizingRes result = planService.getOptimizingTime2(placeListReq);
         return Response.of(HttpStatus.OK, "목적지 리스트 최적화 완료2", result);
     }
