@@ -58,6 +58,13 @@ public class PlaceController {
                                                        @AuthenticationPrincipal CustomOAuth2User user) {
         return Response.of(HttpStatus.OK, "장소 조회", spotService.getSpotSearch(page, contentTypeId, cityId, townId, user.getUserId()));
     }
+    // 홈화면에서 사용할 검색
+    @GetMapping("/search/home")
+    public Response<SpotDTO.SpotListDTO> getHomeSearch(@RequestParam("keyword") String keyword,
+        @RequestParam("page") Integer page,
+        @AuthenticationPrincipal CustomOAuth2User user) {
+        return Response.of(HttpStatus.OK, "장소 조회", spotService.getHomeSearch(keyword, page, user.getUserId()));
+    }
 
     /*
      * 스팟 생성 새 장소 등록 코드, 원본 작성자 퇴사 + 리뉴얼 제작성 하는걸로 자체 결정, 새로 쓸때 참고용으로 주석처리 해둠

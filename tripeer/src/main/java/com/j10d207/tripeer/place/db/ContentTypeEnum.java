@@ -1,5 +1,9 @@
 package com.j10d207.tripeer.place.db;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import lombok.Getter;
@@ -53,4 +57,13 @@ public enum ContentTypeEnum {
         throw new CustomException(ErrorCode.UNDEFINED_TYPE);
     }
 
+    public static List<Integer> getContentTypeIdListFromSortType(int sortType) {
+        return switch (sortType) {
+            case 1 -> Arrays.asList(12, 14, 15, 25, 28, 32, 38, 39);
+            case 2 -> Arrays.asList(12, 14, 15, 25, 28, 38);
+            case 3 -> Collections.singletonList(32);
+            case 4 -> Collections.singletonList(39);
+            default -> throw new CustomException(ErrorCode.UNDEFINED_TYPE);
+        };
+    }
 }

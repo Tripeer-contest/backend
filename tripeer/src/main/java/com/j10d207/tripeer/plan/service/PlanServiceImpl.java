@@ -1,9 +1,12 @@
 package com.j10d207.tripeer.plan.service;
 
 import com.j10d207.tripeer.common.CommonMethod;
+import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.CityEntity;
+import com.j10d207.tripeer.place.db.entity.ElasticSpotEntity;
 import com.j10d207.tripeer.place.db.entity.TownEntity;
 import com.j10d207.tripeer.place.db.repository.CityRepository;
+import com.j10d207.tripeer.place.db.repository.ElasticSpotRepository;
 import com.j10d207.tripeer.place.db.repository.TownRepository;
 import com.j10d207.tripeer.plan.db.TimeEnum;
 import com.j10d207.tripeer.plan.dto.req.*;
@@ -68,6 +71,7 @@ public class PlanServiceImpl implements PlanService {
 
     private final SpotInfoRepository spotInfoRepository;
     private final PlanDetailRepository planDetailRepository;
+    private final ElasticSpotRepository elasticSpotRepository;
 
     private final TMapService tMapService;
 
@@ -334,26 +338,32 @@ public class PlanServiceImpl implements PlanService {
                 ).toList(), spotInfoRepository.searchSpotsOfOption(planId, keyword, sortType, cityId, townId, PageRequest.of(page, SEARCH_PER_PAGE)).isEmpty());
     }
 
-    //관광지 줌레벨 검색
+    //관광지 줌레벨 검색 + elasticSearch
     @Override
     public SpotSearchResDTO getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
         double minLon, double maxLon, int sortType, long userId) {
         PageRequest pageRequest = PageRequest.of(page-1, SEARCH_PER_PAGE);
-
+        List<Integer> contentTypeIds = ContentTypeEnum.getContentTypeIdListFromSortType(sortType);
         // 지도 영역 내의 관광지 검색
-        Page<SpotInfoEntity> spots = spotInfoRepository.searchSpotsInMap(
-            minLat, maxLat, minLon, maxLon, keyword, sortType, pageRequest);
-        // 현재 여행 버킷
-        Set<Integer> planBucketSet = planBucketRepository.findAllSpotInfoIdsByUserId(userId);
+        Page<ElasticSpotEntity> elasticSpotList;
+        if (keyword.isEmpty()) {
+            elasticSpotList = elasticSpotRepository.AllSpotsInMap(
+                minLat, maxLat, minLon, maxLon, contentTypeIds, pageRequest);
+        } else {
+            elasticSpotList = elasticSpotRepository.searchSpotsInMap(
+                minLat, maxLat, minLon, maxLon, keyword, contentTypeIds, pageRequest);
+        }
+        List<Integer> idList = elasticSpotList.stream().map(ElasticSpotEntity::getId).toList();
+        List<SpotInfoEntity> spots = spotInfoRepository.findAllWithReviewsById(idList);
         // 위시리스트
         Set<Integer> wishSet = wishListRepository.findAllSpotInfoIdsByUserId(userId);
 
-        return new SpotSearchResDTO(spots.getContent().stream()
+        return new SpotSearchResDTO(spots.stream()
             .map(spot -> SpotSearchResDTO.SearchResult.fromSpotInfoEntity(spot,
                 wishSet.contains(spot.getSpotInfoId()),    // 위시리스트에 있는지
-                planBucketSet.contains(spot.getSpotInfoId()))  // 버킷에 있는지
+                false)  // 버킷에 있는지
             )
-            .collect(Collectors.toList()),spots.isLast());
+            .toList(), elasticSpotList.isLast());
     }
 
 

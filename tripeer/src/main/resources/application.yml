@@ -11,6 +11,11 @@ spring:
     mongodb:
       uri: ENC(L6iHx2pLNBhXcyl+0zQERCKGHkt+N21FxPil8/c7JigZRGW012tC8GilDiXlVGYzPWaE+Z+Algt1kY0IVodf6jDwK4k6/tb4)
 
+  elasticsearch:
+    uris: ENC(GVWnAtVWWHX3mGclYbpVDmwKro9OZ+hKZw1+jTvE+Wo=)
+    username: ENC(6UJ5jCmUqP1qZ58DFEiR1A==)
+    password: ENC(cqqQm6974Rp+pmTGLGQXGfTzz/AvYewm0oAIs1lxPys=)
+
   datasource:
     url: ENC(lOFswiNgkkKFVYcwvYjD6SjBxBjdd98SV7GocEaulhDjhhQbtUO9uoSQB5O9uCg8ClK5mzgXiWg=)
     username: ENC(9m9o70ex2187SXtUNb1JQA==)

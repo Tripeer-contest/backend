@@ -62,4 +62,7 @@ public interface SpotInfoRepository extends JpaRepository <SpotInfoEntity, Integ
     Optional<SpotInfoEntity> searchNearSpot(@Param("title") String title,
                                             @Param("minLat") double minLat, @Param("maxLat") double maxLat,
                                             @Param("minLon") double minLon, @Param("maxLon") double maxLon);
+
+    @Query("SELECT s FROM spot_info s LEFT JOIN FETCH s.spotReviewList WHERE s.spotInfoId IN :ids")
+    List<SpotInfoEntity> findAllWithReviewsById(@Param("ids") List<Integer> ids);
 }
