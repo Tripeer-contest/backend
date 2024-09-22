@@ -216,7 +216,7 @@ public class UserServiceImpl implements UserService{
         UserEntity user = userRepository.findByUserId(userId);
         user.setAllowNotifications(notiReq);
         userRepository.save(user);
-        return "isNotificationOn 변경 완료";
+        return "allowNotifications 변경 완료";
     }
 
 
