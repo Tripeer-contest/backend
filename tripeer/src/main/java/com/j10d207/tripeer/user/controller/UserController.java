@@ -5,6 +5,7 @@ import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
+import com.j10d207.tripeer.user.dto.req.NotiReq;
 import com.j10d207.tripeer.user.dto.req.WishlistReq;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
@@ -140,4 +141,10 @@ public class UserController {
         throw new CustomException(ErrorCode.REQUEST_AUTHORIZATION);
     }
 
+    // 알람 설정 변경
+    @PostMapping("/noti")
+    public Response<String> changeNoti(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @RequestBody @Valid NotiReq notiReq) {
+        String jwt = userService.changeNoti(customOAuth2User.getUserId(), notiReq);
+        return Response.of(HttpStatus.OK, "알람 설정 변경 완료", jwt);
+    }
 }

@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.user.dto.res;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.user.db.TripStyleEnum;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
@@ -31,6 +32,8 @@ public class UserDTO {
         private int style2Num;
         private String style3;
         private int style3Num;
+        private boolean allowNotifications;
+
 
         public static Info fromUserEntity(UserEntity userEntity) {
             return Info.builder()
@@ -45,6 +48,7 @@ public class UserDTO {
                     .style2Num(TripStyleEnum.getCodeOfName(userEntity.getStyle2()))
                     .style3(userEntity.getStyle3())
                     .style3Num(TripStyleEnum.getCodeOfName(userEntity.getStyle3()))
+                    .allowNotifications(userEntity.isAllowNotifications())
                     .build();
         }
     }

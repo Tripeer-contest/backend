@@ -13,6 +13,7 @@ import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.user.config.JWTUtil;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.repository.UserRepository;
+import com.j10d207.tripeer.user.dto.req.NotiReq;
 import com.j10d207.tripeer.user.dto.req.WishlistReq;
 import com.j10d207.tripeer.user.dto.res.JWTDto;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
@@ -209,6 +210,15 @@ public class UserServiceImpl implements UserService{
         return "Bearer " + result;
     }
 
+    // 알람 설정 변경
+    @Override
+    public String changeNoti(long userId, NotiReq notiReq) {
+        UserEntity user = userRepository.findByUserId(userId);
+        user.setAllowNotifications(notiReq);
+        userRepository.save(user);
+        return "isNotificationOn 변경 완료";
+    }
+
 
     private Cookie createCookie(String key, String value) {
 
@@ -222,4 +232,5 @@ public class UserServiceImpl implements UserService{
 
         return cookie;
     }
+
 }
