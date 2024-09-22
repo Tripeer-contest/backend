@@ -2,6 +2,7 @@ package com.j10d207.tripeer.user.service;
 
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
+import com.j10d207.tripeer.user.dto.req.NotiReq;
 import com.j10d207.tripeer.user.dto.req.WishlistReq;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
 import jakarta.servlet.http.Cookie;
@@ -38,6 +39,7 @@ public interface UserService {
     public String getSuper(HttpServletResponse response, long userId);
     //테스트용 JWT 발급2
     public String getSuper2(HttpServletResponse response, long userId);
-
+    // 알람 설정 변경
+    public String changeNoti(long userId, NotiReq notiReq);
 
 }

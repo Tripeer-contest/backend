@@ -2,6 +2,7 @@ package com.j10d207.tripeer.user.db.entity;
 
 
 import com.j10d207.tripeer.user.db.TripStyleEnum;
+import com.j10d207.tripeer.user.dto.req.NotiReq;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
@@ -39,6 +40,7 @@ public class UserEntity {
     private String style2;
     private String style3;
     private boolean isOnline;
+    private boolean allowNotifications;
 
     public static UserEntity fromJoinReq(JoinReq join) {
 
@@ -71,6 +73,7 @@ public class UserEntity {
                 .style2(join.getStyle2() == null ? null : TripStyleEnum.getNameOfCode(join.getStyle2()))
                 .style3(join.getStyle3() == null ? null : TripStyleEnum.getNameOfCode(join.getStyle3()))
                 .isOnline(false)
+                .allowNotifications(true)
                 .build();
     }
 
@@ -81,4 +84,7 @@ public class UserEntity {
         this.style3 = infoReq.getStyle3Num() == 0 ? null : TripStyleEnum.getNameOfCode(infoReq.getStyle3Num());
     }
 
+    public void setIsNotificationOn(NotiReq notiReq) {
+        this.allowNotifications = notiReq.isAllowNotifications();
+    }
 }
