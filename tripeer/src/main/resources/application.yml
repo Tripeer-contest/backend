@@ -114,3 +114,31 @@ cloud:
 
 admin:
   login: ENC(3At+j0WU3QGuxpq9ZOruxzROL2cCHGCd)
+
+
+firebase:
+  type: service_account
+  project:
+    id: tripeer-99eb2
+  private:
+    id: 4fc372d04a4290dc9b80c940d3d0c16ab516caea
+    key:  "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCwpneMQ7XagEz5\nxRfR6MY822VKXTRZ5C0y8oj2ujIA6pKWfLJIr4HWF/WsAPwl/00F4Im+3SVzGtPf\nuR5XAQtM2Ouys8en/7XSJB3qFQC1qIaWdu6hbFRIqDGN/7QBgfbz4RXL7i+KcXcS\nCIdqAW0T7FlxP6j/KAfpLuWThl+ysrzh/0UDNxuA9TXuGf+8W8LZpCoVZCHkWzaR\nGLOeRJDGa6imqOFI2UiWjYGMdv9fl7aCd8pZzlIuHMXlBntwSNnUU2aO1rD0h4La\nt6pOwuLkySVka343D49x1Yxj4KE7x2h6lllp5X3bNqrfU3gaoicGHEiFuwGb4Mjs\ntPdPfVi5AgMBAAECggEACAMc4/9ENctg8mk2md45c5Qt5XARykv3otpuTOaIExOQ\nn4O7YGGZfXjruyf2R9DrEOusw7vrEWvzlS+jySVyekNSeXH/Cccm24eo1a+rLxIc\nPKHbU/YCYqNCUCL7aqAW79vTLcM5Y8mesXIyliPHa0JqkiDljOEnbrOiVQ0gtQ2j\n8tyruNC5Md8VChbsHAkC0OMqzHC7B4Ku4N+rmilEAqdg/rXoIJMKDMx34m9CJU+l\nLcDt7vBJwRj/j13FWJnfZ2DqbbGISiaiWyotegO7wz9mWyGqf2mKU8VI6vjxoymy\ntKuS/T+aAQ/dtfsVo0yQY8OJLw0EUod9wg1/qsQSgQKBgQDqUI69JybtteE0QEU8\nr9HgF1y2MqFXO2jc4KwaiRLV91le5MpufP+gzxAWVZeuLzrwLVHrVB7FbdcKQhnK\nqczjs8W2ubrQb8D/G6F3MOLly4VTJ81HrrVh87Y+jJYcJ/fBlWO6q9zNE+RoXasr\n3b0ya52K1d8U5nYNSznx3lBm4QKBgQDA/7WjE1vWPcUVK8n6uyRnI21UqDHkhOLQ\nk6euJ4G5F+XWACTpLHc00bypBAwuIYYzX24nuKE8n6c12zhqz8RC10dMTuPQAqaE\n+C7nnQ9rH0ePA+d+DQVpiVoGCRT8LQ8txmJ9ma6ro+SaG0ZotiNKyL/as+7A3kFT\ngSmSvy6k2QKBgGG7Hf4pQWRuszL/B6HrV6eXNvVLot3mirNuBnq+55tVIvKgjQqO\nmnSxSO13398oFfYtgPidyoPgb4v4zBcqwanLxtCTISdlJWOCW9OCEXF1dPOdK1MV\nvNPROhdWvhmaVg1pSQKIQn1LKb6aKxYN06cfGcPZtsVZ5q1ezhli97ghAoGAGZyV\nhRuXj1nJIqMZ/a0CCrHX22kqndHIq7c8hE731xFFzd1dCJh/BUJkD+Xam/CU95JN\ncvX8Z6gkL3B1Dy+dMuWQr560erEvWev5hYEBP8z52Q/Ck6a0timlCbIA1+o+3ms6\nPMK9PEfWmWDPOiwZiN4VH7fLEkssTiGQ28mFLhkCgYEAvHOj6YoyipIBosVwwEtm\n48vnLWmihsgYNjAADqyFuSRbqYhGR0yUrgz7aRdVB3vuh2n/H84ltLLk98oailLb\nCYOrvtx3g4yMRgs5lAz1o1BdArVJtmPgNHMVp5VbWzT7MBcbjSfG1lcCerIo8Gyk\nmi2agXGYbgUWauHIjKQaa+k=\n-----END PRIVATE KEY-----\n"
+  client:
+    id: 117689588121730634646
+    email: firebase-adminsdk-ql7lm@tripeer-99eb2.iam.gserviceaccount.com
+    x509:
+      cert:
+        url: https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-ql7lm%40tripeer-99eb2.iam.gserviceaccount.com
+  auth:
+    uri: https://accounts.google.com/o/oauth2/auth
+    provider:
+      x509:
+        cert:
+          url: https://www.googleapis.com/oauth2/v1/certs
+  token:
+    uri: https://oauth2.googleapis.com/token
+  universe:
+    domain: googleapis.com
+
+
+
