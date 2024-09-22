@@ -11,6 +11,9 @@ import com.j10d207.tripeer.place.db.repository.TownRepository;
 import com.j10d207.tripeer.plan.db.TimeEnum;
 import com.j10d207.tripeer.plan.dto.req.*;
 import com.j10d207.tripeer.plan.dto.res.*;
+import com.j10d207.tripeer.plan.event.CompletePlanEvent;
+import com.j10d207.tripeer.plan.event.CoworkerDto;
+import com.j10d207.tripeer.plan.event.InviteCoworkerEvent;
 import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.j10d207.tripeer.tmap.db.dto.RootInfoDTO;
@@ -37,6 +40,7 @@ import com.j10d207.tripeer.user.db.repository.WishListRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -77,6 +81,7 @@ public class PlanServiceImpl implements PlanService {
 
     private final KakaoService kakaoService;
 
+    private final ApplicationEventPublisher publisher;
     private final WebClient webClient;
     private final CityRepository cityRepository;
     private final TownRepository townRepository;
@@ -118,7 +123,14 @@ public class PlanServiceImpl implements PlanService {
         planDayRepository.saveAll(planDayEntityList);
         // 이메일 전송 스케쥴링
         planSchedulerService.schedulePlanTasks(plan);
-
+        // 여행 시작 및 다이어리 완성 알림 (플랜 생성시 나밖에 없으므로 나에게만 알림 생성)
+        publisher.publishEvent(CompletePlanEvent.builder()
+            .startAt(planCreateInfoReq.getStartDay())
+            .endAt(planCreateInfoReq.getEndDay())
+            .planTitle(planCreateInfoReq.getTitle())
+            .coworkers(List.of(new CoworkerDto(user.getUserId(), user.getNickname())))
+            .build()
+        );
         // city-town 정보 누락 이슈에 대하여
         // 1. 플랜 생성시에는 플랜타운이 가지고 있는 city나 town이 가지고 있는 데이터 중 id값 빼고는 null인 임시 객체라서 데이터를 들고올 수 없었다
         // planTownEntityList.stream().map(TownDTO::fromPlanTownEntity).toList() 이거 하면 데이터가 없음
@@ -256,8 +268,17 @@ public class PlanServiceImpl implements PlanService {
             throw new CustomException(ErrorCode.TOO_MANY_PLAN);
         }
 
+
         CoworkerEntity coworkerEntity = CoworkerEntity.createInviteEntity(coworkerInvitedReq.getUserId(), coworkerInvitedReq.getPlanId(), userId);
         coworkerRepository.save(coworkerEntity);
+        // 유저 닉네임을 들고오기 위해 유저 객체가 필요
+        UserEntity user = userRepository.findByUserId(coworkerInvitedReq.getUserId());
+        // 플랜 초대 알림
+        publisher.publishEvent(InviteCoworkerEvent.builder()
+            .planTitle(coworkerEntity.getPlan().getTitle())
+            .invitedCoworker(new CoworkerDto(user.getUserId(),user.getNickname()))
+            .build()
+        );
     }
 
     //동행자 추가
@@ -275,7 +296,18 @@ public class PlanServiceImpl implements PlanService {
         coworkerEntity.setRole("member");
         coworkerRepository.save(coworkerEntity);
         // ydoc 에 유저 정보 업데이트를 위한 node 서버에 유저 정보 보내기
+        UserEntity user = userRepository.findByUserId(userId);
         NodeInviteDTO nodeInviteDTO = NodeInviteDTO.from(userRepository.findByUserId(userId), planEntity);
+
+        // 초대 수락으로 인한 여행 시작 및 다이어리 완성 알림
+        publisher.publishEvent(CompletePlanEvent.builder()
+            .startAt(planEntity.getStartDate())
+            .endAt(planEntity.getEndDate())
+            .planTitle(planEntity.getTitle())
+            .coworkers(List.of(new CoworkerDto(user.getUserId(), user.getNickname())))
+            .build()
+        );
+
         webClient.post()
             .uri("/node/plan/invite")
             .contentType(MediaType.APPLICATION_JSON)
