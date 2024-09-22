@@ -45,6 +45,8 @@ public class SpotServiceImpl implements SpotService{
     private final TownRepository townRepository;
     private final SpotDetailRepository spotDetailRepository;
     private final UserRepository userRepository;
+    private final ElasticSpotRepository elasticSpotRepository;
+
 
     private static final int ALL = -1;
     private static final int SPOT_SEARCH_PER_PAGE = 15;
@@ -107,6 +109,17 @@ public class SpotServiceImpl implements SpotService{
             case ALL_SPOT -> getSpotByContentType(page, cityId, townId, userId);
             default -> throw new CustomException(ErrorCode.UNDEFINED_TYPE);
         };
+    }
+
+    // 홈에서 사용할 검색 ( 오직 키워드만 가지고 검색 )
+    @Override
+    public SpotDTO.SpotListDTO getHomeSearch(String keyword, int page, long userId) {
+        Pageable pageable = PageRequest.of(page-1, SPOT_SEARCH_PER_PAGE);
+        Page<ElasticSpotEntity> elasticSpotList = elasticSpotRepository.findByKeywordMatchAll(keyword, pageable);
+        List<Integer> idList = elasticSpotList.stream().map(ElasticSpotEntity::getId).toList();
+        List<SpotInfoEntity> spotInfoEntities = spotInfoRepository.findAllWithReviewsById(idList);
+        List<SpotDTO.SpotInfoDTO> spotInfoDTOList = convertToDtoList(spotInfoEntities, userId);
+        return new SpotDTO.SpotListDTO(elasticSpotList.isLast(), spotInfoDTOList);
     }
 
     //타입별 오버로딩, -1은 전체를 의미
