@@ -84,7 +84,7 @@ public class UserEntity {
         this.style3 = infoReq.getStyle3Num() == 0 ? null : TripStyleEnum.getNameOfCode(infoReq.getStyle3Num());
     }
 
-    public void setIsNotificationOn(NotiReq notiReq) {
+    public void setAllowNotifications(NotiReq notiReq) {
         this.allowNotifications = notiReq.isAllowNotifications();
     }
 }

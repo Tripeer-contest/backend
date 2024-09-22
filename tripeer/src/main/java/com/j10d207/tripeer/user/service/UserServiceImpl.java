@@ -214,7 +214,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public String changeNoti(long userId, NotiReq notiReq) {
         UserEntity user = userRepository.findByUserId(userId);
-        user.setIsNotificationOn(notiReq);
+        user.setAllowNotifications(notiReq);
         userRepository.save(user);
         return "isNotificationOn 변경 완료";
     }
