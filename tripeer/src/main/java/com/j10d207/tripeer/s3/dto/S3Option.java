@@ -10,7 +10,9 @@ public enum S3Option {
     profileUpload("프로필 사진 업로드"),
     profileDelete("프로필 사진 삭제"),
     galleryUpload("갤러리 파일 업로드"),
-    galleryDelete("갤러리 파일 삭제");
+    galleryDelete("갤러리 파일 삭제"),
+    reviewUpload("리뷰 사진 업로드"),
+    reviewDelete("리뷰 사진 삭제");
 
 
     private final String name;
