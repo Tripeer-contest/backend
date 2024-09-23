@@ -354,8 +354,8 @@ public class TMapServiceImpl implements TMapService {
         JsonElement bestFerryRoot = apiRequestService.getBestFerryTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries"));
 
         rootInfoDTOList.add(RootJsonRefactor(bestRoot, 1));
+        rootInfoDTOList.add(RootJsonRefactor(bestFerryRoot, 2));
         rootInfoDTOList.add(RootJsonRefactor(bestAirRoot, 2));
-        rootInfoDTOList.add(RootJsonRefactor(bestFerryRoot, 3));
         return rootInfoDTOList;
     }
     private RootInfoDTO ApiResponseHasRoot2(JsonObject routeInfo, RootInfoDTO rootInfoDTO) {
