@@ -119,7 +119,7 @@ public class KakaoServiceImpl implements KakaoService {
                 if (tmp == TimeEnum.ERROR_TIME.getTime()) {
                     timeTable[i][j].setStatus(TmapErrorCode.NO_PUBLIC_TRANSPORT_ROUTE);
                 } else {
-                    timeTable[i][j].setStatus(TmapErrorCode.SUCCESS);
+                    timeTable[i][j].setStatus(TmapErrorCode.SUCCESS_CAR);
                 }
                 timeTable[i][j].setTime(tmp);
                 timeTable[j][i] = timeTable[i][j];
@@ -199,7 +199,7 @@ public class KakaoServiceImpl implements KakaoService {
         }
         //반환 정보 생성
         int totalTime = bestRoot.getAsJsonObject().get("totalTime").getAsInt();
-        rootInfoDTO.setStatus(TmapErrorCode.SUCCESS);
+        rootInfoDTO.setStatus(TmapErrorCode.SUCCESS_CAR);
         rootInfoDTO.setTime(totalTime / TimeEnum.MIN_PER_SECOND.getTime());
         rootInfoDTO.setRootInfo(bestRoot);
 

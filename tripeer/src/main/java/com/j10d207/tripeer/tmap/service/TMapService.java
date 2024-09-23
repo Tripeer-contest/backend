@@ -11,10 +11,7 @@ import java.util.List;
 public interface TMapService {
 
     //최단 경로 찾기
-    public FindRoot getOptimizingTime(List<CoordinateDTO> coordinates);
-
-    //경로별 시간 배열 만들기
-    public RootInfoDTO[][] getTimeTable(List<CoordinateDTO> coordinates);
+    public FindRoot getOptimizingTime(List<CoordinateDTO> coordinates, int option);
 
     // 경로 시간 받아오기
     public RootInfoDTO getPublicTime(double SX, double SY, double EX, double EY, RootInfoDTO timeRootInfoDTO);
@@ -25,11 +22,6 @@ public interface TMapService {
     // 경로 시간 받아오기
     public List<RootInfoDTO> getPublicTime3(double SX, double SY, double EX, double EY, RootInfoDTO timeRootInfoDTO);
 
-    //tMap 대중교통 경로 찾기 시작
-    public RootRes useTMapPublic (RootRes rootRes);
-
-    //tMap 대중교통 경로 찾기 시작
-    public RootInfoDTO useTMapPublic2 (PlaceListReq placeListReq);
 
     //tMap 대중교통 경로 찾기 시작
     public List<RootInfoDTO> useTMapPublic3 (PlaceListReq placeListReq);

@@ -37,6 +37,7 @@ public class PublicRootEntity {
 	private int pathType;
 	private int totalFare;
 	private int totalTime;
+	private int option;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PUBLIC_ROOT_ID")

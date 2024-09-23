@@ -56,7 +56,7 @@ public class ApiRequestServiceImpl implements ApiRequestService {
             int tmpTime = itinerary.getAsJsonObject().get("totalTime").getAsInt();
             int tmpPathType = itinerary.getAsJsonObject().get("pathType").getAsInt();
             // 이동수단이 6-항공일 경우 제외
-            if( tmpPathType == 6) {
+            if( tmpPathType == 6 || tmpPathType == 7) {
                 continue;
             }
 

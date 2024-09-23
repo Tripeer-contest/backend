@@ -89,6 +89,7 @@ public class PlanServiceImpl implements PlanService {
     private final int SEARCH_PER_PAGE = 10;
     private final int OPTION_KAKAO_CAR = 0;
     private final int OPTION_TMAP_PUBLIC = 1;
+    private final int OPTION_TMAP_FERRY_AIR = 2;
 
     //플랜 생성
     /*
@@ -552,8 +553,8 @@ public class PlanServiceImpl implements PlanService {
         if ( placeListReq.getOption() == OPTION_KAKAO_CAR ) {
             root = kakaoService.getOptimizingTime(coordinateDTOList);
         }
-        else if ( placeListReq.getOption() == OPTION_TMAP_PUBLIC ) {
-            root = tMapService.getOptimizingTime(coordinateDTOList);
+        else if ( placeListReq.getOption() == OPTION_TMAP_PUBLIC || placeListReq.getOption() == OPTION_TMAP_FERRY_AIR ) {
+            root = tMapService.getOptimizingTime(coordinateDTOList, placeListReq.getOption());
         }
         if (root != null) {
             return refactorResult2(root, placeListReq);
