@@ -495,7 +495,7 @@ public class PlanServiceImpl implements PlanService {
                 placeListReq.getPlaceList().getFirst().getLatitude(),
                 placeListReq.getPlaceList().getLast().getLongitude(),
                 placeListReq.getPlaceList().getLast().getLatitude());
-        if( carTime == TimeEnum.ERROR_TIME.getTime()) {
+        if( carTime > 300) {
             resultTime.add("경로를 찾을 수 없습니다.");
         } else {
             resultTime.add(CommonMethod.timeToString(carTime));
@@ -576,7 +576,7 @@ public class PlanServiceImpl implements PlanService {
 
         for (int i = 1; i< resultNumbers.size(); i++) {
             RootInfoDTO selectInfo = root.getTimeTable()[resultNumbers.get(i-1)][resultNumbers.get(i)];
-
+            if (selectInfo.getTime() == TimeEnum.ERROR_TIME.getTime()) throw new CustomException(ErrorCode.NOT_FOUND_ROOT);
 
             PlaceListReq tmpPlaceList = PlaceListReq.builder().
                     placeList(List.of(placeListReq.getPlaceList().get(resultNumbers.get(i-1)),

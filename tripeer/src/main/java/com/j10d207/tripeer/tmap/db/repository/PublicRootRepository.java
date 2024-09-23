@@ -12,7 +12,7 @@ public interface PublicRootRepository extends JpaRepository<PublicRootEntity, Lo
 
     Optional<PublicRootEntity> findByStartLatAndStartLonAndEndLatAndEndLonAndTypeOption(double startLat, double startLon, double endLat, double endLon, int option);
 
-    Optional<List<PublicRootEntity>> findByStartLatAndStartLonAndEndLatAndEndLon(double startLat, double startLon, double endLat, double endLon);
+    List<PublicRootEntity> findByStartLatAndStartLonAndEndLatAndEndLon(double startLat, double startLon, double endLat, double endLon);
 
 
 }

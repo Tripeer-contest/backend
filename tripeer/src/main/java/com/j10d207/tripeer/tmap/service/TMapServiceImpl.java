@@ -120,18 +120,20 @@ public class TMapServiceImpl implements TMapService {
 
     @Override
     public List<RootInfoDTO> getPublicTime3(double SX, double SY, double EX, double EY, RootInfoDTO rootInfoDTO) {
-        Optional<List<PublicRootEntity>> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
+        Optional<List<PublicRootEntity>> optionalPublicRoot = Optional.ofNullable(publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY));
         rootInfoDTO.setLocation(SX, SY, EX, EY);
         return optionalPublicRoot
+                .filter(list -> !list.isEmpty())
                 //최근에 조회한 경로가 있는경우
                 .map(publicRoot -> {
                     rootInfoDTO.setStatus(TmapErrorCode.NO_PUBLIC_TRANSPORT_ROUTE);
+                    rootInfoDTO.setTime(TimeEnum.ERROR_TIME.getTime());
                     List<RootInfoDTO> rootInfoDTOList = new ArrayList<>(Arrays.asList(rootInfoDTO, rootInfoDTO, rootInfoDTO));
                     for (PublicRootEntity publicRootEntity : publicRoot) {
                         int option = publicRootEntity.getTypeOption();
                         RootInfoDTO result = new RootInfoDTO();
                         // 시간 경로 상태
-                        result.setStatus(TmapErrorCode.SUCCESS_PUBLIC);
+                        result.setStatus(TmapErrorCode.fromCode(publicRootEntity.getTypeOption()));
                         result.setPublicRoot(apiRequestService.getRootDTO(publicRootEntity));
                         result.setTime(result.getPublicRoot().getTotalTime());
                         rootInfoDTOList.set(option-1, result);
@@ -144,7 +146,7 @@ public class TMapServiceImpl implements TMapService {
                     // 조회 결과에 따라 적절한 응답 반환
                     return result.getAsJsonObject().has("result")
                             ? ApiResponseHasNonRoot3(result.getAsJsonObject("result").get("status").getAsInt())
-                            : ApiResponseHasRoot3(result.getAsJsonObject("metaData"));
+                            : ApiResponseHasRoot3(result.getAsJsonObject("metaData"), rootInfoDTO);
                 });
     }
 
@@ -216,7 +218,7 @@ public class TMapServiceImpl implements TMapService {
     조회 결과 오류는 아니지만 경로가 없기때문에 해당 결과를 정제하여 반환하는 메소드
      */
     private RootInfoDTO ApiResponseHasNonRoot(int status) {
-        return RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).build();
+        return RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).time(TimeEnum.ERROR_TIME.getTime()).build();
     }
 
     private RootInfoDTO ApiResponseHasNonRoot2(int status, RootInfoDTO rootInfoDTO) {
@@ -249,8 +251,8 @@ public class TMapServiceImpl implements TMapService {
         rootInfoDTO.setRootInfo(bestRoot);
         rootInfoDTO.setStatus(TmapErrorCode.SUCCESS_PUBLIC);
 
-        RootJsonRefactor(apiRequestService.getBestFerryTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries")), 2);
-        RootJsonRefactor(apiRequestService.getBestAirTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries")), 3);
+        RootJsonRefactor(apiRequestService.getBestFerryTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries")), 2, rootInfoDTO);
+        RootJsonRefactor(apiRequestService.getBestAirTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries")), 3, rootInfoDTO);
 
         apiRequestService.saveRootInfo(bestRoot,
                 rootInfoDTO.getStartLatitude(),
@@ -268,7 +270,7 @@ public class TMapServiceImpl implements TMapService {
     정보들을 정제하여 반환하는 메소드
      */
 
-    private List<RootInfoDTO> ApiResponseHasRoot3 (JsonObject routeInfo) {
+    private List<RootInfoDTO> ApiResponseHasRoot3 (JsonObject routeInfo, RootInfoDTO rootInfoDTO) {
         List<RootInfoDTO> rootInfoDTOList = new ArrayList<>();
         //경로 정보중 제일 좋은 경로를 가져옴
         JsonElement bestRoot = apiRequestService.getBestTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries"));
@@ -277,9 +279,9 @@ public class TMapServiceImpl implements TMapService {
         //경로 정보중 제일 좋은 경로를 가져옴
         JsonElement bestFerryRoot = apiRequestService.getBestFerryTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries"));
 
-        rootInfoDTOList.add(RootJsonRefactor(bestRoot, 1));
-        rootInfoDTOList.add(RootJsonRefactor(bestFerryRoot, 2));
-        rootInfoDTOList.add(RootJsonRefactor(bestAirRoot, 3));
+        rootInfoDTOList.add(RootJsonRefactor(bestRoot, 1, rootInfoDTO));
+        rootInfoDTOList.add(RootJsonRefactor(bestFerryRoot, 2, rootInfoDTO));
+        rootInfoDTOList.add(RootJsonRefactor(bestAirRoot, 3, rootInfoDTO));
         return rootInfoDTOList;
     }
     private RootInfoDTO ApiResponseHasRoot2(JsonObject routeInfo, RootInfoDTO rootInfoDTO) {
@@ -308,8 +310,9 @@ public class TMapServiceImpl implements TMapService {
         return rootInfoDTO;
     }
 
-    private RootInfoDTO RootJsonRefactor(JsonElement root, int option) {
+    private RootInfoDTO RootJsonRefactor(JsonElement root, int option, RootInfoDTO oldInfo) {
         RootInfoDTO rootInfoDTO = new RootInfoDTO();
+        rootInfoDTO.setLocation(oldInfo.getStartLatitude(), oldInfo.getStartLongitude(), oldInfo.getEndLatitude(), oldInfo.getEndLongitude());
         //모든 경로가 백트래킹 됨
         if(root.getAsJsonObject().size() == 0) {
             rootInfoDTO.setStatus(TmapErrorCode.NO_PUBLIC_TRANSPORT_ROUTE);
