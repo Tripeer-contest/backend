@@ -16,8 +16,6 @@ public interface TMapService {
     // 경로 시간 받아오기
     public RootInfoDTO getPublicTime(double SX, double SY, double EX, double EY, RootInfoDTO timeRootInfoDTO);
 
-    // 경로 시간 받아오기
-    public RootInfoDTO getPublicTime2(double SX, double SY, double EX, double EY, RootInfoDTO timeRootInfoDTO);
 
     // 경로 시간 받아오기
     public List<RootInfoDTO> getPublicTime3(double SX, double SY, double EX, double EY, RootInfoDTO timeRootInfoDTO);

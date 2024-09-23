@@ -20,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 
 @Service
@@ -100,7 +97,7 @@ public class TMapServiceImpl implements TMapService {
      */
     @Override
     public RootInfoDTO getPublicTime(double SX, double SY, double EX, double EY, RootInfoDTO rootInfoDTO) {
-        Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
+        Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLonAndTypeOption(SX, SY, EX, EY, 1);
         rootInfoDTO.setLocation(SX, SY, EX, EY);
         return optionalPublicRoot
                 //최근에 조회한 경로가 있는경우
@@ -120,39 +117,26 @@ public class TMapServiceImpl implements TMapService {
                 });
     }
 
-    @Override
-    public RootInfoDTO getPublicTime2(double SX, double SY, double EX, double EY, RootInfoDTO rootInfoDTO) {
-        Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
-        rootInfoDTO.setLocation(SX, SY, EX, EY);
-        return optionalPublicRoot
-                //최근에 조회한 경로가 있는경우
-                .map(publicRoot -> {
-                    rootInfoDTO.setStatus(TmapErrorCode.SUCCESS_PUBLIC);
-                    rootInfoDTO.setPublicRoot(apiRequestService.getRootDTO(publicRoot));
-                    rootInfoDTO.setTime(rootInfoDTO.getPublicRoot().getTotalTime());
-                    return rootInfoDTO;
-                })
-                .orElseGet(() -> {
-                    // A에서 B로 가는 경로의 정보를 조회
-                    JsonObject result = apiRequestService.getResult(SX, SY, EX, EY);
-                    // 조회 결과에 따라 적절한 응답 반환
-                    return result.getAsJsonObject().has("result")
-                            ? ApiResponseHasNonRoot2(result.getAsJsonObject("result").get("status").getAsInt(), rootInfoDTO)
-                            : ApiResponseHasRoot2(result.getAsJsonObject("metaData"), rootInfoDTO);
-                });
-    }
 
     @Override
     public List<RootInfoDTO> getPublicTime3(double SX, double SY, double EX, double EY, RootInfoDTO rootInfoDTO) {
-        Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
+        Optional<List<PublicRootEntity>> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
         rootInfoDTO.setLocation(SX, SY, EX, EY);
         return optionalPublicRoot
                 //최근에 조회한 경로가 있는경우
                 .map(publicRoot -> {
-                    rootInfoDTO.setStatus(TmapErrorCode.SUCCESS_PUBLIC);
-                    rootInfoDTO.setPublicRoot(apiRequestService.getRootDTO(publicRoot));
-                    rootInfoDTO.setTime(rootInfoDTO.getPublicRoot().getTotalTime());
-                    return List.of(rootInfoDTO);
+                    rootInfoDTO.setStatus(TmapErrorCode.NO_PUBLIC_TRANSPORT_ROUTE);
+                    List<RootInfoDTO> rootInfoDTOList = new ArrayList<>(Arrays.asList(rootInfoDTO, rootInfoDTO, rootInfoDTO));
+                    for (PublicRootEntity publicRootEntity : publicRoot) {
+                        int option = publicRootEntity.getTypeOption();
+                        RootInfoDTO result = new RootInfoDTO();
+                        // 시간 경로 상태
+                        result.setStatus(TmapErrorCode.SUCCESS_PUBLIC);
+                        result.setPublicRoot(apiRequestService.getRootDTO(publicRootEntity));
+                        result.setTime(result.getPublicRoot().getTotalTime());
+                        rootInfoDTOList.set(option-1, result);
+                    }
+                    return rootInfoDTOList;
                 })
                 .orElseGet(() -> {
                     // A에서 B로 가는 경로의 정보를 조회
@@ -265,12 +249,16 @@ public class TMapServiceImpl implements TMapService {
         rootInfoDTO.setRootInfo(bestRoot);
         rootInfoDTO.setStatus(TmapErrorCode.SUCCESS_PUBLIC);
 
-//        apiRequestService.saveRootInfo(bestRoot,
-//                rootInfoDTO.getStartLatitude(),
-//                rootInfoDTO.getStartLongitude(),
-//                rootInfoDTO.getEndLatitude(),
-//                rootInfoDTO.getEndLongitude(),
-//                totalTime / TimeEnum.HOUR_PER_MIN.getTime());
+        RootJsonRefactor(apiRequestService.getBestFerryTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries")), 2);
+        RootJsonRefactor(apiRequestService.getBestAirTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries")), 3);
+
+        apiRequestService.saveRootInfo(bestRoot,
+                rootInfoDTO.getStartLatitude(),
+                rootInfoDTO.getStartLongitude(),
+                rootInfoDTO.getEndLatitude(),
+                rootInfoDTO.getEndLongitude(),
+                totalTime / TimeEnum.HOUR_PER_MIN.getTime(),
+                1);
 
         return rootInfoDTO;
     }
@@ -335,12 +323,13 @@ public class TMapServiceImpl implements TMapService {
         rootInfoDTO.setPublicRoot(PublicRootDTO.fromJson(root.getAsJsonObject()));
         rootInfoDTO.setStatus(TmapErrorCode.fromCode(option));
 
-//        apiRequestService.saveRootInfo(bestRoot,
-//                rootInfoDTO.getStartLatitude(),
-//                rootInfoDTO.getStartLongitude(),
-//                rootInfoDTO.getEndLatitude(),
-//                rootInfoDTO.getEndLongitude(),
-//                totalTime / TimeEnum.HOUR_PER_MIN.getTime());
+        apiRequestService.saveRootInfo(root,
+                rootInfoDTO.getStartLatitude(),
+                rootInfoDTO.getStartLongitude(),
+                rootInfoDTO.getEndLatitude(),
+                rootInfoDTO.getEndLongitude(),
+                totalTime / TimeEnum.HOUR_PER_MIN.getTime(),
+                option);
 
         return rootInfoDTO;
     }
