@@ -37,12 +37,13 @@ public class PublicRootEntity {
 	private int pathType;
 	private int totalFare;
 	private int totalTime;
+	private int typeOption;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PUBLIC_ROOT_ID")
 	private List<PublicRootDetailEntity> publicRootDetailList;
 
-    public static PublicRootEntity JsonToEntity (JsonElement rootInfo, double SX, double SY, double EX, double EY, int time) {
+    public static PublicRootEntity JsonToEntity (JsonElement rootInfo, double SX, double SY, double EX, double EY, int time, int option) {
         return  PublicRootEntity.builder()
                 .startLat(SX)
                 .startLon(SY)
@@ -54,6 +55,7 @@ public class PublicRootEntity {
                 .totalWalkDistance(rootInfo.getAsJsonObject().get("totalWalkDistance").getAsInt())
                 .pathType(rootInfo.getAsJsonObject().get("pathType").getAsInt())
                 .totalFare(rootInfo.getAsJsonObject().getAsJsonObject("fare").getAsJsonObject("regular").get("totalFare").getAsInt())
+				.typeOption(option)
                 .build();
     }
 

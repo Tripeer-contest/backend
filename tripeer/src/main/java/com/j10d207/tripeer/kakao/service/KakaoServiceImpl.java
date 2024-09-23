@@ -119,7 +119,7 @@ public class KakaoServiceImpl implements KakaoService {
                 if (tmp == TimeEnum.ERROR_TIME.getTime()) {
                     timeTable[i][j].setStatus(TmapErrorCode.NO_PUBLIC_TRANSPORT_ROUTE);
                 } else {
-                    timeTable[i][j].setStatus(TmapErrorCode.SUCCESS);
+                    timeTable[i][j].setStatus(TmapErrorCode.SUCCESS_CAR);
                 }
                 timeTable[i][j].setTime(tmp);
                 timeTable[j][i] = timeTable[i][j];
@@ -159,34 +159,34 @@ public class KakaoServiceImpl implements KakaoService {
         }
     }
 
-    /*
-    출발지와 도착지의 좌표를 사용하여 이동 시간을 얻어오는 메소드
-    출발지 도착지의 좌표는 double 변수, 각 지점의 이름 등은 rootInfoDTO 에 저장된 채로 입력
-    산이나 섬같은 경우 차로는 안뜨는 경우가 있어 대중교통 시간으로 우회 경우가 있음
-     */
-    private RootInfoDTO getPublicTime(double SX, double SY, double EX, double EY) {
-        Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY);
-        RootInfoDTO rootInfoDTO = RootInfoDTO.createOfLocation(SX, SY, EX, EY);
-
-        return optionalPublicRoot.map(publicRoot -> {
-            rootInfoDTO.setPublicRoot(apiRequestService.getRootDTO(optionalPublicRoot.get()));
-            rootInfoDTO.setTime(rootInfoDTO.getPublicRoot().getTotalTime());
-            return rootInfoDTO;
-        }).orElseGet(() -> {
-            // A에서 B로 가는 경로의 정보를 조회
-            JsonObject result = apiRequestService.getResult(SX, SY, EX, EY);
-
-            return Optional.of(result.getAsJsonObject())
-                    .filter(json -> json.has("result"))
-                    .map(json -> {
-                        //임시, 종류가 많아질경우 Tmap에서 rename 하는게 좋아보임
-                        rootInfoDTO.setStatus(TmapErrorCode.NO_CAR_AND_PUBLIC_TRANSPORT_ROUTE);
-                        return rootInfoDTO;
-                    })
-                    .orElseGet(() -> ApiResponseHasRoot(result.getAsJsonObject("metaData"), rootInfoDTO));
-        });
-
-    }
+//    /*
+//    출발지와 도착지의 좌표를 사용하여 이동 시간을 얻어오는 메소드
+//    출발지 도착지의 좌표는 double 변수, 각 지점의 이름 등은 rootInfoDTO 에 저장된 채로 입력
+//    산이나 섬같은 경우 차로는 안뜨는 경우가 있어 대중교통 시간으로 우회 경우가 있음
+//     */
+//    private RootInfoDTO getPublicTime(double SX, double SY, double EX, double EY) {
+//        Optional<PublicRootEntity> optionalPublicRoot = publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLonAndOption(SX, SY, EX, EY, 1);
+//        RootInfoDTO rootInfoDTO = RootInfoDTO.createOfLocation(SX, SY, EX, EY);
+//
+//        return optionalPublicRoot.map(publicRoot -> {
+//            rootInfoDTO.setPublicRoot(apiRequestService.getRootDTO(optionalPublicRoot.get()));
+//            rootInfoDTO.setTime(rootInfoDTO.getPublicRoot().getTotalTime());
+//            return rootInfoDTO;
+//        }).orElseGet(() -> {
+//            // A에서 B로 가는 경로의 정보를 조회
+//            JsonObject result = apiRequestService.getResult(SX, SY, EX, EY);
+//
+//            return Optional.of(result.getAsJsonObject())
+//                    .filter(json -> json.has("result"))
+//                    .map(json -> {
+//                        //임시, 종류가 많아질경우 Tmap에서 rename 하는게 좋아보임
+//                        rootInfoDTO.setStatus(TmapErrorCode.NO_CAR_AND_PUBLIC_TRANSPORT_ROUTE);
+//                        return rootInfoDTO;
+//                    })
+//                    .orElseGet(() -> ApiResponseHasRoot(result.getAsJsonObject("metaData"), rootInfoDTO));
+//        });
+//
+//    }
 
     private RootInfoDTO ApiResponseHasRoot(JsonObject routeInfo, RootInfoDTO rootInfoDTO) {
         //경로 정보중 제일 좋은 경로를 가져옴
@@ -199,7 +199,7 @@ public class KakaoServiceImpl implements KakaoService {
         }
         //반환 정보 생성
         int totalTime = bestRoot.getAsJsonObject().get("totalTime").getAsInt();
-        rootInfoDTO.setStatus(TmapErrorCode.SUCCESS);
+        rootInfoDTO.setStatus(TmapErrorCode.SUCCESS_CAR);
         rootInfoDTO.setTime(totalTime / TimeEnum.MIN_PER_SECOND.getTime());
         rootInfoDTO.setRootInfo(bestRoot);
 
@@ -208,7 +208,8 @@ public class KakaoServiceImpl implements KakaoService {
                 rootInfoDTO.getStartLongitude(),
                 rootInfoDTO.getEndLatitude(),
                 rootInfoDTO.getEndLongitude(),
-                totalTime/TimeEnum.MIN_PER_SECOND.getTime());
+                totalTime/TimeEnum.MIN_PER_SECOND.getTime(),
+                1);
 
         return rootInfoDTO;
     }

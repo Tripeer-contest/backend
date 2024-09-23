@@ -89,6 +89,7 @@ public class PlanServiceImpl implements PlanService {
     private final int SEARCH_PER_PAGE = 10;
     private final int OPTION_KAKAO_CAR = 0;
     private final int OPTION_TMAP_PUBLIC = 1;
+    private final int OPTION_TMAP_FERRY_AIR = 2;
 
     //플랜 생성
     /*
@@ -494,7 +495,7 @@ public class PlanServiceImpl implements PlanService {
                 placeListReq.getPlaceList().getFirst().getLatitude(),
                 placeListReq.getPlaceList().getLast().getLongitude(),
                 placeListReq.getPlaceList().getLast().getLatitude());
-        if( carTime == TimeEnum.ERROR_TIME.getTime()) {
+        if( carTime > 300) {
             resultTime.add("경로를 찾을 수 없습니다.");
         } else {
             resultTime.add(CommonMethod.timeToString(carTime));
@@ -552,8 +553,8 @@ public class PlanServiceImpl implements PlanService {
         if ( placeListReq.getOption() == OPTION_KAKAO_CAR ) {
             root = kakaoService.getOptimizingTime(coordinateDTOList);
         }
-        else if ( placeListReq.getOption() == OPTION_TMAP_PUBLIC ) {
-            root = tMapService.getOptimizingTime(coordinateDTOList);
+        else if ( placeListReq.getOption() == OPTION_TMAP_PUBLIC || placeListReq.getOption() == OPTION_TMAP_FERRY_AIR ) {
+            root = tMapService.getOptimizingTime(coordinateDTOList, placeListReq.getOption());
         }
         if (root != null) {
             return refactorResult2(root, placeListReq);
@@ -575,7 +576,7 @@ public class PlanServiceImpl implements PlanService {
 
         for (int i = 1; i< resultNumbers.size(); i++) {
             RootInfoDTO selectInfo = root.getTimeTable()[resultNumbers.get(i-1)][resultNumbers.get(i)];
-
+            if (selectInfo.getTime() == TimeEnum.ERROR_TIME.getTime()) throw new CustomException(ErrorCode.NOT_FOUND_ROOT);
 
             PlaceListReq tmpPlaceList = PlaceListReq.builder().
                     placeList(List.of(placeListReq.getPlaceList().get(resultNumbers.get(i-1)),

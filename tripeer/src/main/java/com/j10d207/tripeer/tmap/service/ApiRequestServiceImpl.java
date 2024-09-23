@@ -56,7 +56,7 @@ public class ApiRequestServiceImpl implements ApiRequestService {
             int tmpTime = itinerary.getAsJsonObject().get("totalTime").getAsInt();
             int tmpPathType = itinerary.getAsJsonObject().get("pathType").getAsInt();
             // 이동수단이 6-항공일 경우 제외
-            if( tmpPathType == 6) {
+            if( tmpPathType == 6 || tmpPathType == 7) {
                 continue;
             }
 
@@ -119,10 +119,10 @@ public class ApiRequestServiceImpl implements ApiRequestService {
 
     //최초에 조회된 경로를 저장
     @Override
-    public void saveRootInfo(JsonElement rootInfo, double SX, double SY, double EX, double EY, int time) {
+    public void saveRootInfo(JsonElement rootInfo, double SX, double SY, double EX, double EY, int time, int option) {
         long rootId = 0;
         try {
-            rootId = publicRootRepository.save(PublicRootEntity.JsonToEntity(rootInfo, SX, SY, EX, EY, time)).getPublicRootId();
+            rootId = publicRootRepository.save(PublicRootEntity.JsonToEntity(rootInfo, SX, SY, EX, EY, time, option)).getPublicRootId();
         } catch (DataIntegrityViolationException e ) {
             log.error("DataIntegerityViolationError : " + e.getMessage() );
             return;
