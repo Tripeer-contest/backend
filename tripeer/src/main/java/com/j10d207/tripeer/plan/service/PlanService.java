@@ -58,13 +58,7 @@ public interface PlanService {
     public PlanDetailMainDTO.PlanCoworker getPlanMyInfo(long planId, long userId);
 
     //목적지간 최단 루트 계산
-    public RootRes getShortTime(RootRes rootRes);
-
-    //목적지간 최단 루트 계산
     public AtoBRes getShortTime2(PlaceListReq placeListReq);
-
-    //플랜 최단거리 조정
-    public RootRes getOptimizingTime(RootRes rootOptimizeReqDTO) throws IOException;
 
     //플랜 최단거리 조정
     public OptimizingRes getOptimizingTime2(PlaceListReq placeListReq) throws IOException;
