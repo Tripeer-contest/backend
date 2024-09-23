@@ -74,4 +74,8 @@ public class Notification {
 	public void toSENT() {
 		this.state = State.SENT;
 	}
+
+	public void toREAD() {
+		this.state = State.READ;
+	}
 }
