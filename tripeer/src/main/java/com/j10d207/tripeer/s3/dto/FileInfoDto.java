@@ -16,7 +16,7 @@ public class FileInfoDto {
     private MultipartFile file;
     private String deleteURL;
     private List<String> allowedMimeTypes;
-    private long userId;
+    private long id;
     private LocalDate date;
 
     private S3Option s3Option;
@@ -25,7 +25,7 @@ public class FileInfoDto {
         return FileInfoDto.builder()
                 .file(file)
                 .allowedMimeTypes(List.of("image/jpg", "image/jpeg", "image/png"))
-                .userId(userId)
+                .id(userId)
                 .s3Option(s3Option)
                 .build();
     }
@@ -34,7 +34,7 @@ public class FileInfoDto {
         return FileInfoDto.builder()
                 .file(file)
                 .allowedMimeTypes(List.of("image/jpeg", "image/png", "image/gif", "video/mp4", "video/webm", "video/ogg", "video/3gpp", "video/x-msvideo", "video/quicktime"))
-                .userId(userId)
+                .id(userId)
                 .date(date)
                 .s3Option(s3Option)
                 .build();
@@ -43,6 +43,15 @@ public class FileInfoDto {
     public static FileInfoDto fromDelete(String deleteURL, S3Option s3Option) {
         return FileInfoDto.builder()
                 .deleteURL(deleteURL)
+                .s3Option(s3Option)
+                .build();
+    }
+
+    public static FileInfoDto ofReviewImage(MultipartFile file, long reviewId, S3Option s3Option) {
+        return FileInfoDto.builder()
+                .file(file)
+                .allowedMimeTypes(List.of("image/jpg", "image/jpeg", "image/png"))
+                .id(reviewId)
                 .s3Option(s3Option)
                 .build();
     }

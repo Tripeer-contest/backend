@@ -16,8 +16,10 @@ import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -78,9 +80,11 @@ public class PlaceController {
     /*
     리뷰 작성하기 + 별점
      */
-    @PostMapping("review/write")
-    public Response<?> createReview(@AuthenticationPrincipal CustomOAuth2User user, @RequestBody @Valid ReviewReq reviewReq) {
-        reviewService.saveReview(user.getUserId(), reviewReq);
+    @PostMapping(value = "review/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response<?> createReview(@AuthenticationPrincipal CustomOAuth2User user,
+                                    @RequestPart("reviewReq") @Valid ReviewReq reviewReq,
+                                    @RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
+        reviewService.saveReview(user.getUserId(), reviewReq, multipartFiles);
         return Response.of(HttpStatus.OK, "리뷰 작성 완료", null);
     }
 
