@@ -69,7 +69,11 @@ public enum ErrorCode {
     //Valid
     RUNTIME_EXCEPTION(HttpStatus.NOT_FOUND, "VALID-001", "예측되지 않은 오류가 발생했습니다. "),
     INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-002", "Invalid argument"),
-    INVALID_PAGE(HttpStatus.BAD_REQUEST, "VALID-003", "입력될 수 없는 페이지 값");
+    INVALID_PAGE(HttpStatus.BAD_REQUEST, "VALID-003", "입력될 수 없는 페이지 값"),
+
+    // Notification
+    NOT_FOUND_NOTI(HttpStatus.NOT_FOUND, "NOTI-001", "알림을 찾을 수 없습니다.")
+    ;
 
 
     private final HttpStatus httpStatus;	// HttpStatus

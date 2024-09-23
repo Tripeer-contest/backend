@@ -2,12 +2,15 @@ package com.j10d207.tripeer.noti.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.firebase.FirebaseException;
 import com.google.firebase.messaging.Message;
+import com.j10d207.tripeer.exception.CustomException;
+import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.noti.db.entity.FirebaseToken;
 import com.j10d207.tripeer.noti.db.entity.Notification;
 import com.j10d207.tripeer.noti.db.firebase.FirebasePublisher;
@@ -60,9 +63,20 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void updateStateToSent(final Notification task) {
-		final Notification mergedTaskEntity = em.merge(task);
-		mergedTaskEntity.toSENT();
+	public void updateStateToSent(Notification task) {
+		if (!em.contains(task)) task = em.merge(task);
+		task.toSENT();
+	}
+
+	@Transactional
+	public void updateStateToRead(final Long id) {
+		final Optional<Notification> notification = notificationRepository.findById(id);
+		notification.ifPresentOrElse(
+			Notification::toREAD,
+			() -> {
+				throw new CustomException(ErrorCode.NOT_FOUND_NOTI);
+			}
+		);
 	}
 
 
