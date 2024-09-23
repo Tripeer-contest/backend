@@ -27,19 +27,20 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public void saveReview(long userId, ReviewReq reviewReq, List<MultipartFile> multipartFileList) {
 
-        if ( multipartFileList.size() > 5) throw new CustomException(ErrorCode.MANY_REQUEST);
-
         if (reviewReq.getSpotReviewId() > 0 ) {
             s3Service.deleteFile("https://tripeer207.s3.ap-northeast-2.amazonaws.com/Review/" + reviewReq.getSpotReviewId(), S3Option.reviewDelete);
         }
 
-       SpotReviewEntity spotReviewEntity = spotReviewRepository.save(SpotReviewEntity.ofReviewReq(reviewReq, userId, multipartFileList));
-
-       List<String> uploadURLList = new ArrayList<>();
-        for (int i = 0; i < multipartFileList.size(); i++) {
-            FileInfoDto fileInfoDto = FileInfoDto.ofReviewImage(multipartFileList.get(i), spotReviewEntity.getSpotReviewId(), S3Option.reviewUpload);
-            uploadURLList.add(s3Service.fileUpload(fileInfoDto));
+        SpotReviewEntity spotReviewEntity = spotReviewRepository.save(SpotReviewEntity.ofReviewReq(reviewReq, userId, multipartFileList));
+        List<String> uploadURLList = new ArrayList<>();
+        if (multipartFileList != null) {
+            if (multipartFileList.size() > 5) throw new CustomException(ErrorCode.MANY_REQUEST);
+            for (int i = 0; i < multipartFileList.size(); i++) {
+                FileInfoDto fileInfoDto = FileInfoDto.ofReviewImage(multipartFileList.get(i), spotReviewEntity.getSpotReviewId(), S3Option.reviewUpload);
+                uploadURLList.add(s3Service.fileUpload(fileInfoDto));
+            }
         }
+
         spotReviewEntity.setImages(uploadURLList);
         spotReviewRepository.save(spotReviewEntity);
     }
