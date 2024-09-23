@@ -143,8 +143,6 @@ public class PlanDetailMainDTO {
                         .contentType(ContentTypeEnum.getNameByCode(planDetailEntity.getSpotInfo().getContentTypeId()))
                         .day(planDetailEntity.getDay())
                         .step(planDetailEntity.getStep())
-                        .spotTime(planDetailEntity.getSpotTime())
-                        .description(planDetailEntity.getDescription())
                         .cost(planDetailEntity.getCost())
                         .build();
 
