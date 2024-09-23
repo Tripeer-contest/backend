@@ -14,7 +14,7 @@ public interface HistoryService {
 
 	public CostRes postCost(CostReq costReq);
 
-	public String savePlanDetail(PlanSaveReq planSaveReq);
+	// public String savePlanDetail(PlanSaveReq planSaveReq);
 
 	public HistoryDetailRes getHistoryDetail(long planId);
 

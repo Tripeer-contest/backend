@@ -2,7 +2,10 @@ package com.j10d207.tripeer.plan.db.entity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import com.j10d207.tripeer.history.db.entity.GalleryEntity;
 
@@ -53,4 +56,16 @@ public class PlanDayEntity {
                 .build();
 
     }
+
+
+	// 저장을 위해 planEntity 만으로 플랜에 맞는 길이의 PlanDayEntity 리스트를 생성
+	public static List<PlanDayEntity> from(PlanEntity planEntity) {
+		int howLongDays = (int) ChronoUnit.DAYS.between(planEntity.getStartDate(), planEntity.getEndDate());
+		return IntStream.range(0, howLongDays + 1)
+			.mapToObj(i -> PlanDayEntity.builder()
+				.plan(planEntity)
+				.day(planEntity.getStartDate().plusDays(i))
+				.build())
+			.toList();
+	}
 }
