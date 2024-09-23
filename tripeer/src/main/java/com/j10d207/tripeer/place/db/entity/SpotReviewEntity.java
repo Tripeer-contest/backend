@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -49,7 +50,7 @@ public class SpotReviewEntity {
                 .collect(Collectors.toList());
     }
 
-    public static SpotReviewEntity ofReviewReq(ReviewReq reviewReq, long userId) {
+    public static SpotReviewEntity ofReviewReq(ReviewReq reviewReq, long userId, List<MultipartFile> multipartFileList) {
         return  SpotReviewEntity.builder()
                 .spotReviewId(reviewReq.getSpotReviewId())
                 .spotInfo(SpotInfoEntity.builder().spotInfoId(reviewReq.getSpotInfoId()).build())
@@ -57,11 +58,14 @@ public class SpotReviewEntity {
                 .starPoint(reviewReq.getStarPoint())
                 .message(reviewReq.getMessage())
                 .createTime(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-                .image1(reviewReq.getImg().isEmpty() ? null : reviewReq.getImg().poll())
-                .image2(reviewReq.getImg().isEmpty() ? null : reviewReq.getImg().poll())
-                .image3(reviewReq.getImg().isEmpty() ? null : reviewReq.getImg().poll())
-                .image4(reviewReq.getImg().isEmpty() ? null : reviewReq.getImg().poll())
                 .build();
+    }
+
+    public void setImages(List<String> imageList) {
+        if (imageList.size() > 0 ) this.image1 = imageList.get(0);
+        if (imageList.size() > 1 ) this.image2 = imageList.get(1);
+        if (imageList.size() > 2 ) this.image3 = imageList.get(2);
+        if (imageList.size() > 3 ) this.image4 = imageList.get(3);
     }
 
 }

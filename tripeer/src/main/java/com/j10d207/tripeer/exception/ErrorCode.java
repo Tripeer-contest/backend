@@ -13,6 +13,7 @@ public enum ErrorCode {
     // common
     SCROLL_END(HttpStatus.BAD_REQUEST, "COMMON-001", "무한 스크롤의 끝"),
     SEARCH_NULL(HttpStatus.NOT_FOUND, "COMMON-002", "검색 결과가 NULL"),
+    MANY_REQUEST(HttpStatus.BAD_REQUEST, "COMMON-003", "요청된 데이터 혹은 파일이 너무 많습니다."),
     // user
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "ACCOUNT-001", "사용자를 찾을 수 없습니다."),
     HAS_EMAIL(HttpStatus.BAD_REQUEST, "ACCOUNT-002", "존재하는 닉네임 이메일입니다."),
@@ -69,7 +70,11 @@ public enum ErrorCode {
     //Valid
     RUNTIME_EXCEPTION(HttpStatus.NOT_FOUND, "VALID-001", "예측되지 않은 오류가 발생했습니다. "),
     INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "VALID-002", "Invalid argument"),
-    INVALID_PAGE(HttpStatus.BAD_REQUEST, "VALID-003", "입력될 수 없는 페이지 값");
+    INVALID_PAGE(HttpStatus.BAD_REQUEST, "VALID-003", "입력될 수 없는 페이지 값"),
+
+    // Notification
+    NOT_FOUND_NOTI(HttpStatus.NOT_FOUND, "NOTI-001", "알림을 찾을 수 없습니다.")
+    ;
 
 
     private final HttpStatus httpStatus;	// HttpStatus

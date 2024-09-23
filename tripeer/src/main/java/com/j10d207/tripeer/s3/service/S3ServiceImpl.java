@@ -71,7 +71,7 @@ public class S3ServiceImpl implements S3Service {
 		String ext = originName.substring(originName.lastIndexOf(".")); //확장자
 		switch (fileInfoDto.getS3Option()) {
 			case profileUpload -> {     //프로필 사진 업로드 경로
-				return "ProfileImage/" + fileInfoDto.getUserId() + "/" + UUID.randomUUID().toString()
+				return "ProfileImage/" + fileInfoDto.getId() + "/" + UUID.randomUUID().toString()
 					+ ext;    //프로필 이미지 저장경로 생성
 			}
 			case profileDelete -> {     //프로필 사진 삭제 경로
@@ -83,13 +83,19 @@ public class S3ServiceImpl implements S3Service {
 					//날짜를 String 으로 변환
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 					String dateString = fileInfoDto.getDate().format(formatter);
-					return "Gallery/" + fileInfoDto.getUserId() + "/" + dateString + "/" + UUID.randomUUID().toString()
+					return "Gallery/" + fileInfoDto.getId() + "/" + dateString + "/" + UUID.randomUUID().toString()
 						+ originName;
 				}
 				return null;
 			}
 			case galleryDelete -> {
 				return originName.substring(50);
+			}
+			case reviewUpload -> {
+				return "Review/" + fileInfoDto.getId() + "/" + originName;
+			}
+			case reviewDelete -> {
+				return fileInfoDto.getDeleteURL();
 			}
 			default -> {
 				return null;
