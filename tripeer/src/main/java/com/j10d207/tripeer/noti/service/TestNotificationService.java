@@ -47,7 +47,6 @@ public class TestNotificationService {
 
 		MessageBody msgBody = MessageBuilder.getMessageBody(MessageType.TRIPEER_START, planTitle, userNickname);
 
-
 		firebaseTokens.forEach(token -> {
 			try {
 				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, token.getToken()));

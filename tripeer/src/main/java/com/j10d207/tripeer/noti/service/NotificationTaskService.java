@@ -14,6 +14,7 @@ import com.j10d207.tripeer.noti.db.firebase.FirebasePublisher;
 import com.j10d207.tripeer.noti.db.firebase.MessageBody;
 import com.j10d207.tripeer.noti.db.firebase.MessageBuilder;
 import com.j10d207.tripeer.noti.db.repository.NotificationTaskRepository;
+import com.j10d207.tripeer.user.service.UserService;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,8 @@ public class NotificationTaskService {
 	private final FirebaseTokenService firebaseTokenService;
 
 	private final FirebasePublisher firebasePublisher;
+
+	private final UserService userService;
 
 	private final EntityManager em;
 
@@ -73,6 +76,15 @@ public class NotificationTaskService {
 	public void processingMessageTask (NotificationTask task) {
 
 		if(em.contains(task)) task = em.merge(task);
+
+		final Long userId =  task.getNotification().getUserId();
+
+		final Boolean isAllow = userService.getAllowNotificationById(userId);
+
+		if (!isAllow) {
+			log.info("Not allow Notification userId: {}", userId);
+			return;
+		}
 
 		final Notification notification = task.getNotification();
 
