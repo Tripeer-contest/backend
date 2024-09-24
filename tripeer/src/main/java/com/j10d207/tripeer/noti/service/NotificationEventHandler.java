@@ -25,6 +25,7 @@ import com.j10d207.tripeer.noti.db.firebase.MessageType;
 import com.j10d207.tripeer.plan.event.CompletePlanEvent;
 import com.j10d207.tripeer.plan.event.CoworkerDto;
 import com.j10d207.tripeer.plan.event.InviteCoworkerEvent;
+import com.j10d207.tripeer.user.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +37,7 @@ public class NotificationEventHandler implements ApplicationListener<Application
 	private final FirebaseTokenService firebaseTokenService;
 	private final NotificationTaskService notificationTaskService;
 	private final NotificationService notificationService;
+	private final UserService userService;
 	private static final int BASIC_NOTI_HOUR = 9;
 	private static final int BASIC_NOTI_MINUTE = 0;
 	private static final int NEXT_DAY = 1;
@@ -46,12 +48,14 @@ public class NotificationEventHandler implements ApplicationListener<Application
 		TaskScheduler scheduler,
 		FirebaseTokenService service,
 		NotificationTaskService notificationTaskService,
-		NotificationService notificationService
+		NotificationService notificationService,
+		UserService userService
 	) {
 		this.scheduler = scheduler;
 		this.firebaseTokenService = service;
 		this.notificationTaskService = notificationTaskService;
 		this.notificationService = notificationService;
+		this.userService = userService;
 	}
 
 	public void handlePlanNoti(final CompletePlanEvent event, final boolean isScheduled) {
@@ -153,15 +157,15 @@ public class NotificationEventHandler implements ApplicationListener<Application
 		log.info("application started event 감지");
 		final List<NotificationTask> unsentTasks = notificationTaskService.getUnsentNotificationTasks();
 
-		unsentTasks.forEach(unsentTask -> {
-			if(unsentTask.isImmediately()) {
-				notificationTaskService.updateStateToSent(unsentTask);
-				notificationTaskService.processingMessageTask(unsentTask);
-			}
-			if(unsentTask.isScheduled()) {
-				log.info("scheduling task: {}, at: {}", unsentTask.getNotification().getId(), unsentTask.getNotification().getStartAt());
-				scheduler.schedule(toRunnableTask(unsentTask), toInstant(unsentTask.getNotification().getStartAt()));
-			}
-		});
+		unsentTasks.forEach(task -> {
+				if(task.isImmediately()) {
+					notificationTaskService.updateStateToSent(task);
+					notificationTaskService.processingMessageTask(task);
+				}
+				if(task.isScheduled()) {
+					log.info("scheduling task: {}, at: {}", task.getNotification().getId(), task.getNotification().getStartAt());
+					scheduler.schedule(toRunnableTask(task), toInstant(task.getNotification().getStartAt()));
+				}
+			});
 	}
 }

@@ -27,7 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -232,5 +234,11 @@ public class UserServiceImpl implements UserService{
 
         return cookie;
     }
+
+    // 해당 하는 유저의 notification allow 상태 확인
+    public Boolean getAllowNotificationById(final Long userId) {
+        final Optional<UserEntity> user = userRepository.findById(userId);
+		return user.map(UserEntity::isAllowNotifications).orElse(false);
+	}
 
 }

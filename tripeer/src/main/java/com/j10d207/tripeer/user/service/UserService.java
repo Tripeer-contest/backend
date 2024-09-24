@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 // access 토큰 재발급
 public interface UserService {
@@ -41,5 +42,8 @@ public interface UserService {
     public String getSuper2(HttpServletResponse response, long userId);
     // 알람 설정 변경
     public String changeNoti(long userId, NotiReq notiReq);
+
+    // 해당 하는 유저의 notification allow 상태 확인
+   Boolean getAllowNotificationById(final Long userIds);
 
 }
