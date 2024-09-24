@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,8 @@ import com.j10d207.tripeer.noti.db.firebase.MessageBody;
 import com.j10d207.tripeer.noti.db.firebase.MessageBuilder;
 import com.j10d207.tripeer.noti.db.firebase.MessageType;
 import com.j10d207.tripeer.noti.db.repository.NotificationRepository;
+import com.j10d207.tripeer.noti.dto.res.NotificationDto;
+import com.j10d207.tripeer.noti.dto.res.NotificationList;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,8 @@ public class NotificationService {
 	private final FirebasePublisher firebasePublisher;
 
 	private final EntityManager em;
+
+	private static final int ITEMS_OFFSET = 1;
 
 	public List<Notification> createTasks(
 		final String planTitle,
@@ -69,6 +74,26 @@ public class NotificationService {
 	}
 
 	@Transactional
+	public NotificationList findAllWithSentByUser(final Long userId, final Optional<Long> lastId, final int size) {
+		if (lastId.isPresent()) {
+			final List<Notification> notificationList = notificationRepository.findByIdLessThanAndUserIdAndStateOrderByIdDesc(lastId.get(), userId, Notification.State.SENT, Pageable.ofSize(size + ITEMS_OFFSET));
+			return getNotificationList(size, notificationList);
+		}
+		final List<Notification> notificationList = notificationRepository.findByUserIdAndStateOrderByIdDesc(userId, Notification.State.SENT, Pageable.ofSize(size + ITEMS_OFFSET));
+		return getNotificationList(size, notificationList);
+	}
+
+	private NotificationList getNotificationList(final int size, final List<Notification> notificationList) {
+		final List<NotificationDto> dtoList = notificationList.stream()
+			.map(notification -> {
+				final MessageType type = MessageType.valueOf(notification.getMsgType().name());
+				return NotificationDto.of(notification.getId(), type, notification.getTitle(), notification.getContent(), notification.getStartAt().toLocalDate(), notification.getTargetId());
+			})
+			.toList();
+		return NotificationList.of(dtoList, size);
+	}
+
+	@Transactional
 	public void updateStateToRead(final Long id) {
 		final Optional<Notification> notification = notificationRepository.findById(id);
 		notification.ifPresentOrElse(
@@ -78,7 +103,6 @@ public class NotificationService {
 			}
 		);
 	}
-
 
 	@Transactional
 	public void processingMessageTask (final Notification task) {

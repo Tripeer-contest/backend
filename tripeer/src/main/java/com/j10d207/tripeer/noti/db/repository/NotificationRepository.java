@@ -2,6 +2,7 @@ package com.j10d207.tripeer.noti.db.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -12,4 +13,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 	@Query("SELECT n FROM notification n where n.state = 'CREATED'")
 	List<Notification> findAllWithUnsent();
 
+
+	List<Notification> findByIdLessThanAndUserIdAndStateOrderByIdDesc(Long id, Long userId, Notification.State state, Pageable pageable);
+
+	List<Notification> findByUserIdAndStateOrderByIdDesc(Long userId, Notification.State state, Pageable pageable);
 }

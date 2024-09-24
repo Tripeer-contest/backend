@@ -34,6 +34,8 @@ public class Notification {
 	@JoinColumn(name = "token_id")
 	private FirebaseToken token;
 
+	private Long userId;
+
 	private String title;
 
 	private String content;
@@ -47,7 +49,7 @@ public class Notification {
 
 	private LocalDateTime startAt;
 
-	private enum State {
+	public enum State {
 
 		CREATED,
 		SCHEDULED,
