@@ -10,10 +10,6 @@ import com.j10d207.tripeer.noti.db.entity.Notification;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-	@Query("SELECT n FROM notification n where n.state = 'CREATED'")
-	List<Notification> findAllWithUnsent();
-
-
 	List<Notification> findByIdLessThanAndUserIdAndStateOrderByIdDesc(Long id, Long userId, Notification.State state, Pageable pageable);
 
 	List<Notification> findByUserIdAndStateOrderByIdDesc(Long userId, Notification.State state, Pageable pageable);

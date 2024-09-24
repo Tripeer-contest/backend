@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.j10d207.tripeer.noti.dto.res.NotificationList;
 import com.j10d207.tripeer.noti.service.FirebaseTokenService;
 import com.j10d207.tripeer.noti.service.NotificationService;
+import com.j10d207.tripeer.noti.service.NotificationTaskService;
 import com.j10d207.tripeer.noti.service.TestNotificationService;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -104,8 +104,8 @@ public class NotificationController {
 	 * @param user: 로그인 된 유저
 	 * @param lastId: 마지막 번호
 	 * @param size: 목록의 아이템 개수
-	 * @status: 성공시 204 NO_CONTENT
-	 * @body: 	null
+	 * @status: 성공시 200 OK
+	 * @body: 	NotificationList
 	 *
 	 */
 
@@ -113,12 +113,12 @@ public class NotificationController {
 	public Response<NotificationList> getNotificationList(
 		@AuthenticationPrincipal CustomOAuth2User user,
 		@RequestParam(name = "lastid", required = false) @Min(value = 1, message = "lastid는 0보다 커야 합니다.") Long lastId,
-		@RequestParam(name = "size", defaultValue = "3", required = false)
-			//@Max(value = 40, message = "size는 10 ~ 40 까지 유효합니다. 기본값은 20입니다.")
-			//@Min(value = 10, message = "size는 10 ~ 40 까지 유효합니다. 기본값은 20입니다.") int size
-			int size
+		@RequestParam(name = "size", defaultValue = "20", required = false)
+			@Max(value = 40, message = "size는 10 ~ 40 까지 유효합니다. 기본값은 20입니다.")
+			@Min(value = 10, message = "size는 10 ~ 40 까지 유효합니다. 기본값은 20입니다.") int size
 	) {
-		final NotificationList responseBody = notificationService.findAllWithSentByUser(user.getUserId(), Optional.ofNullable(lastId), size);
+		final NotificationList responseBody = notificationService.findAllWithReceiveByUser(user.getUserId(), Optional.ofNullable(lastId), size);
+
 		return Response.of(
 			ResponseHeader.NOTI_LIST.getStatus(),
 			ResponseHeader.NOTI_LIST.getMessage(),
@@ -130,12 +130,9 @@ public class NotificationController {
 	@GetMapping("/test/tripeer")
 	public Response<Void> testTripeerStart(
 		@AuthenticationPrincipal CustomOAuth2User user,
-		@RequestParam String fcmToken,
 		@RequestParam String planTitle
 	) {
-		log.info("param: token={}, planTitle={}", fcmToken, planTitle);
-		testService.testTripeerNoti(user.getUserId(), fcmToken, planTitle);
-
+		testService.testTripeerNoti(user.getUserId(), planTitle);
 		return Response.of(
 			HttpStatus.OK,
 			null,
@@ -145,10 +142,9 @@ public class NotificationController {
 
 	@GetMapping("/test/diary")
 	public Response<Void> testDiarySave(
-		@AuthenticationPrincipal CustomOAuth2User user,
-		@RequestParam String fcmToken
+		@AuthenticationPrincipal CustomOAuth2User user
 	) {
-		testService.testDiaryNoti(user.getUserId(), fcmToken);
+		testService.testDiaryNoti(user.getUserId());
 		return Response.of(
 			HttpStatus.OK,
 			null,
@@ -159,10 +155,10 @@ public class NotificationController {
 	@GetMapping("/test/invite")
 	public Response<Void> testInvite(
 		@AuthenticationPrincipal CustomOAuth2User user,
-		@RequestParam String fcmToken,
-		@RequestParam String planTitle
+		@RequestParam String planTitle,
+		@RequestParam Long planId
 	) {
-		testService.testInviteNoti(user.getUserId(), fcmToken, planTitle);
+		testService.testInviteNoti(user.getUserId(), planTitle, planId);
 		return Response.of(
 			HttpStatus.OK,
 			null,
