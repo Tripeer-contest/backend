@@ -84,6 +84,7 @@ public class SpotDTO {
         private String spotName;
         private String spotImg;
         private String address;
+        private String contentType;
         private double starPointAvg;
         private double latitude;
         private double longitude;
@@ -95,6 +96,7 @@ public class SpotDTO {
                     .spotId(spotInfoEntity.getSpotInfoId())
                     .spotImg(spotInfoEntity.getFirstImage())
                     .address(spotInfoEntity.getAddr1())
+                    .contentType(ContentTypeEnum.getNameByCode(spotInfoEntity.getContentTypeId()))
                     .spotName(spotInfoEntity.getTitle())
                     .starPointAvg(spotInfoEntity.getSpotReviewList().stream().mapToDouble(
 						SpotReviewEntity::getStarPoint).average().orElse(0.0))
