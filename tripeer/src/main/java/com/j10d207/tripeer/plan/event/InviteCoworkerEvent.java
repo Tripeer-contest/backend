@@ -14,4 +14,5 @@ public class InviteCoworkerEvent {
 
 	private final String planTitle;
 
+	private final Long planId;
 }

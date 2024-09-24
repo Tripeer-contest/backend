@@ -274,10 +274,13 @@ public class PlanServiceImpl implements PlanService {
         coworkerRepository.save(coworkerEntity);
         // 유저 닉네임을 들고오기 위해 유저 객체가 필요
         UserEntity user = userRepository.findByUserId(coworkerInvitedReq.getUserId());
+
         // 플랜 초대 알림
+        PlanEntity coworkerPlan = coworkerEntity.getPlan();
         publisher.publishEvent(InviteCoworkerEvent.builder()
-            .planTitle(coworkerEntity.getPlan().getTitle())
+            .planTitle(coworkerPlan.getTitle())
             .invitedCoworker(new CoworkerDto(user.getUserId(),user.getNickname()))
+            .planId(coworkerPlan.getPlanId())
             .build()
         );
     }
