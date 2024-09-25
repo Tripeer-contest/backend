@@ -276,7 +276,8 @@ public class PlanServiceImpl implements PlanService {
         UserEntity user = userRepository.findByUserId(coworkerInvitedReq.getUserId());
 
         // 플랜 초대 알림
-        PlanEntity coworkerPlan = coworkerEntity.getPlan();
+        PlanEntity coworkerPlan = planRepository.findByPlanId(coworkerInvitedReq.getPlanId());
+
         publisher.publishEvent(InviteCoworkerEvent.builder()
             .planTitle(coworkerPlan.getTitle())
             .invitedCoworker(new CoworkerDto(user.getUserId(),user.getNickname()))
