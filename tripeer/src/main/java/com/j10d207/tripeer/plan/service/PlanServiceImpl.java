@@ -201,7 +201,8 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public List<PlanDetailMainDTO.MyPlan> planList(long userId) {
         // 사용자가 소유중인 플랜의 리스트 목록을 가져옴
-        List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(userId, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1));
+        List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserIdAndPlan_EndDateAfterAndRole(userId, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1), "member");
+
 
         // 반환리스트를 담아줄 DTO 생성
         List<PlanDetailMainDTO.MyPlan> myPlans = new ArrayList<>();
