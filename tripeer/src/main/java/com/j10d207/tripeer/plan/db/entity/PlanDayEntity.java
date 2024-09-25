@@ -41,7 +41,7 @@ public class PlanDayEntity {
 
     private LocalDate day;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "PLAN_DAY_ID")
     private List<PlanDetailEntity> planDetailList;
 

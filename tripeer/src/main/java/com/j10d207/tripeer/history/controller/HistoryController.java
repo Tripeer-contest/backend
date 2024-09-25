@@ -95,8 +95,10 @@ public class HistoryController implements HistoryControllerDocs {
 	// }
 
 	@GetMapping("/{planId}")
-	public Response<HistoryDetailRes> getPlanDetail(@PathVariable("planId") long planId) {
-		HistoryDetailRes res = historyService.getHistoryDetail(planId);
+	public Response<HistoryDetailRes> getPlanDetail(
+		@AuthenticationPrincipal CustomOAuth2User user,
+		@PathVariable("planId") long planId) {
+		HistoryDetailRes res = historyService.getHistoryDetail(planId, user.getUserId());
 		return Response.of(HttpStatus.OK, "다이어리 디테일 조회 성공", res);
 	}
 

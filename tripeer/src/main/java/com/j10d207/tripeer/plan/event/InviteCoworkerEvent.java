@@ -10,8 +10,11 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 public class InviteCoworkerEvent {
 
+	private final CoworkerDto invitor;
+
 	private final CoworkerDto invitedCoworker;
 
 	private final String planTitle;
 
+	private final Long planId;
 }

@@ -30,49 +30,67 @@ public class Notification {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToOne
-	@JoinColumn(name = "token_id")
-	private FirebaseToken token;
+	private Long userId;
+
+	@Builder.Default
+	@Enumerated(EnumType.STRING)
+	private State state = State.RECEIVE;
 
 	private String title;
 
 	private String content;
 
-	@Builder.Default
-	@Enumerated(EnumType.STRING)
-	private State state = State.CREATED;
-
 	@Enumerated(EnumType.STRING)
 	private MessageType msgType;
 
+	private Long targetId;
+
 	private LocalDateTime startAt;
 
-	private enum State {
+	public enum State {
 
-		CREATED,
-		SCHEDULED,
-		SENT,
+		RECEIVE,
 		READ
 	}
 
 	public static Notification of(
 		final MessageBody messageBody,
-		final FirebaseToken firebaseToken,
-		final LocalDateTime startAt
+		final Long userId,
+		final LocalDateTime startAt,
+		final Long targetId
 	) {
 		return Notification.builder()
-				.token(firebaseToken)
 				.title(messageBody.getTitle())
 				.content(messageBody.getContent())
+				.targetId(targetId)
 				.startAt(startAt)
+				.userId(userId)
 				.msgType(messageBody.getMessageType())
 				.build();
 	}
 
-	private Long targetId;
+	public static Notification ofState(
+		final MessageBody messageBody,
+		final FirebaseToken firebaseToken,
+		final LocalDateTime startAt,
+		final Long targetId,
+		final Notification.State state
+	) {
+		return Notification.builder()
+			.title(messageBody.getTitle())
+			.content(messageBody.getContent())
+			.startAt(startAt)
+			.state(state)
+			.msgType(messageBody.getMessageType())
+			.userId(firebaseToken.getUser().getUserId())
+			.targetId(targetId)
+			.build();
+	}
 
-	public void toSENT() {
-		this.state = State.SENT;
+
+
+	public void toRECEIVE() {
+		this.state = State.RECEIVE;
 	}
 
 	public void toREAD() {

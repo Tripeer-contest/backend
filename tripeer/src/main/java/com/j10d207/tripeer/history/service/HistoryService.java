@@ -16,7 +16,7 @@ public interface HistoryService {
 
 	// public String savePlanDetail(PlanSaveReq planSaveReq);
 
-	public HistoryDetailRes getHistoryDetail(long planId);
+	public HistoryDetailRes getHistoryDetail(long planId, long userId);
 
 	public String revokeHistoryDetail(long planId);
 

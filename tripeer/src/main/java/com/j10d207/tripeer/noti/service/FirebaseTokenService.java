@@ -1,6 +1,9 @@
 package com.j10d207.tripeer.noti.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -61,22 +64,28 @@ public class FirebaseTokenService {
 
 
 	@Transactional
-	public List<FirebaseToken> findAllNotificationByUsers(final List<CoworkerDto> coworkers) {
-		final List<Long> userIdList = coworkers.stream().map(CoworkerDto::getId).toList();
-		final List<UserEntity> users = userRepository.findAllById(userIdList);
-		return firebaseTokenRepository.findAllAvailableByUser(users);
+	public Map<Long, List<String>> findAllNotificationByUsers(final List<Long> userIds) {
+		final List<UserEntity> users = userRepository.findAllById(userIds);
+		final List<FirebaseToken> tokens = firebaseTokenRepository.findAllAvailableByUser(users);
+		return tokens.stream()
+			.collect(Collectors.groupingBy(
+				token -> token.getUser().getUserId(),
+				Collectors.mapping(FirebaseToken::getToken, Collectors.toList())
+			));
 	}
 
+
 	@Transactional
-	public List<FirebaseToken> findAllNotificationByUser(final CoworkerDto coworker) {
-		final UserEntity user = userRepository.findByUserId(coworker.getId());
-		return firebaseTokenRepository.findAllAvailableByUser(List.of(user));
+	public List<String> findAllNotificationByUser(final Long userId) {
+		final UserEntity user = userRepository.findByUserId(userId);
+		return firebaseTokenRepository.findAllAvailableByUser(List.of(user)).stream()
+			.map(FirebaseToken::getToken)
+			.toList();
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void invalidFirebaseHandler(final FirebaseToken firebaseToken) {
-		final FirebaseToken mergedFirebaseTokenEntity = em.merge(firebaseToken);
-		log.info("invalid firebase token: {}", firebaseToken.getUser().getNickname());
-		mergedFirebaseTokenEntity.mark();
+	public void invalidFirebaseHandler(final String firebaseToken) {
+		final Optional<FirebaseToken> token = firebaseTokenRepository.findByToken(firebaseToken);
+		token.ifPresent(FirebaseToken::mark);
 	}
 }
