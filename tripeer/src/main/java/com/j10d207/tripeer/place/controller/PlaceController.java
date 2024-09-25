@@ -87,6 +87,11 @@ public class PlaceController {
         reviewService.saveReview(user.getUserId(), reviewReq, multipartFiles);
         return Response.of(HttpStatus.OK, "리뷰 작성 완료", null);
     }
+    @DeleteMapping(value = "review/{spotReviewId}")
+    public Response<?> createReview(@AuthenticationPrincipal CustomOAuth2User user, @PathVariable long spotReviewId) {
+        reviewService.deleteReview(user.getUserId(), spotReviewId);
+        return Response.of(HttpStatus.NO_CONTENT, "리뷰 작성 완료", null);
+    }
 
     // 홈화면 추천 api
     @GetMapping("/recommend/home")

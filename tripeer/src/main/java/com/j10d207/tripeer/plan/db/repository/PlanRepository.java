@@ -16,4 +16,12 @@ public interface PlanRepository extends JpaRepository<PlanEntity, Long> {
 
     @Query("SELECT p.planId FROM plan p where p.isSaved = false AND p.endDate < :today ")
     List<Long> findAllWithUnsavedAndPastEndDate(@Param("today") LocalDate today);
+
+    @Query("SELECT p FROM plan p " +
+        "LEFT JOIN FETCH p.planDayList pd " +
+        "LEFT JOIN FETCH pd.planDetailList pdl " +
+        "LEFT JOIN FETCH pdl.spotInfo si " +
+        "WHERE p.planId = :planId")
+    PlanEntity findByPlanForHistory(@Param("planId") long planId);
 }
+

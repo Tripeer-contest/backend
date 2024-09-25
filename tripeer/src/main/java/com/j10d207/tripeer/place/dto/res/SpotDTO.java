@@ -98,8 +98,7 @@ public class SpotDTO {
                     .address(spotInfoEntity.getAddr1())
                     .contentType(ContentTypeEnum.getNameByCode(spotInfoEntity.getContentTypeId()))
                     .spotName(spotInfoEntity.getTitle())
-                    .starPointAvg(spotInfoEntity.getSpotReviewList().stream().mapToDouble(
-						SpotReviewEntity::getStarPoint).average().orElse(0.0))
+                    .starPointAvg(spotInfoEntity.getStarPointAvg())
                     .latitude(spotInfoEntity.getLatitude())
                     .longitude(spotInfoEntity.getLongitude())
                     .isWishlist(isWishlist)

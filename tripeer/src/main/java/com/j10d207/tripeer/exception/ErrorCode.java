@@ -25,6 +25,7 @@ public enum ErrorCode {
     EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "ACCOUNT-008", "토큰이 만료되었습니다."),
     NONE_WISHLIST(HttpStatus.BAD_REQUEST, "ACCOUNT-009", "찜목록에 없는 장소입니다"),
     HAS_WISHLIST(HttpStatus.BAD_REQUEST, "ACCOUNT-009", "이미 찜목록에 등록된 장소입니다"),
+    DONT_HAVE_PERMISSION(HttpStatus.FORBIDDEN, "ACCOUNT-010", "작성자가 아니거나 권한이 없습니다"),
 
     // plan
     HAS_BUCKET(HttpStatus.BAD_REQUEST, "PLAN-001", "이미 등록된 장소입니다."),
@@ -50,6 +51,7 @@ public enum ErrorCode {
     UNDEFINED_TYPE(HttpStatus.NOT_FOUND, "PLACE-004", "정의되지 않은 타입입니다."),
     BLOG_SEARCH_ERROR(HttpStatus.BAD_REQUEST, "PLACE-005", "블로그 검색 중 마지막 페이지를 넘었거나 오류가 발생했습니다."),
     FOUND_SPOT(HttpStatus.BAD_REQUEST, "PLACE-006", "이미 서비스에 존재하는 장소입니다."),
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE-007", "리뷰를 찾을 수 없습니다."),
 
     //root
     NOT_FOUND_ROOT(HttpStatus.BAD_REQUEST, "ROOT-001", "대중교통 수단이 없습니다."),

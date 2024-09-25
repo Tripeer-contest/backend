@@ -60,6 +60,21 @@ public class SpotInfoEntity {
 	private double longitude;
 	//받은 DB에 있었는데 뭔지 모르겠습니다.
 	private String mlevel;
+	// 평균 별점을 들고오기위해 spotReviewList를 받는 것은 비효율적인 것 같아서 추가
+	// 리뷰 작성및 삭제때 마다 업데이트해주는 식으로 구현해놓음
+	@Setter
+	private double starSum;
+	@Setter
+	private Integer starCount;
+
+	// 별점 평균은 소수점 첫째자리까지만
+	public double getStarPointAvg() {
+		if (starSum == 0) {
+			return 0.0; // starSum가 0이면 기본값 반환
+		}
+		double starPoint = starSum / starCount;
+		return Math.round(starPoint * 10) / 10.0;
+	}
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumns({@JoinColumn(name = "SPOT_INFO_ID")})

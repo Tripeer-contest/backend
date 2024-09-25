@@ -1,6 +1,8 @@
 package com.j10d207.tripeer.place.db.repository;
 
 import com.j10d207.tripeer.place.db.entity.SpotReviewEntity;
+import com.j10d207.tripeer.user.db.entity.UserEntity;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +20,7 @@ public interface SpotReviewRepository extends JpaRepository<SpotReviewEntity, Lo
 //    Optional<Double> findAverageStarPointBySpotInfo_SpotInfoId(long spotInfoId);
     @Query(value = "SELECT AVG(star_point) FROM tripeer.spot_review WHERE spot_info_id = :spotInfoId", nativeQuery = true)
     Optional<Double> findAverageStarPointBySpotInfoId(@Param("spotInfoId") int spotInfoId);
+
+    @Query("SELECT sr.spotInfo.spotInfoId FROM spot_review sr WHERE sr.user = :user")
+    List<Integer> findSpotInfoIdsByUser(UserEntity user);
 }

@@ -37,7 +37,7 @@ public class PlanDetailEntity {
 	@JoinColumn(name = "PLAN_DAY_ID")
 	private PlanDayEntity planDay;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "SPOT_INFO_ID")
 	private SpotInfoEntity spotInfo;
 

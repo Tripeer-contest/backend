@@ -129,14 +129,6 @@ public class UserServiceImpl implements UserService{
     public List<UserDTO.Wishlist> getMyWishlist(long userId) {
         List<WishListEntity> wishListEntityList = wishListRepository.findByUser_UserId(userId);
         List<UserDTO.Wishlist> wishlistList = wishListEntityList.stream().map(UserDTO.Wishlist::ofEntity).toList();
-        for ( UserDTO.Wishlist wishlist : wishlistList) {
-            Optional<Double> starPoint = spotReviewRepository.findAverageStarPointBySpotInfoId(wishlist.getSpotInfoId());
-            if(starPoint.isPresent()) {
-                wishlist.setStarPointAvg(Math.round(starPoint.get()*10)/10.0);
-            } else {
-                wishlist.setStarPointAvg(0);
-            }
-        }
         return wishlistList;
     }
 
