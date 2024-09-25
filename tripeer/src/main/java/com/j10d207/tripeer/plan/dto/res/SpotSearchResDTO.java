@@ -35,6 +35,8 @@ public class SpotSearchResDTO {
         private boolean isWishlist;
         private boolean isSpot;
 
+
+
         public static SearchResult fromWishListEntity(WishListEntity wishList, boolean isSpot) {
 
             return SearchResult.builder()

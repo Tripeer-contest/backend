@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
@@ -41,7 +42,7 @@ public class PlanEntity {
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PLAN_ID")
-	List<PlanDayEntity> planDayList;
+	Set<PlanDayEntity> planDayList;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PLAN_ID")

@@ -23,6 +23,7 @@ import com.j10d207.tripeer.history.dto.req.PlanSaveReq;
 import com.j10d207.tripeer.history.dto.res.CostRes;
 import com.j10d207.tripeer.history.dto.res.HistoryDetailRes;
 import com.j10d207.tripeer.history.dto.res.PlanInfoRes;
+import com.j10d207.tripeer.place.db.repository.SpotReviewRepository;
 import com.j10d207.tripeer.plan.db.entity.PlanDayEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanDetailEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanEntity;
@@ -47,6 +48,7 @@ public class HistoryServiceImpl implements HistoryService {
 	private final PlanDetailRepository planDetailRepository;
 	private final PlanDayRepository planDayRepository;
 	private final WebClient webClient;
+	private final SpotReviewRepository spotReviewRepository;
 	private final UserRepository userRepository;
 
 	ObjectMapper objectMapper = new ObjectMapper();
@@ -71,10 +73,10 @@ public class HistoryServiceImpl implements HistoryService {
 	}
 
 	public HistoryDetailRes getHistoryDetail(long planId, long userId) {
-		UserEntity user = userRepository.findByUserId(userId);
-		PlanEntity plan = Optional.ofNullable(planRepository.findByPlanId(planId))
+		UserEntity user = userRepository.findById(userId).orElseThrow(() ->new CustomException(ErrorCode.USER_NOT_FOUND));
+		PlanEntity plan = Optional.ofNullable(planRepository.findByPlanForHistory(planId))
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
-		return HistoryDetailRes.from(plan, user);
+		return HistoryDetailRes.from(plan, spotReviewRepository.findSpotInfoIdsByUser(user));
 	}
 
 	public String revokeHistoryDetail(long planId) {

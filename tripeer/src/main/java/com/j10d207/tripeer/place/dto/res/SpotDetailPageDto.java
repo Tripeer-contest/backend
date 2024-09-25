@@ -57,6 +57,7 @@ public class SpotDetailPageDto {
                 .latitude(spotInfoEntity.getLatitude())
                 .longitude(spotInfoEntity.getLongitude())
                 .addr1(spotInfoEntity.getAddr1())
+                .starPointAvg(spotInfoEntity.getStarPointAvg())
                 .build();
     }
 }

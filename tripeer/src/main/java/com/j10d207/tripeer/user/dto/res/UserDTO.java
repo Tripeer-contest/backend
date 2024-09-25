@@ -82,6 +82,7 @@ public class UserDTO {
                     .latitude(wishListEntity.getSpotInfo().getLatitude())
                     .longitude(wishListEntity.getSpotInfo().getLongitude())
                     .img(wishListEntity.getSpotInfo().getFirstImage())
+                    .starPointAvg(wishListEntity.getSpotInfo().getStarPointAvg())
                     .isLike(true)
                     .build();
         }

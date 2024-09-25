@@ -8,4 +8,5 @@ import java.util.List;
 public interface ReviewService {
 
     public void saveReview(long userId, ReviewReq reviewReq, List<MultipartFile> multipartFileList);
+    public void deleteReview(long userId, long spotReviewId);
 }

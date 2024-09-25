@@ -1,5 +1,7 @@
 package com.j10d207.tripeer.history.dto.res;
 
+import java.util.List;
+
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
 import com.j10d207.tripeer.place.db.entity.SpotReviewEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanDetailEntity;
@@ -25,7 +27,7 @@ public class HistorySpotRes {
 	private int step;
 	private int cost;
 
-	public static HistorySpotRes from(PlanDetailEntity planDetailEntity, UserEntity userEntity) {
+	public static HistorySpotRes from(PlanDetailEntity planDetailEntity, Boolean isWriteReview ) {
 		return HistorySpotRes.builder()
 			.planDetailId(planDetailEntity.getPlanDetailId())
 			.spotId(planDetailEntity.getSpotInfo().getSpotInfoId())
@@ -36,7 +38,7 @@ public class HistorySpotRes {
 			.latitude(planDetailEntity.getSpotInfo().getLatitude())
 			.longitude(planDetailEntity.getSpotInfo().getLongitude())
 			.starPointAvg(planDetailEntity.getSpotInfo().getStarPointAvg())
-			// .isWriteReview(planDetailEntity.getSpotInfo().getSpotReviewList().stream().map(SpotReviewEntity::getUser).anyMatch(userEntity::equals))
+			.isWriteReview(isWriteReview)
 			.day(planDetailEntity.getDay())
 			.step(planDetailEntity.getStep())
 			.cost(planDetailEntity.getCost())
