@@ -131,13 +131,14 @@ public class NotificationEventHandler implements ApplicationListener<Application
 	public void handleInviteNoti(final InviteCoworkerEvent event) {
 
 		final String planTitle = event.getPlanTitle();
-		final CoworkerDto coworker = event.getInvitedCoworker();
+		final CoworkerDto invitor = event.getInvitor();
+		final CoworkerDto invitedCoworker = event.getInvitedCoworker();
 
-		final MessageBody inviteMsgBody = MessageBuilder.getMessageBody(MessageType.USER_INVITED, planTitle, coworker.getNickname());
+		final MessageBody inviteMsgBody = MessageBuilder.getMessageBody(MessageType.USER_INVITED, planTitle, invitor.getNickname());
 
-		final Notification notification = notificationService.getNotificaitonAfterSave(inviteMsgBody, coworker.getId(), LocalDateTime.now(), event.getPlanId());
+		final Notification notification = notificationService.getNotificationAfterSave(inviteMsgBody, invitedCoworker.getId(), LocalDateTime.now(), event.getPlanId());
 
-		final List<String> firebaseTokens = firebaseTokenService.findAllNotificationByUser(coworker.getId());
+		final List<String> firebaseTokens = firebaseTokenService.findAllNotificationByUser(invitedCoworker.getId());
 
 		firebaseTokens.forEach(token -> {
 			notificationTaskService.processingMessageTask(NotificationTask.of(notification, token));

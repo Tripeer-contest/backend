@@ -266,6 +266,9 @@ public class PlanServiceImpl implements PlanService {
         }
 
 
+        // 초대자 조회
+        UserEntity invitor = userRepository.findByUserId(userId);
+
         CoworkerEntity coworkerEntity = CoworkerEntity.createInviteEntity(coworkerInvitedReq.getUserId(), coworkerInvitedReq.getPlanId(), userId);
         coworkerRepository.save(coworkerEntity);
         // 유저 닉네임을 들고오기 위해 유저 객체가 필요
@@ -274,9 +277,12 @@ public class PlanServiceImpl implements PlanService {
         // 플랜 초대 알림
         PlanEntity coworkerPlan = planRepository.findByPlanId(coworkerInvitedReq.getPlanId());
 
+        // invitor: 초대 보낸사람
+        // invitedCoworker: 초대 받은사람의 정보임
         publisher.publishEvent(InviteCoworkerEvent.builder()
             .planTitle(coworkerPlan.getTitle())
-            .invitedCoworker(new CoworkerDto(user.getUserId(),user.getNickname()))
+            .invitor(new CoworkerDto(invitor.getUserId(), invitor.getNickname()))
+            .invitedCoworker(new CoworkerDto(user.getUserId(), user.getNickname()))
             .planId(coworkerPlan.getPlanId())
             .build()
         );
