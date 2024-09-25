@@ -265,11 +265,6 @@ public class PlanServiceImpl implements PlanService {
             throw new CustomException(ErrorCode.HAS_COWORKER);
         }
 
-        //너무 많은 플랜을 가진건 아닌지 확인
-        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerInvitedReq.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
-            throw new CustomException(ErrorCode.TOO_MANY_PLAN);
-        }
-
 
         CoworkerEntity coworkerEntity = CoworkerEntity.createInviteEntity(coworkerInvitedReq.getUserId(), coworkerInvitedReq.getPlanId(), userId);
         coworkerRepository.save(coworkerEntity);
@@ -289,6 +284,11 @@ public class PlanServiceImpl implements PlanService {
     //동행자 추가
     @Override
     public void joinPlan(long planId, long userId) {
+        //너무 많은 플랜을 가진건 아닌지 확인
+        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfterAndRole(userId, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1), "member").size() > 5) {
+            throw new CustomException(ErrorCode.TOO_MANY_PLAN);
+        }
+
         PlanEntity planEntity = planRepository.findById(planId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
 
