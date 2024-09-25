@@ -3,14 +3,10 @@ package com.j10d207.tripeer.tmap.service;
 
 import com.j10d207.tripeer.plan.db.TimeEnum;
 import com.j10d207.tripeer.plan.dto.req.PlaceListReq;
-import com.j10d207.tripeer.plan.dto.res.RootRes;
 import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import com.nimbusds.jose.shaded.gson.JsonObject;
-import com.j10d207.tripeer.exception.CustomException;
-import com.j10d207.tripeer.exception.ErrorCode;
-import com.j10d207.tripeer.kakao.service.KakaoService;
 import com.j10d207.tripeer.tmap.db.dto.CoordinateDTO;
 import com.j10d207.tripeer.tmap.db.dto.RootInfoDTO;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
@@ -32,7 +28,6 @@ public class TMapServiceImpl implements TMapService {
     private String apikey;
 
     private final ApiRequestService apiRequestService;
-    private final KakaoService kakaoService;
     private final PublicRootRepository publicRootRepository;
 
     /*
@@ -78,11 +73,10 @@ public class TMapServiceImpl implements TMapService {
                             coordinates.get(j).getLatitude(),
                             timeTable[i][j]);
 
-                    int minTime = Math.min(Math.min(tmp.get(0).getTime(), tmp.get(1).getTime()), tmp.get(2).getTime());
-                    if (minTime == 0) System.out.println("0 감지");
-                    if (minTime == tmp.get(0).getTime()) timeTable[i][j] = tmp.get(0);
-                    else if (minTime == tmp.get(1).getTime()) timeTable[i][j] = tmp.get(1);
-                    else if (minTime == tmp.get(2).getTime()) timeTable[i][j] = tmp.get(2);
+                    timeTable[i][j] = tmp.stream()
+                            .min(Comparator.comparingInt(RootInfoDTO::getTime))
+                            .orElseThrow(() -> new IllegalArgumentException("List is empty"));
+
                 }
 
             }
@@ -150,7 +144,6 @@ public class TMapServiceImpl implements TMapService {
                 });
     }
 
-
     @Override
     public List<RootInfoDTO> useTMapPublic3 (PlaceListReq placeListReq) {
         RootInfoDTO baseInfo = RootInfoDTO.builder()
@@ -165,66 +158,12 @@ public class TMapServiceImpl implements TMapService {
     }
 
     /*
-    TMap Api 요청시 오류가 반환되었을 경우 error 코드내용을 분석해 처리하는 메소드
-     */
-    private List<String[]> tMapApiErrorCodeFilter (TmapErrorCode errorCode) {
-        List<String[]> timeList = new ArrayList<>();
-        StringBuilder time = new StringBuilder();
-        switch (errorCode) {
-            case NO_PUBLIC_ROUTE_START_END_NEAR:
-            case NO_PUBLIC_AND_CAR_ROUTE_START_END_NEAR:
-                time.append("출발지/도착지 간 거리가 가까워서 탐색된 경로가 없습니다.");
-                timeList.add(new String[]{time.toString(), "2" });
-                break;
-            case NO_PUBLIC_ROUTE_FROM_START_POINT:
-            case NO_PUBLIC_AND_CAR_ROUTE_FROM_START_POINT:
-                time.append("출발지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
-                timeList.add(new String[]{time.toString(), "2" });
-                break;
-            case NO_PUBLIC_ROUTE_FROM_END_POINT:
-            case NO_PUBLIC_AND_CAR_ROUTE_FROM_END_POINT:
-                time.append("도착지에서 검색된 정류장이 없어 탐색된 경로가 없습니다.");
-                timeList.add(new String[]{time.toString(), "2" });
-                break;
-            case NO_PUBLIC_TRANSPORT_ROUTE:
-            case NO_PUBLIC_AND_CAR_TRANSPORT_ROUTE:
-                time.append("출발지/도착지 간 탐색된 대중교통 경로가 없어 탐색된 경로가 없습니다.");
-                timeList.add(new String[]{time.toString(), "2" });
-                break;
-            default:
-                throw new CustomException(ErrorCode.ROOT_API_ERROR);
-        }
-
-        return timeList;
-    }
-
-    /*
-    TMap Api 요청시 이미 조회된 경로와 아닌경우를 분류해서 DTO 로 변환하는 메소드
-     */
-    private RootRes tMapApiSuccessCode(RootRes rootRes, RootInfoDTO rootInfoDTO) {
-        rootRes.setSpotTime(Collections.singletonList(new String[]{rootInfoDTO.timeToString(), String.valueOf(rootRes.getOption())}));
-
-        if (rootInfoDTO.getPublicRoot() != null ) {
-            List<PublicRootDTO> publicRootDTOList = new ArrayList<>();
-            publicRootDTOList.add(rootInfoDTO.getPublicRoot());
-            rootRes.setPublicRootList(publicRootDTOList);
-            return rootRes;
-        } else {
-            return MakeRootInfo(rootRes, rootInfoDTO.getRootInfo());
-        }
-    }
-
-    /*
     조회 결과 오류는 아니지만 경로가 없기때문에 해당 결과를 정제하여 반환하는 메소드
      */
     private RootInfoDTO ApiResponseHasNonRoot(int status) {
         return RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).time(TimeEnum.ERROR_TIME.getTime()).build();
     }
 
-    private RootInfoDTO ApiResponseHasNonRoot2(int status, RootInfoDTO rootInfoDTO) {
-        rootInfoDTO.setStatus(TmapErrorCode.fromCode(status));
-        return rootInfoDTO;
-    }
 
     private List<RootInfoDTO> ApiResponseHasNonRoot3(int status) {
         return List.of(RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).build(),
@@ -284,31 +223,6 @@ public class TMapServiceImpl implements TMapService {
         rootInfoDTOList.add(RootJsonRefactor(bestAirRoot, 3, rootInfoDTO));
         return rootInfoDTOList;
     }
-    private RootInfoDTO ApiResponseHasRoot2(JsonObject routeInfo, RootInfoDTO rootInfoDTO) {
-        //경로 정보중 제일 좋은 경로를 가져옴
-        JsonElement bestRoot = apiRequestService.getBestTime(routeInfo.getAsJsonObject("plan").getAsJsonArray("itineraries"));
-        //모든 경로가 백트래킹 됨
-        if(bestRoot.getAsJsonObject().size() == 0) {
-            rootInfoDTO.setStatus(TmapErrorCode.NO_PUBLIC_AND_CAR_TRANSPORT_ROUTE);
-            rootInfoDTO.setTime(TimeEnum.ERROR_TIME.getTime());
-            return rootInfoDTO;
-        }
-        //반환 정보 생성
-        int totalTime = bestRoot.getAsJsonObject().get("totalTime").getAsInt();
-        rootInfoDTO.setTime(totalTime / TimeEnum.HOUR_PER_MIN.getTime());
-//        rootInfoDTO.setRootInfo(bestRoot);
-        rootInfoDTO.setPublicRoot(PublicRootDTO.fromJson(bestRoot.getAsJsonObject()));
-        rootInfoDTO.setStatus(TmapErrorCode.SUCCESS_PUBLIC);
-
-//        apiRequestService.saveRootInfo(bestRoot,
-//                rootInfoDTO.getStartLatitude(),
-//                rootInfoDTO.getStartLongitude(),
-//                rootInfoDTO.getEndLatitude(),
-//                rootInfoDTO.getEndLongitude(),
-//                totalTime / TimeEnum.HOUR_PER_MIN.getTime());
-
-        return rootInfoDTO;
-    }
 
     private RootInfoDTO RootJsonRefactor(JsonElement root, int option, RootInfoDTO oldInfo) {
         RootInfoDTO rootInfoDTO = new RootInfoDTO();
@@ -335,34 +249,6 @@ public class TMapServiceImpl implements TMapService {
                 option);
 
         return rootInfoDTO;
-    }
-
-    /*
-    Json 정제
-     */
-    private RootRes MakeRootInfo(RootRes rootRes, JsonElement rootInfo) {
-        if(rootInfo == null) {
-            List<PublicRootDTO> rootList = new ArrayList<>();
-            if(rootRes.getPublicRootList() != null) {
-                rootList = rootRes.getPublicRootList();
-            }
-            rootList.add(null);
-            rootRes.setPublicRootList(rootList);
-            return rootRes;
-        }
-        JsonObject infoObject = rootInfo.getAsJsonObject();
-
-        PublicRootDTO publicRoot = PublicRootDTO.fromJson(infoObject);
-
-
-        List<PublicRootDTO> rootList = new ArrayList<>();
-        if(rootRes.getPublicRootList() != null) {
-            rootList = rootRes.getPublicRootList();
-        }
-        rootList.add(publicRoot);
-        rootRes.setPublicRootList(rootList);
-
-        return rootRes;
     }
 
 

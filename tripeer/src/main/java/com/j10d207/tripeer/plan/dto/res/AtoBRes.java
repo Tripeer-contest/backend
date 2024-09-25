@@ -16,4 +16,11 @@ public class AtoBRes {
     private List<String> time;
     private List<PublicRootDTO> rootList;
 
+    public static AtoBRes ofResultList(List<String> time, List< PublicRootDTO> rootList) {
+        return AtoBRes.builder()
+                .time(time)
+                .rootList(rootList)
+                .build();
+    }
+
 }

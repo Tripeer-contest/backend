@@ -2,7 +2,6 @@ package com.j10d207.tripeer.tmap.service;
 
 
 import com.j10d207.tripeer.plan.dto.req.PlaceListReq;
-import com.j10d207.tripeer.plan.dto.res.RootRes;
 import com.j10d207.tripeer.tmap.db.dto.CoordinateDTO;
 import com.j10d207.tripeer.tmap.db.dto.RootInfoDTO;
 
