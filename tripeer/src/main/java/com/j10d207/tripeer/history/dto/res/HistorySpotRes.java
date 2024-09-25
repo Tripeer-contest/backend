@@ -35,9 +35,8 @@ public class HistorySpotRes {
 			.address(planDetailEntity.getSpotInfo().getAddr1())
 			.latitude(planDetailEntity.getSpotInfo().getLatitude())
 			.longitude(planDetailEntity.getSpotInfo().getLongitude())
-			.starPointAvg(planDetailEntity.getSpotInfo().getSpotReviewList().stream().mapToDouble(
-				SpotReviewEntity::getStarPoint).average().orElse(0.0))
-			.isWriteReview(planDetailEntity.getSpotInfo().getSpotReviewList().stream().map(SpotReviewEntity::getUser).anyMatch(userEntity::equals))
+			.starPointAvg(planDetailEntity.getSpotInfo().getStarPointAvg())
+			// .isWriteReview(planDetailEntity.getSpotInfo().getSpotReviewList().stream().map(SpotReviewEntity::getUser).anyMatch(userEntity::equals))
 			.day(planDetailEntity.getDay())
 			.step(planDetailEntity.getStep())
 			.cost(planDetailEntity.getCost())

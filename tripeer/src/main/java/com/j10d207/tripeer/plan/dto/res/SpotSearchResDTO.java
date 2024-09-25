@@ -42,8 +42,7 @@ public class SpotSearchResDTO {
                     .title(wishList.getSpotInfo().getTitle())
                     .contentType(ContentTypeEnum.getNameByCode(wishList.getSpotInfo().getContentTypeId()))
                     .addr(wishList.getSpotInfo().getAddr1())
-                    .starPointAvg(wishList.getSpotInfo().getSpotReviewList().stream().mapToDouble(
-                            SpotReviewEntity::getStarPoint).average().orElse(0.0))
+                    .starPointAvg(wishList.getSpotInfo().getStarPointAvg())
                     .latitude(wishList.getSpotInfo().getLatitude())
                     .longitude(wishList.getSpotInfo().getLongitude())
                     .img(wishList.getSpotInfo().getFirstImage())
@@ -64,8 +63,7 @@ public class SpotSearchResDTO {
                     .title(spotInfo.getTitle())
                     .contentType(ContentTypeEnum.getMajorNameByCode(spotInfo.getContentTypeId()))
                     .addr(spotInfo.getAddr1())
-                    .starPointAvg(spotInfo.getSpotReviewList().stream().mapToDouble(
-                            SpotReviewEntity::getStarPoint).average().orElse(0.0))
+                    .starPointAvg(spotInfo.getStarPointAvg())
                     .latitude(spotInfo.getLatitude())
                     .longitude(spotInfo.getLongitude())
                     .img(img)
