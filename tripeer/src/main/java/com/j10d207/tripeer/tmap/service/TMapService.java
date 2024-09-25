@@ -15,13 +15,12 @@ public interface TMapService {
     // 경로 시간 받아오기
     public RootInfoDTO getPublicTime(double SX, double SY, double EX, double EY, RootInfoDTO timeRootInfoDTO);
 
-
     // 경로 시간 받아오기
-    public List<RootInfoDTO> getPublicTime3(double SX, double SY, double EX, double EY, RootInfoDTO timeRootInfoDTO);
+    public List<RootInfoDTO> getPublicTimeList(double SX, double SY, double EX, double EY, RootInfoDTO timeRootInfoDTO);
 
 
     //tMap 대중교통 경로 찾기 시작
-    public List<RootInfoDTO> useTMapPublic3 (PlaceListReq placeListReq);
+    public List<RootInfoDTO> useTMapPublic(PlaceListReq placeListReq);
 
 //    //경로 리스트 중에서 제일 좋은 경로 하나를 선정해서 반환 ( 시간 우선 )
 //    public JsonElement getBestTime(JsonArray itineraries);

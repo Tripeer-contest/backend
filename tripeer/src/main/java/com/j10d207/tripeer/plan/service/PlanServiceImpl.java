@@ -14,12 +14,9 @@ import com.j10d207.tripeer.plan.dto.res.*;
 import com.j10d207.tripeer.plan.event.CompletePlanEvent;
 import com.j10d207.tripeer.plan.event.CoworkerDto;
 import com.j10d207.tripeer.plan.event.InviteCoworkerEvent;
-import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.j10d207.tripeer.tmap.db.dto.PublicRootDTO;
 import com.j10d207.tripeer.tmap.db.dto.RootInfoDTO;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
-import com.nimbusds.jose.shaded.gson.JsonElement;
-import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.kakao.service.KakaoService;
@@ -508,7 +505,7 @@ public class PlanServiceImpl implements PlanService {
         resultTime.add(carTime > 300 ? "경로를 찾을 수 없습니다." : CommonMethod.timeToString(carTime));
         resultRootDTO.add(null);
 
-        tMapService.useTMapPublic3(placeListReq).forEach(info -> {
+        tMapService.useTMapPublic(placeListReq).forEach(info -> {
             resultTime.add(info.getStatus().getCode() < 11 ? info.timeToString() : info.getStatus().getMessage());
             resultRootDTO.add(info.getStatus().getCode() < 11 ? info.getPublicRoot() : null);
         });
@@ -553,9 +550,13 @@ public class PlanServiceImpl implements PlanService {
                     RootInfoDTO selectInfo = root.getTimeTable()[resultNumbers.get(i-1)][resultNumbers.get(i)];
                     if (selectInfo.getTime() == TimeEnum.ERROR_TIME.getTime()) throw new CustomException(ErrorCode.NOT_FOUND_ROOT);
 
-                    AtoBRes newAtoB = getShortTime((PlaceListReq) List.of(
-                            placeListReq.getPlaceList().get(resultNumbers.get(i-1)),
-                            placeListReq.getPlaceList().get(resultNumbers.get(i))));
+                    PlaceListReq tmpPlaceList = PlaceListReq.builder()
+                            .placeList(List.of(
+                                    placeListReq.getPlaceList().get(resultNumbers.get(i-1)),
+                                    placeListReq.getPlaceList().get(resultNumbers.get(i))))
+                            .build();
+
+                    AtoBRes newAtoB = getShortTime(tmpPlaceList);
                     newAtoB.setOption(selectInfo.getStatus().getCode());
                     return newAtoB;
                 }).forEach(atoBResList::add);

@@ -67,7 +67,7 @@ public class TMapServiceImpl implements TMapService {
                             coordinates.get(j).getLatitude(),
                             timeTable[i][j]);
                 } else {
-                    List<RootInfoDTO> tmp = getPublicTime3(coordinates.get(i).getLongitude(),
+                    List<RootInfoDTO> tmp = getPublicTimeList(coordinates.get(i).getLongitude(),
                             coordinates.get(i).getLatitude(),
                             coordinates.get(j).getLongitude(),
                             coordinates.get(j).getLatitude(),
@@ -113,7 +113,7 @@ public class TMapServiceImpl implements TMapService {
 
 
     @Override
-    public List<RootInfoDTO> getPublicTime3(double SX, double SY, double EX, double EY, RootInfoDTO rootInfoDTO) {
+    public List<RootInfoDTO> getPublicTimeList(double SX, double SY, double EX, double EY, RootInfoDTO rootInfoDTO) {
         Optional<List<PublicRootEntity>> optionalPublicRoot = Optional.ofNullable(publicRootRepository.findByStartLatAndStartLonAndEndLatAndEndLon(SX, SY, EX, EY));
         rootInfoDTO.setLocation(SX, SY, EX, EY);
         return optionalPublicRoot
@@ -145,13 +145,13 @@ public class TMapServiceImpl implements TMapService {
     }
 
     @Override
-    public List<RootInfoDTO> useTMapPublic3 (PlaceListReq placeListReq) {
+    public List<RootInfoDTO> useTMapPublic(PlaceListReq placeListReq) {
         RootInfoDTO baseInfo = RootInfoDTO.builder()
                 .startTitle(placeListReq.getPlaceList().getFirst().getTitle())
                 .endTitle(placeListReq.getPlaceList().getLast().getTitle())
                 .build();
 
-        return getPublicTime3(placeListReq.getPlaceList().getFirst().getLongitude(),
+        return getPublicTimeList(placeListReq.getPlaceList().getFirst().getLongitude(),
                 placeListReq.getPlaceList().getFirst().getLatitude(),
                 placeListReq.getPlaceList().getLast().getLongitude(),
                 placeListReq.getPlaceList().getLast().getLatitude(), baseInfo);
@@ -236,7 +236,6 @@ public class TMapServiceImpl implements TMapService {
         //반환 정보 생성
         int totalTime = root.getAsJsonObject().get("totalTime").getAsInt();
         rootInfoDTO.setTime(totalTime / TimeEnum.HOUR_PER_MIN.getTime());
-//        rootInfoDTO.setRootInfo(bestRoot);
         rootInfoDTO.setPublicRoot(PublicRootDTO.fromJson(root.getAsJsonObject()));
         rootInfoDTO.setStatus(TmapErrorCode.fromCode(option));
 
