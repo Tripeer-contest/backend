@@ -15,6 +15,13 @@ public class OptimizingRes {
     private List<Place> placeList;
     private List<AtoBRes> optimizing;
 
+    public static OptimizingRes ofResultList(List<Place> placeList, List<AtoBRes> optimizing) {
+        return OptimizingRes.builder()
+                .placeList(placeList)
+                .optimizing(optimizing)
+                .build();
+    }
+
     @Getter
     @Builder
     public static class Place {

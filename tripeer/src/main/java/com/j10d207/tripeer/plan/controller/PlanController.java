@@ -3,7 +3,6 @@ package com.j10d207.tripeer.plan.controller;
 import com.j10d207.tripeer.plan.dto.req.*;
 import com.j10d207.tripeer.plan.dto.res.*;
 import com.j10d207.tripeer.plan.service.PlanService;
-import com.j10d207.tripeer.plan.service.PlanServiceImpl;
 import com.j10d207.tripeer.response.Response;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import jakarta.validation.Valid;
@@ -174,13 +173,13 @@ public class PlanController {
 
     @PostMapping("/optimizing/short")
     public Response<AtoBRes> getShortTime(@RequestBody PlaceListReq placeListReq) {
-        return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime2(placeListReq));
+        return Response.of(HttpStatus.OK, "목적지 간 대중교통 경로, 자차 소요시간 조회.", planService.getShortTime(placeListReq));
     }
 
     //플랜 최단거리 조정
     @PostMapping("/optimizing")
     public Response<OptimizingRes> getOptimizedPlan(@RequestBody @Valid PlaceListReq placeListReq) throws IOException {
-        OptimizingRes result = planService.getOptimizingTime2(placeListReq);
+        OptimizingRes result = planService.getOptimizingTime(placeListReq);
         return Response.of(HttpStatus.OK, "목적지 리스트 최적화 완료", result);
     }
 }
