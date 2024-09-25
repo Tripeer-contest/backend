@@ -201,7 +201,8 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public List<PlanDetailMainDTO.MyPlan> planList(long userId) {
         // 사용자가 소유중인 플랜의 리스트 목록을 가져옴
-        List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(userId, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1));
+        List<CoworkerEntity> coworkerList = coworkerRepository.findByUser_UserIdAndPlan_EndDateAfterAndRole(userId, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1), "member");
+
 
         // 반환리스트를 담아줄 DTO 생성
         List<PlanDetailMainDTO.MyPlan> myPlans = new ArrayList<>();
@@ -264,11 +265,9 @@ public class PlanServiceImpl implements PlanService {
             throw new CustomException(ErrorCode.HAS_COWORKER);
         }
 
-        //너무 많은 플랜을 가진건 아닌지 확인
-        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfter(coworkerInvitedReq.getUserId(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1)).size() > 5) {
-            throw new CustomException(ErrorCode.TOO_MANY_PLAN);
-        }
 
+        // 초대자 조회
+        UserEntity invitor = userRepository.findByUserId(userId);
 
         CoworkerEntity coworkerEntity = CoworkerEntity.createInviteEntity(coworkerInvitedReq.getUserId(), coworkerInvitedReq.getPlanId(), userId);
         coworkerRepository.save(coworkerEntity);
@@ -276,10 +275,14 @@ public class PlanServiceImpl implements PlanService {
         UserEntity user = userRepository.findByUserId(coworkerInvitedReq.getUserId());
 
         // 플랜 초대 알림
-        PlanEntity coworkerPlan = coworkerEntity.getPlan();
+        PlanEntity coworkerPlan = planRepository.findByPlanId(coworkerInvitedReq.getPlanId());
+
+        // invitor: 초대 보낸사람
+        // invitedCoworker: 초대 받은사람의 정보임
         publisher.publishEvent(InviteCoworkerEvent.builder()
             .planTitle(coworkerPlan.getTitle())
-            .invitedCoworker(new CoworkerDto(user.getUserId(),user.getNickname()))
+            .invitor(new CoworkerDto(invitor.getUserId(), invitor.getNickname()))
+            .invitedCoworker(new CoworkerDto(user.getUserId(), user.getNickname()))
             .planId(coworkerPlan.getPlanId())
             .build()
         );
@@ -288,6 +291,11 @@ public class PlanServiceImpl implements PlanService {
     //동행자 추가
     @Override
     public void joinPlan(long planId, long userId) {
+        //너무 많은 플랜을 가진건 아닌지 확인
+        if(coworkerRepository.findByUser_UserIdAndPlan_EndDateAfterAndRole(userId, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1), "member").size() > 5) {
+            throw new CustomException(ErrorCode.TOO_MANY_PLAN);
+        }
+
         PlanEntity planEntity = planRepository.findById(planId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
 

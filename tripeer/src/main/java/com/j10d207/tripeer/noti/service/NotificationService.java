@@ -53,7 +53,7 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public Notification getNotificaitonAfterSave(
+	public Notification getNotificationAfterSave(
 		final MessageBody msgBody,
 		final Long userId,
 		final LocalDateTime startAt,
