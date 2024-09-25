@@ -43,7 +43,8 @@ public interface HistoryControllerDocs {
 		@ApiResponse(responseCode = "403", description = "해당 여행의 유저가 아닙니다.",
 			content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class)))
 	})
-	Response<HistoryDetailRes> getPlanDetail(@PathVariable("planId") long planId);
+	Response<HistoryDetailRes> getPlanDetail(
+		@AuthenticationPrincipal CustomOAuth2User user,@PathVariable("planId") long planId);
 
 	@Operation(summary = "갤러리에 이미지, 동영상 저장 요청", description = "MultipartForm 을 통해서 이미지를 저장할 수 있다.")
 	@ApiResponses(value = {

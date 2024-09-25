@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.j10d207.tripeer.plan.db.entity.PlanEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanTownEntity;
+import com.j10d207.tripeer.user.db.entity.UserEntity;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -23,11 +24,11 @@ public class HistoryDetailRes {
 	// 해당 여행의 장소를 리스트로 반환 ex) {cityId : 12, townId : 123}
 	private List<Map<String, Integer>> cityIdTownIdList;
 
-	public static HistoryDetailRes from(PlanEntity planEntity) {
+	public static HistoryDetailRes from(PlanEntity planEntity, UserEntity userEntity) {
 		return HistoryDetailRes.builder()
 			.planId(planEntity.getPlanId())
 			.diaryDetail(PlanInfoRes.from(planEntity))
-			.diaryDayList(planEntity.getPlanDayList().stream().map(HistoryDayRes::from).toList())
+			.diaryDayList(planEntity.getPlanDayList().stream().map(el -> HistoryDayRes.from(el,userEntity)).toList())
 			.cityIdTownIdList(makeCityIdTownIdList(planEntity))
 			.build();
 	}

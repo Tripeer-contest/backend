@@ -30,7 +30,9 @@ import com.j10d207.tripeer.plan.db.repository.PlanDayRepository;
 import com.j10d207.tripeer.plan.db.repository.PlanDetailRepository;
 import com.j10d207.tripeer.plan.db.repository.PlanRepository;
 import com.j10d207.tripeer.user.db.entity.CoworkerEntity;
+import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.repository.CoworkerRepository;
+import com.j10d207.tripeer.user.db.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +47,7 @@ public class HistoryServiceImpl implements HistoryService {
 	private final PlanDetailRepository planDetailRepository;
 	private final PlanDayRepository planDayRepository;
 	private final WebClient webClient;
+	private final UserRepository userRepository;
 
 	ObjectMapper objectMapper = new ObjectMapper();
 
@@ -67,10 +70,11 @@ public class HistoryServiceImpl implements HistoryService {
 		return CostRes.from(planDetail);
 	}
 
-	public HistoryDetailRes getHistoryDetail(long planId) {
+	public HistoryDetailRes getHistoryDetail(long planId, long userId) {
+		UserEntity user = userRepository.findByUserId(userId);
 		PlanEntity plan = Optional.ofNullable(planRepository.findByPlanId(planId))
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
-		return HistoryDetailRes.from(plan);
+		return HistoryDetailRes.from(plan, user);
 	}
 
 	public String revokeHistoryDetail(long planId) {
