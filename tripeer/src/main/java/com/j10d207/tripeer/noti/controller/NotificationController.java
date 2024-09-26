@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.j10d207.tripeer.noti.dto.res.NotificationList;
 import com.j10d207.tripeer.noti.service.FirebaseTokenService;
+import com.j10d207.tripeer.noti.service.NotificationEventTestPublisher;
 import com.j10d207.tripeer.noti.service.NotificationService;
 import com.j10d207.tripeer.noti.service.NotificationTaskService;
 import com.j10d207.tripeer.noti.service.TestNotificationService;
@@ -41,6 +42,7 @@ public class NotificationController {
 	private final FirebaseTokenService firebaseTokenService;
 	private final NotificationService notificationService;
 	private final TestNotificationService testService;
+	private final NotificationEventTestPublisher publisher;
 
 	/**
 	 * @author: 김회창
@@ -144,6 +146,7 @@ public class NotificationController {
 	public Response<Void> testDiarySave(
 		@AuthenticationPrincipal CustomOAuth2User user
 	) {
+		// publisher.publish();
 		testService.testDiaryNoti(user.getUserId());
 		return Response.of(
 			HttpStatus.OK,

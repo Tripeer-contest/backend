@@ -95,7 +95,7 @@ public class NotificationTaskService {
 			final Message fcmMessage = MessageBuilder.toFirebaseMessage(messageBody, task.getTargetToken());
 			firebasePublisher.sendFirebaseMessage(fcmMessage);
 		} catch (FirebaseException e) {
-			firebaseTokenService.invalidFirebaseHandler(task.getTargetToken());
+			firebaseTokenService.invalidFirebaseHandler(task.getTargetToken(), userId);
 		}
 	}
 

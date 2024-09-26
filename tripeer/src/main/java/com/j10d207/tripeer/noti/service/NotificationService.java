@@ -2,6 +2,7 @@ package com.j10d207.tripeer.noti.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,11 +69,12 @@ public class NotificationService {
 
 	@Transactional
 	public NotificationList findAllWithReceiveByUser(final Long userId, final Optional<Long> lastId, final int size) {
+		final LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 		if (lastId.isPresent()) {
-			final List<Notification> notificationList = notificationRepository.findByIdLessThanAndUserIdAndStateOrderByIdDesc(lastId.get(), userId, Notification.State.RECEIVE, Pageable.ofSize(size + ITEMS_OFFSET));
+			final List<Notification> notificationList = notificationRepository.findByIdLessThanAndUserIdAndStateAndStartAtLessThanEqualOrderByIdDesc(lastId.get(), userId, Notification.State.RECEIVE, now,  Pageable.ofSize(size + ITEMS_OFFSET));
 			return getNotificationList(size, notificationList);
 		}
-		final List<Notification> notificationList = notificationRepository.findByUserIdAndStateOrderByIdDesc(userId, Notification.State.RECEIVE, Pageable.ofSize(size + ITEMS_OFFSET));
+		final List<Notification> notificationList = notificationRepository.findByUserIdAndStateAndStartAtLessThanEqualOrderByIdDesc(userId, Notification.State.RECEIVE, now, Pageable.ofSize(size + ITEMS_OFFSET));
 		return getNotificationList(size, notificationList);
 	}
 

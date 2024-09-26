@@ -51,7 +51,7 @@ public class TestNotificationService {
 			try {
 				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, token.getToken()));
 			} catch (FirebaseException e) {
-				firebaseTokenService.invalidFirebaseHandler(token.getToken());
+				firebaseTokenService.invalidFirebaseHandler(token.getToken(), userId);
 			}
 
 		});
@@ -72,7 +72,7 @@ public class TestNotificationService {
 			try {
 				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, token.getToken()));
 			} catch (FirebaseException e) {
-				firebaseTokenService.invalidFirebaseHandler(token.getToken());
+				firebaseTokenService.invalidFirebaseHandler(token.getToken(), userId);
 			}
 
 		});
@@ -89,9 +89,10 @@ public class TestNotificationService {
 
 		firebaseTokens.forEach(token -> {
 			try {
+				log.info("target token : {}", token.getToken());
 				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, token.getToken()));
 			} catch (FirebaseException e) {
-				firebaseTokenService.invalidFirebaseHandler(token.getToken());
+				firebaseTokenService.invalidFirebaseHandler(token.getToken(), token.getUser().getUserId());
 			}
 		});
 		notificationRepository.save(Notification.of(msgBody, userId, LocalDateTime.now(), planId));

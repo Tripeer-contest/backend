@@ -84,8 +84,8 @@ public class FirebaseTokenService {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void invalidFirebaseHandler(final String firebaseToken) {
-		final Optional<FirebaseToken> token = firebaseTokenRepository.findByToken(firebaseToken);
+	public void invalidFirebaseHandler(final String firebaseToken, final Long userId) {
+		final Optional<FirebaseToken> token = firebaseTokenRepository.findByToken(firebaseToken, userId);
 		token.ifPresent(FirebaseToken::mark);
 	}
 }
