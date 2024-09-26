@@ -24,7 +24,7 @@ public class HistoryDayRes {
 			.date(planDayEntity.getDay().toString())
 			.planDetailList(planDayEntity.getPlanDetailList().stream().map(el ->
 				HistorySpotRes.from(el, reviewIdList.containsKey(el.getSpotInfo().getSpotInfoId()),
-					reviewIdList.getOrDefault(el.getSpotInfo().getSpotInfoId(), null))).toList())
+					reviewIdList.getOrDefault(el.getSpotInfo().getSpotInfoId(), 0L))).toList())
 			.build();
 	}
 
