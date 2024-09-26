@@ -58,10 +58,10 @@ public interface PlanService {
     public PlanDetailMainDTO.PlanCoworker getPlanMyInfo(long planId, long userId);
 
     //목적지간 최단 루트 계산
-    public AtoBRes getShortTime2(PlaceListReq placeListReq);
+    public AtoBRes getShortTime(PlaceListReq placeListReq);
 
     //플랜 최단거리 조정
-    public OptimizingRes getOptimizingTime2(PlaceListReq placeListReq) throws IOException;
+    public OptimizingRes getOptimizingTime(PlaceListReq placeListReq) throws IOException;
 
     //지도 줌레벨 기반의 관광지 검색
     SpotSearchResDTO getSpotsInMap(long planId, String keyword, int page, double minLat, double maxLat,
