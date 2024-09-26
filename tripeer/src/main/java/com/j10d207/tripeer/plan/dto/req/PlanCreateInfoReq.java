@@ -16,7 +16,7 @@ public class PlanCreateInfoReq {
     @NotNull(message = "선택된 여행지가 없습니다. townList가 null입니다. ")
     private List<TownDTO> townList;
     private Boolean isSaved;
-    @FutureOrPresent(message = "과거 일자를 계획할 수 없습니다.")
+    @Future(message = "과거 일자를 계획할 수 없습니다.")
     private LocalDate startDay;
     @Future(message = "과거 일자를 계획할 수 없습니다.")
     private LocalDate endDay;
