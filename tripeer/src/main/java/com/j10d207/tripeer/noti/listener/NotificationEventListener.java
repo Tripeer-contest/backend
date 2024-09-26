@@ -25,17 +25,8 @@ public class NotificationEventListener {
 	public void completePlanEventListener(final CompletePlanEvent planEvent) {
 
 		// TODO: Plan 시작 알림을 보내는 것과, 다른 하나는 Diary 쓰라는 알림
-		final LocalDate startDate = planEvent.getStartAt();
-
-		if (LocalDate.now().isAfter(startDate)) {
-			log.debug("Listener 에서 스케쥴러 작동완료: {}", planEvent.getPlanTitle());
-			notificationEventHandler.handlePlanNoti(planEvent, true);
-		}
-		if (LocalDate.now().isEqual(startDate)) {
-			log.debug("Listener 에서 즉각 메시지 작동완료: {}", planEvent.getPlanTitle());
-			notificationEventHandler.handlePlanNoti(planEvent, false);
-		}
-
+		log.info("planEvent 도착: {}", planEvent.getPlanTitle());
+		notificationEventHandler.handlePlanNoti(planEvent, true);
 	}
 
 	@EventListener

@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.noti.db.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,7 @@ import com.j10d207.tripeer.noti.db.entity.Notification;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-	List<Notification> findByIdLessThanAndUserIdAndStateOrderByIdDesc(Long id, Long userId, Notification.State state, Pageable pageable);
+	List<Notification> findByIdLessThanAndUserIdAndStateAndStartAtLessThanEqualOrderByIdDesc(Long id, Long userId, Notification.State state, LocalDateTime now, Pageable pageable);
 
-	List<Notification> findByUserIdAndStateOrderByIdDesc(Long userId, Notification.State state, Pageable pageable);
+	List<Notification> findByUserIdAndStateAndStartAtLessThanEqualOrderByIdDesc(Long userId, Notification.State state, LocalDateTime now, Pageable pageable);
 }

@@ -17,7 +17,7 @@ public interface FirebaseTokenRepository extends JpaRepository<FirebaseToken, Lo
 	@Query("SELECT f FROM firebase_token f WHERE f.user IN :coworker")
 	List<FirebaseToken> findAllByUser(List<UserEntity> coworker);
 
-	@Query("SELECT f FROM firebase_token f WHERE f.token = :firebaseToken")
-	Optional<FirebaseToken> findByToken(String firebaseToken);
+	@Query("SELECT f FROM firebase_token f WHERE f.token = :firebaseToken AND f.user.userId = :userId")
+	Optional<FirebaseToken> findByToken(String firebaseToken, Long userId);
 
 }
