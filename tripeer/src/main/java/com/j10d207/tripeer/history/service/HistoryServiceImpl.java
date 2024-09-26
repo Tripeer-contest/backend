@@ -80,8 +80,9 @@ public class HistoryServiceImpl implements HistoryService {
 		List<SpotReviewEntity> spotReviewEntities = spotReviewRepository.findSpotInfoIdsByUser(user);
 		Map<Integer, Long> spotReviewMap = spotReviewEntities.stream()
 			.collect(Collectors.toMap(
-				spotReviewEntity -> spotReviewEntity.getSpotInfo().getSpotInfoId(), // 키 매핑 함수
-				SpotReviewEntity::getSpotReviewId // 값 매핑 함수
+				spotReviewEntity -> spotReviewEntity.getSpotInfo().getSpotInfoId(),
+				SpotReviewEntity::getSpotReviewId,
+				(existing, replacement) -> replacement  // 키가 중복될 경우 대체
 			));
 		PlanEntity plan = Optional.ofNullable(planRepository.findByPlanForHistory(planId))
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
