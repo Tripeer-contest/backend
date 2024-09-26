@@ -22,5 +22,5 @@ public interface SpotReviewRepository extends JpaRepository<SpotReviewEntity, Lo
     Optional<Double> findAverageStarPointBySpotInfoId(@Param("spotInfoId") int spotInfoId);
 
     @Query("SELECT sr.spotInfo.spotInfoId FROM spot_review sr WHERE sr.user = :user")
-    List<Integer> findSpotInfoIdsByUser(UserEntity user);
+    List<SpotReviewEntity> findSpotInfoIdsByUser(UserEntity user);
 }
