@@ -21,7 +21,8 @@ public interface PlanRepository extends JpaRepository<PlanEntity, Long> {
         "LEFT JOIN FETCH p.planDayList pd " +
         "LEFT JOIN FETCH pd.planDetailList pdl " +
         "LEFT JOIN FETCH pdl.spotInfo si " +
-        "WHERE p.planId = :planId")
+        "WHERE p.planId = :planId " +
+        "ORDER BY pdl.day, pdl.step")
     PlanEntity findByPlanForHistory(@Param("planId") long planId);
 
     @Query("SELECT p FROM plan p " +
