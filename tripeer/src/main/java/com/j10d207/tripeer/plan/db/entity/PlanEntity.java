@@ -15,6 +15,7 @@ import java.util.Set;
 
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,6 +43,7 @@ public class PlanEntity {
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PLAN_ID")
+	@OrderBy("day ASC")
 	Set<PlanDayEntity> planDayList;
 
 	@OneToMany(fetch = FetchType.LAZY)
