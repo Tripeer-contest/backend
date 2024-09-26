@@ -1,11 +1,7 @@
 package com.j10d207.tripeer.history.dto.res;
 
-import java.util.List;
-
 import com.j10d207.tripeer.place.db.ContentTypeEnum;
-import com.j10d207.tripeer.place.db.entity.SpotReviewEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanDetailEntity;
-import com.j10d207.tripeer.user.db.entity.UserEntity;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -23,11 +19,12 @@ public class HistorySpotRes {
 	private Double longitude;
 	private Double starPointAvg;
 	private boolean isWriteReview;
+	private long spotReviewId;
 	private int day;
 	private int step;
 	private int cost;
 
-	public static HistorySpotRes from(PlanDetailEntity planDetailEntity, Boolean isWriteReview ) {
+	public static HistorySpotRes from(PlanDetailEntity planDetailEntity, Boolean isWriteReview, Long spotReviewId) {
 		return HistorySpotRes.builder()
 			.planDetailId(planDetailEntity.getPlanDetailId())
 			.spotId(planDetailEntity.getSpotInfo().getSpotInfoId())
@@ -39,6 +36,7 @@ public class HistorySpotRes {
 			.longitude(planDetailEntity.getSpotInfo().getLongitude())
 			.starPointAvg(planDetailEntity.getSpotInfo().getStarPointAvg())
 			.isWriteReview(isWriteReview)
+			.spotReviewId(spotReviewId)
 			.day(planDetailEntity.getDay())
 			.step(planDetailEntity.getStep())
 			.cost(planDetailEntity.getCost())

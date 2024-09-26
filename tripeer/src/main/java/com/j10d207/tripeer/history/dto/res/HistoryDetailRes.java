@@ -24,7 +24,7 @@ public class HistoryDetailRes {
 	// 해당 여행의 장소를 리스트로 반환 ex) {cityId : 12, townId : 123}
 	private List<Map<String, Integer>> cityIdTownIdList;
 
-	public static HistoryDetailRes from(PlanEntity planEntity, List<Integer> reviewIdList) {
+	public static HistoryDetailRes from(PlanEntity planEntity, Map<Integer, Long> reviewIdList) {
 		return HistoryDetailRes.builder()
 			.planId(planEntity.getPlanId())
 			.diaryDetail(PlanInfoRes.from(planEntity))

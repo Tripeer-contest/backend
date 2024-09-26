@@ -3,7 +3,9 @@ package com.j10d207.tripeer.history.service;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.http.MediaType;
@@ -23,6 +25,7 @@ import com.j10d207.tripeer.history.dto.req.PlanSaveReq;
 import com.j10d207.tripeer.history.dto.res.CostRes;
 import com.j10d207.tripeer.history.dto.res.HistoryDetailRes;
 import com.j10d207.tripeer.history.dto.res.PlanInfoRes;
+import com.j10d207.tripeer.place.db.entity.SpotReviewEntity;
 import com.j10d207.tripeer.place.db.repository.SpotReviewRepository;
 import com.j10d207.tripeer.plan.db.entity.PlanDayEntity;
 import com.j10d207.tripeer.plan.db.entity.PlanDetailEntity;
@@ -74,9 +77,15 @@ public class HistoryServiceImpl implements HistoryService {
 
 	public HistoryDetailRes getHistoryDetail(long planId, long userId) {
 		UserEntity user = userRepository.findById(userId).orElseThrow(() ->new CustomException(ErrorCode.USER_NOT_FOUND));
+		List<SpotReviewEntity> spotReviewEntities = spotReviewRepository.findSpotInfoIdsByUser(user);
+		Map<Integer, Long> spotReviewMap = spotReviewEntities.stream()
+			.collect(Collectors.toMap(
+				spotReviewEntity -> spotReviewEntity.getSpotInfo().getSpotInfoId(), // 키 매핑 함수
+				SpotReviewEntity::getSpotReviewId // 값 매핑 함수
+			));
 		PlanEntity plan = Optional.ofNullable(planRepository.findByPlanForHistory(planId))
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PLAN));
-		return HistoryDetailRes.from(plan, spotReviewRepository.findSpotInfoIdsByUser(user));
+		return HistoryDetailRes.from(plan, spotReviewMap);
 	}
 
 	public String revokeHistoryDetail(long planId) {
@@ -102,8 +111,9 @@ public class HistoryServiceImpl implements HistoryService {
 	@Scheduled(cron = "0 0 3 * * ?")
 	public void planSaveScheduleTask(){
 		List<Long> unsavedPlanIdList = planRepository.findAllWithUnsavedAndPastEndDate(LocalDate.now());
+		log.info("플랜 저장 시작");
 		Flux<PlanSaveReq> responseFlux = webClient.post()
-			.uri("/node/plan")
+			.uri("/node/plan/save")
 			.contentType(MediaType.APPLICATION_JSON)
 			.bodyValue(unsavedPlanIdList)
 			.retrieve()
@@ -116,15 +126,18 @@ public class HistoryServiceImpl implements HistoryService {
 			planEntity.setIsSaved(true);
 			planRepository.save(planEntity);
 			List<PlanDayEntity> planDayEntityList = PlanDayEntity.from(planEntity);
-			planDayRepository.saveAll(planDayEntityList);
-			IntStream.range(0, planDayEntityList.size()).forEach(i -> {
-				PlanDayEntity planDay = planDayEntityList.get(i);
-				List<PlanDetailSaveReq> planDetailSaveReqs = planSaveReq.getPlanDayList().get(i);
-				List<PlanDetailEntity> planDetails = planDetailSaveReqs.stream()
-					.map(req -> PlanDetailEntity.from(req, planDay))
-					.toList();
-				planDetailRepository.saveAll(planDetails);
-			});
+			if (!planDayEntityList.isEmpty()) {
+				planDayRepository.saveAll(planDayEntityList);
+				IntStream.range(0, planSaveReq.getPlanDayList().size()).forEach(i -> {
+					PlanDayEntity planDay = planDayEntityList.get(i);
+					List<PlanDetailSaveReq> planDetailSaveReqs = planSaveReq.getPlanDayList().get(i);
+					List<PlanDetailEntity> planDetails = planDetailSaveReqs.stream()
+						.map(req -> PlanDetailEntity.from(req, planDay))
+						.toList();
+					planDetailRepository.saveAll(planDetails);
+				});
+			}
+
 		});
 	}
 

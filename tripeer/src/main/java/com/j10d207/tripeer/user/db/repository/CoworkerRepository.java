@@ -29,4 +29,9 @@ public interface CoworkerRepository  extends JpaRepository<CoworkerEntity, Long>
 
     List<CoworkerEntity> findByUser_UserIdAndPlan_EndDateAfter(long user_userId, LocalDate startDate);
     List<CoworkerEntity> findByUser_UserIdAndPlan_EndDateAfterAndRole(long user_userId, LocalDate startDate, String role);
+
+    @Query("SELECT c FROM coworker c " +
+        "JOIN c.plan p " +
+        "WHERE p.endDate < CURRENT_DATE AND p.isSaved = false")
+    List<CoworkerEntity> findExpiredAndUnsavedCoworkers();
 }
