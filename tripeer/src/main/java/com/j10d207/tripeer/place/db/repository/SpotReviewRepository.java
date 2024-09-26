@@ -21,6 +21,6 @@ public interface SpotReviewRepository extends JpaRepository<SpotReviewEntity, Lo
     @Query(value = "SELECT AVG(star_point) FROM tripeer.spot_review WHERE spot_info_id = :spotInfoId", nativeQuery = true)
     Optional<Double> findAverageStarPointBySpotInfoId(@Param("spotInfoId") int spotInfoId);
 
-    @Query("SELECT sr.spotInfo.spotInfoId FROM spot_review sr WHERE sr.user = :user")
+    @Query("SELECT sr FROM spot_review sr WHERE sr.user = :user")
     List<SpotReviewEntity> findSpotInfoIdsByUser(UserEntity user);
 }
