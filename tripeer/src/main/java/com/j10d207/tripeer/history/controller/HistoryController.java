@@ -88,11 +88,11 @@ public class HistoryController implements HistoryControllerDocs {
 		}
 	}
 
-	// @PostMapping("/save")
-	// public Response<String> savePlanDetail(@RequestBody PlanSaveReq planSaveReq) {
-	// 	String res = historyService.savePlanDetail(planSaveReq);
-	// 	return Response.of(HttpStatus.OK, "다이어리 디테일 생성 성공", res);
-	// }
+	@PostMapping("/save")
+	public Response<String> savePlanDetail(@RequestBody PlanSaveReq planSaveReq) {
+		String res = historyService.savePlanDetail(planSaveReq);
+		return Response.of(HttpStatus.OK, "다이어리 디테일 생성 성공", res);
+	}
 
 	@GetMapping("/{planId}")
 	public Response<HistoryDetailRes> getPlanDetail(

@@ -143,34 +143,34 @@ public class HistoryServiceImpl implements HistoryService {
 	}
 
 	// 저장 테스트용 api
-	// @Transactional
-	// public String savePlanDetail(PlanSaveReq planSaveReq) {
-	// 	List<Long> unsavedPlanIdList = Collections.singletonList(planSaveReq.getPlanId());
-	// 	Flux<PlanSaveReq> responseFlux = webClient.post()
-	// 		.uri("/node/plan/save")
-	// 		.contentType(MediaType.APPLICATION_JSON)
-	// 		.bodyValue(unsavedPlanIdList)
-	// 		.retrieve()
-	// 		.bodyToFlux(PlanSaveReq.class);
-	// 	// 저장할려는 플랜 리스트
-	// 	List<PlanSaveReq> planSaveReqList = responseFlux.collectList().block();
-	//
-	// 	planSaveReqList.forEach(SaveReq -> {
-	// 		PlanEntity planEntity = planRepository.findByPlanId(SaveReq.getPlanId());
-	// 		planEntity.setIsSaved(true);
-	// 		planRepository.save(planEntity);
-	// 		List<PlanDayEntity> planDayEntityList = PlanDayEntity.from(planEntity);
-	// 		planDayRepository.saveAll(planDayEntityList);
-	// 		IntStream.range(0, planDayEntityList.size()).forEach(i -> {
-	// 			PlanDayEntity planDay = planDayEntityList.get(i);
-	// 			List<PlanDetailSaveReq> planDetailSaveReqs = SaveReq.getPlanDayList().get(i);
-	// 			List<PlanDetailEntity> planDetails = planDetailSaveReqs.stream()
-	// 				.map(req -> PlanDetailEntity.from(req, planDay))
-	// 				.toList();
-	// 			planDetailRepository.saveAll(planDetails);
-	// 		});
-	// 	});
-	// 	return "성공";
-	// };
+	@Transactional
+	public String savePlanDetail(PlanSaveReq planSaveReq) {
+		List<Long> unsavedPlanIdList = Collections.singletonList(planSaveReq.getPlanId());
+		Flux<PlanSaveReq> responseFlux = webClient.post()
+			.uri("/node/plan/save")
+			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue(unsavedPlanIdList)
+			.retrieve()
+			.bodyToFlux(PlanSaveReq.class);
+		// 저장할려는 플랜 리스트
+		List<PlanSaveReq> planSaveReqList = responseFlux.collectList().block();
+
+		planSaveReqList.forEach(SaveReq -> {
+			PlanEntity planEntity = planRepository.findByPlanId(SaveReq.getPlanId());
+			planEntity.setIsSaved(true);
+			planRepository.save(planEntity);
+			List<PlanDayEntity> planDayEntityList = PlanDayEntity.from(planEntity);
+			planDayRepository.saveAll(planDayEntityList);
+			IntStream.range(0, planDayEntityList.size()).forEach(i -> {
+				PlanDayEntity planDay = planDayEntityList.get(i);
+				List<PlanDetailSaveReq> planDetailSaveReqs = SaveReq.getPlanDayList().get(i);
+				List<PlanDetailEntity> planDetails = planDetailSaveReqs.stream()
+					.map(req -> PlanDetailEntity.from(req, planDay))
+					.toList();
+				planDetailRepository.saveAll(planDetails);
+			});
+		});
+		return "성공";
+	};
 
 }

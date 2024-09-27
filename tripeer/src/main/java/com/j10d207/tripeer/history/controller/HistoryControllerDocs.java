@@ -89,15 +89,15 @@ public interface HistoryControllerDocs {
 	})
 	Response<String> deleteResources(@RequestBody GalleryIdListReq galleryIdList);
 
-	// @Operation(summary = "플랜 저장 요청", description = "작성완료한 여행일정을 저장할 수 있다.")
-	// @ApiResponses(value = {
-	// 	@ApiResponse(responseCode = "201", description = "플랜 저장 성공"),
-	// 	@ApiResponse(responseCode = "400", description = "잘못된 요청 또는 파라미터 입니다.",
-	// 		content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class))),
-	// 	@ApiResponse(responseCode = "403", description = "해당 여행의 유저가 아닙니다.",
-	// 		content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class))),
-	// })
-	// Response<String> savePlanDetail(@RequestBody PlanSaveReq planSaveReq);
+	@Operation(summary = "플랜 저장 요청", description = "작성완료한 여행일정을 저장할 수 있다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "201", description = "플랜 저장 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 또는 파라미터 입니다.",
+			content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class))),
+		@ApiResponse(responseCode = "403", description = "해당 여행의 유저가 아닙니다.",
+			content = @Content(schema = @Schema(implementation = ErrorResponseEntity.class))),
+	})
+	Response<String> savePlanDetail(@RequestBody PlanSaveReq planSaveReq);
 
 	@Operation(summary = "플랜 저장 취소", description = "저장한 플랜을 수정을 위해 저장을 취소할 수 있다.")
 	@ApiResponses(value = {
