@@ -5,6 +5,8 @@ import com.j10d207.tripeer.tmap.db.TmapErrorCode;
 import com.nimbusds.jose.shaded.gson.JsonElement;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -60,7 +62,7 @@ public class RootInfoDTO {
             return RootInfoDTO.builder()
                     .time(TimeEnum.NEAR_TIME.getTime())
                     .status(TmapErrorCode.SUCCESS_PUBLIC)
-                    .publicRoot(PublicRootDTO.builder().totalTime(TimeEnum.NEAR_TIME.getTime()).totalWalkTime(TimeEnum.NEAR_TIME.getTime()).build())
+                    .publicRoot(PublicRootDTO.builder().totalTime(TimeEnum.NEAR_TIME.getTime()).totalWalkTime(TimeEnum.NEAR_TIME.getTime()).publicRootDetailList(List.of(PublicRootDTO.PublicRootDetail.createNear())).build())
                     .build();
         }
         return RootInfoDTO.builder()
