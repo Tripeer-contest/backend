@@ -112,13 +112,6 @@ public class PlanServiceImpl implements PlanService {
                 .map(townDTO -> PlanTownEntity.ofDtoAndPlanEntity(townDTO, plan)).toList();
 
         planTownRepository.saveAll(planTownEntityList);
-
-        int day = (int) ChronoUnit.DAYS.between(createResultInfo.getStartDay(), createResultInfo.getEndDay()) + 1;
-        List<PlanDayEntity> planDayEntityList = new ArrayList<>();
-        IntStream.range(0, day)
-                .mapToObj(i -> PlanDayEntity.createEntity(createResultInfo, plan, i))
-                .forEach(planDayEntityList::add);
-        planDayRepository.saveAll(planDayEntityList);
         // 이메일 전송 스케쥴링
         planSchedulerService.schedulePlanTasks(plan);
         // 여행 시작 및 다이어리 완성 알림 (플랜 생성시 나밖에 없으므로 나에게만 알림 생성)
