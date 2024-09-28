@@ -73,6 +73,9 @@ public class SpotServiceImpl implements SpotService{
                 spotInfoRepository::findBySpotInfoId).map(el -> SpotDTO.SpotInfoDTO.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
             spotDetailPageDto.setNearSpotList(spotCollection.getNearSpotIdList().stream().map(
                 spotInfoRepository::findBySpotInfoId).map(el -> SpotDTO.SpotInfoDTO.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
+        } else {
+            spotDetailPageDto.setSimilarSpotList(Collections.emptyList());
+            spotDetailPageDto.setNearSpotList(Collections.emptyList());
         }
 
         return spotDetailPageDto;
