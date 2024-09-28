@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.tmap.db.dto;
 
+import com.j10d207.tripeer.plan.db.TimeEnum;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootDetailEntity;
 import com.j10d207.tripeer.tmap.db.entity.PublicRootEntity;
 import com.nimbusds.jose.shaded.gson.JsonArray;
@@ -160,7 +161,19 @@ public class PublicRootDTO {
                     .build();
         }
 
+        public static PublicRootDetail createNear() {
+            return PublicRootDetail.builder()
+                    .distance(0)
+                    .sectionTime(TimeEnum.NEAR_TIME.getTime())
+                    .mode("WALK")
+                    .startName("출발지")
+                    .endName("도착지")
+                    .build();
+        }
+
     }
+
+
 
 
 }

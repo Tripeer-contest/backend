@@ -161,14 +161,14 @@ public class TMapServiceImpl implements TMapService {
     조회 결과 오류는 아니지만 경로가 없기때문에 해당 결과를 정제하여 반환하는 메소드
      */
     private RootInfoDTO ApiResponseHasNonRoot(int status) {
-        return RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).time(TimeEnum.ERROR_TIME.getTime()).build();
+        return RootInfoDTO.fromStatus(status);
     }
 
 
     private List<RootInfoDTO> ApiResponseHasNonRoot3(int status) {
-        return List.of(RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).build(),
-                RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).build(),
-                RootInfoDTO.builder().status(TmapErrorCode.fromCode(status)).build());
+        return List.of(RootInfoDTO.fromStatus(status),
+                RootInfoDTO.builder().time(TimeEnum.ERROR_TIME.getTime()).status(TmapErrorCode.fromCode(status)).build(),
+                RootInfoDTO.builder().time(TimeEnum.ERROR_TIME.getTime()).status(TmapErrorCode.fromCode(status)).build());
     }
 
     /*
