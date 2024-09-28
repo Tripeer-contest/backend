@@ -14,4 +14,12 @@ public class CommonMethod {
 
         return  resultTime.toString();
     }
+
+    //Enum화 필요
+    public static String convertStatus(int status) {
+        if(status == 0 ) return "문의 대기";
+        else if (status == 1 ) return "문의 답변 대기중";
+        else if (status == 2 ) return "답변 완료";
+        else return "";
+    }
 }
