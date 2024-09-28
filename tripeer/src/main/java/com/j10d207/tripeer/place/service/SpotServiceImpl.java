@@ -68,11 +68,13 @@ public class SpotServiceImpl implements SpotService{
         spotDetailPageDto.setAdditionalInfo(AdditionalDto.from(additionalBaseRepository.findBySpotInfo(spotInfoEntity)));
 
         SpotCollectionEntity spotCollection = spotCollectionRepository.findBySpotInfoId(spotInfoEntity.getSpotInfoId());
-        spotDetailPageDto.setSimilarSpotList(spotCollection.getSimSpotIdList().stream().map(
-			spotInfoRepository::findBySpotInfoId).map(el -> SpotDTO.SpotInfoDTO.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
+        if (spotCollection != null) {
+            spotDetailPageDto.setSimilarSpotList(spotCollection.getSimSpotIdList().stream().map(
+                spotInfoRepository::findBySpotInfoId).map(el -> SpotDTO.SpotInfoDTO.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
+            spotDetailPageDto.setNearSpotList(spotCollection.getNearSpotIdList().stream().map(
+                spotInfoRepository::findBySpotInfoId).map(el -> SpotDTO.SpotInfoDTO.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
+        }
 
-        spotDetailPageDto.setNearSpotList(spotCollection.getNearSpotIdList().stream().map(
-            spotInfoRepository::findBySpotInfoId).map(el -> SpotDTO.SpotInfoDTO.convertToDto(el, wishList.contains(el.getSpotInfoId()))).toList());
         return spotDetailPageDto;
     }
 
