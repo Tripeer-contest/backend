@@ -1,9 +1,11 @@
 package com.j10d207.tripeer.noti.db.entity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import com.j10d207.tripeer.noti.db.firebase.MessageType;
+import com.j10d207.tripeer.noti.dto.NotificationDto;
+import com.j10d207.tripeer.noti.dto.Token;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,7 +35,9 @@ public class NotificationTask {
 	@JoinColumn(name = "notification_id")
 	private Notification notification;
 
-	private String targetToken;
+	@ManyToOne
+	@JoinColumn(name = "target_token")
+	private FirebaseToken targetToken;
 
 	@Builder.Default
 	@Enumerated(EnumType.STRING)
@@ -43,10 +47,17 @@ public class NotificationTask {
 		WAIT, SENT;
 	}
 
-	public static NotificationTask of(final Notification notification, final String token) {
+	public static NotificationTask of(final NotificationDto notification, final Token token) {
 		return NotificationTask.builder()
-			.notification(notification)
-			.targetToken(token)
+			.notification(Notification.builder()
+					.id(notification.notificationId())
+					.userId(notification.userId())
+					.title(notification.title())
+					.msgType(MessageType.valueOf(notification.msgType()))
+					.content(notification.content())
+					.startAt(notification.startAt())
+					.build())
+			.targetToken(FirebaseToken.from(token.tokenId(), token.firebaseToken()))
 			.build();
 	}
 

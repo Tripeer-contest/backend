@@ -75,7 +75,10 @@ public enum ErrorCode {
     INVALID_PAGE(HttpStatus.BAD_REQUEST, "VALID-003", "입력될 수 없는 페이지 값"),
 
     // Notification
-    NOT_FOUND_NOTI(HttpStatus.NOT_FOUND, "NOTI-001", "알림을 찾을 수 없습니다.")
+    NOT_FOUND_NOTI(HttpStatus.NOT_FOUND, "NOTI-001", "알림을 찾을 수 없습니다."),
+
+    // Notification
+    NOT_FOUND_NOTI_TASK(HttpStatus.NOT_FOUND, "NOTI-002", "처리해야 할 알림을 찾을 수 없습니다.")
     ;
 
 

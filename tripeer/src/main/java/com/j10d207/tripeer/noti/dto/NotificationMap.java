@@ -5,13 +5,13 @@ import java.util.Optional;
 
 public class NotificationMap {
 
-	private final Map<Long, Long> notificationMap;
+	private final Map<Long, NotificationDto> notificationMap;
 
-	public NotificationMap(final Map<Long, Long> notificationMap) {
-		this.notificationMap = notificationMap;
+	public NotificationMap(final Map<Long, NotificationDto> notificationMap) {
+		this.notificationMap = Map.copyOf(notificationMap);
 	}
 
-	public Optional<Long> getNotificationId(final Long userId) {
+	public Optional<NotificationDto> getNotification(final Long userId) {
 		return Optional.ofNullable(notificationMap.get(userId));
 	}
 }

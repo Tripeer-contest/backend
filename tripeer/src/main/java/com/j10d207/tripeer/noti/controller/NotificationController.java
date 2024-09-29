@@ -146,8 +146,8 @@ public class NotificationController {
 	public Response<Void> testDiarySave(
 		@AuthenticationPrincipal CustomOAuth2User user
 	) {
-		// publisher.publish();
-		testService.testDiaryNoti(user.getUserId());
+		publisher.publish();
+		// testService.testDiaryNoti(user.getUserId());
 		return Response.of(
 			HttpStatus.OK,
 			null,
