@@ -60,11 +60,11 @@ public class NotificationService {
 		final LocalDateTime startAt,
 		final Long targetId
 	) {
-		final Notification notificaiton = Notification.of(msgBody, userId, startAt, targetId);
+		final Notification notification = Notification.of(msgBody, userId, startAt, targetId);
 
-		notificationRepository.save(notificaiton);
+		notificationRepository.save(notification);
 
-		return notificaiton;
+		return notification;
 	}
 
 	@Transactional

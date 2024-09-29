@@ -2,6 +2,7 @@ package com.j10d207.tripeer.noti.db.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -50,13 +51,13 @@ public class NotificationTask {
 	}
 
 	public boolean isImmediately() {
-		final LocalDate today =  LocalDate.now();
+		final LocalDate today =  LocalDate.now(ZoneId.of("Asia/Seoul"));
 		final LocalDate startDate = notification.getStartAt().toLocalDate();
 		return today.isAfter(startDate) || today.isEqual(startDate);
 	}
 
 	public boolean isScheduled() {
-		final LocalDate today =  LocalDate.now();
+		final LocalDate today =  LocalDate.now(ZoneId.of("Asia/Seoul"));
 		final LocalDate startDate = notification.getStartAt().toLocalDate();
 		return today.isBefore(startDate);
 	}
