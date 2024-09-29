@@ -36,6 +36,13 @@ public class FirebaseToken {
             .build();
     }
 
+    public static FirebaseToken from(final Long tokenId, final String firebaseToken) {
+        return FirebaseToken.builder()
+            .id(tokenId)
+            .token(firebaseToken)
+            .build();
+    }
+
 
     private enum Mark {
         CHECKED,

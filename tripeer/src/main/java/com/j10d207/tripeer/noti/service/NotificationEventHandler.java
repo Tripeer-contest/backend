@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.j10d207.tripeer.noti.dto.NotificationDto;
+import com.j10d207.tripeer.noti.dto.NotificationMap;
+import com.j10d207.tripeer.noti.dto.Token;
+import com.j10d207.tripeer.noti.dto.TokenMap;
+import com.j10d207.tripeer.noti.mapper.FirebaseTokenMapper;
+import com.j10d207.tripeer.noti.mapper.NotificationMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
@@ -63,7 +69,7 @@ public class NotificationEventHandler implements ApplicationListener<Application
 		final List<CoworkerDto> coworkers = event.getCoworkers();
 		final List<Long> userIds = coworkers.stream().map(CoworkerDto::getId).toList();
 		final String planTitle = event.getPlanTitle();
-		final Map<Long, List<String>> tokenMap = firebaseTokenService.findAllNotificationByUsers(userIds);
+		final TokenMap tokenMap = firebaseTokenService.findAllNotificationByUsers(userIds);
 		final LocalDateTime tripeerStartAt = event.getStartAt().atTime(BASIC_NOTI_HOUR, BASIC_NOTI_MINUTE);
 		final LocalDateTime diaryStartAt = event.getEndAt().plusDays(NEXT_DAY).atTime(BASIC_NOTI_HOUR, BASIC_NOTI_MINUTE);
 
@@ -72,7 +78,7 @@ public class NotificationEventHandler implements ApplicationListener<Application
 	}
 
 	private void handleDiaryNotification(
-		final Map<Long, List<String>> tokenMap,
+		final TokenMap tokenMap,
 		final List<CoworkerDto> coworkers,
 		final String planTitle,
 		final LocalDateTime startAt
@@ -86,9 +92,9 @@ public class NotificationEventHandler implements ApplicationListener<Application
 				}
 			));
 
-		final Map<Long, Notification> notificationMap = notificationService.getNotificationMapAfterSave(msgBodyMap, startAt, null);
+		final NotificationMap notificationMap = notificationService.getNotificationMapAfterSave(msgBodyMap, startAt, null);
 
-		final List<NotificationTask> willSchedulingTasks = notificationTaskService.getScheduleNeedTasksForPlan(tokenMap, notificationMap);
+		final List<Long> willSchedulingTasks = notificationTaskService.getScheduleNeedTasksForPlan(tokenMap, notificationMap);
 
 		willSchedulingTasks.forEach(task -> {
 			scheduler.schedule(toRunnableTask(task), toInstant(startAt));
@@ -96,7 +102,7 @@ public class NotificationEventHandler implements ApplicationListener<Application
 	}
 
 	private void handleTripeerNotification(
-		final Map<Long, List<String>> tokenMap,
+		final TokenMap tokenMap,
 		final List<CoworkerDto> coworkers,
 		final String planTitle,
 		final LocalDateTime startAt
@@ -111,20 +117,20 @@ public class NotificationEventHandler implements ApplicationListener<Application
 				}
 			));
 
-		final Map<Long, Notification> notificationMap = notificationService.getNotificationMapAfterSave(msgBodyMap, startAt, null);
+		final NotificationMap notificationMap = notificationService.getNotificationMapAfterSave(msgBodyMap, startAt, null);
 
-		final List<NotificationTask> willSchedulingTasks = notificationTaskService.getScheduleNeedTasksForPlan(tokenMap, notificationMap);
+		final List<Long> willSchedulingTasks = notificationTaskService.getScheduleNeedTasksForPlan(tokenMap, notificationMap);
 
 		willSchedulingTasks.forEach(task -> {
 			scheduler.schedule(toRunnableTask(task), toInstant(startAt));
 		});
 	}
 
-	public Runnable toRunnableTask(final NotificationTask task) {
+	public Runnable toRunnableTask(final Long taskId) {
 		return () -> {
-			log.info("task execute: {}", task.getNotification().getTitle());
-			notificationTaskService.updateStateToSent(task);
-			notificationTaskService.processingMessageTask(task);
+			log.info("task execute taskId: {}", taskId);
+			notificationTaskService.updateStateToSent(taskId);
+			notificationTaskService.processingMessageTask(taskId);
 		};
 	}
 
@@ -136,12 +142,12 @@ public class NotificationEventHandler implements ApplicationListener<Application
 
 		final MessageBody inviteMsgBody = MessageBuilder.getMessageBody(MessageType.USER_INVITED, planTitle, invitor.getNickname());
 
-		final Notification notification = notificationService.getNotificationAfterSave(inviteMsgBody, invitedCoworker.getId(), LocalDateTime.now(), event.getPlanId());
+		final NotificationDto notification = notificationService.getNotificationAfterSave(inviteMsgBody, invitedCoworker.getId(), LocalDateTime.now(), event.getPlanId());
 
-		final List<String> firebaseTokens = firebaseTokenService.findAllNotificationByUser(invitedCoworker.getId());
+		final List<Token> firebaseTokens = firebaseTokenService.findAllNotificationByUser(invitedCoworker.getId());
 
 		firebaseTokens.forEach(token -> {
-			notificationTaskService.processingMessageTask(NotificationTask.of(notification, token));
+			notificationTaskService.processingImmediately(notification, token);
 		});
 
 	}
@@ -160,12 +166,13 @@ public class NotificationEventHandler implements ApplicationListener<Application
 
 		unsentTasks.forEach(task -> {
 				if(task.isImmediately()) {
-					notificationTaskService.updateStateToSent(task);
-					notificationTaskService.processingMessageTask(task);
+					final NotificationDto notificationDto = NotificationMapper.toNotificationDto(task.getNotification());
+					final Token token = FirebaseTokenMapper.toTokenDto(task.getTargetToken());
+					notificationTaskService.processingImmediately(notificationDto, token);
 				}
 				if(task.isScheduled()) {
 					log.info("scheduling task: {}, at: {}", task.getNotification().getId(), task.getNotification().getStartAt());
-					scheduler.schedule(toRunnableTask(task), toInstant(task.getNotification().getStartAt()));
+					scheduler.schedule(toRunnableTask(task.getId()), toInstant(task.getNotification().getStartAt()));
 				}
 			});
 	}

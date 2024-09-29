@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.j10d207.tripeer.noti.dto.NotificationMap;
+import com.j10d207.tripeer.noti.mapper.NotificationMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +37,7 @@ public class NotificationService {
 
 
 	@Transactional
-	public Map<Long, Notification> getNotificationMapAfterSave (
+	public NotificationMap getNotificationMapAfterSave (
 		final Map<Long, MessageBody> msgBodyMap,
 		final LocalDateTime startAt,
 		final Long targetId
@@ -46,25 +48,21 @@ public class NotificationService {
 
 		notificationRepository.saveAll(notifications);
 
-		return notifications.stream()
-			.collect(Collectors.toMap(
-				Notification::getUserId,
-				notification -> notification
-			));
+		return NotificationMapper.toNotificationMap(notifications);
 	}
 
 	@Transactional
-	public Notification getNotificationAfterSave(
+	public com.j10d207.tripeer.noti.dto.NotificationDto getNotificationAfterSave(
 		final MessageBody msgBody,
 		final Long userId,
 		final LocalDateTime startAt,
 		final Long targetId
 	) {
-		final Notification notificaiton = Notification.of(msgBody, userId, startAt, targetId);
+		final Notification notification = Notification.of(msgBody, userId, startAt, targetId);
 
-		notificationRepository.save(notificaiton);
+		notificationRepository.save(notification);
 
-		return notificaiton;
+		return NotificationMapper.toNotificationDto(notification);
 	}
 
 	@Transactional

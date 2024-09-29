@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.j10d207.tripeer.noti.dto.Token;
+import com.j10d207.tripeer.noti.dto.TokenMap;
+import com.j10d207.tripeer.noti.mapper.FirebaseTokenMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,28 +67,25 @@ public class FirebaseTokenService {
 
 
 	@Transactional
-	public Map<Long, List<String>> findAllNotificationByUsers(final List<Long> userIds) {
+	public TokenMap findAllNotificationByUsers(final List<Long> userIds) {
 		final List<UserEntity> users = userRepository.findAllById(userIds);
 		final List<FirebaseToken> tokens = firebaseTokenRepository.findAllAvailableByUser(users);
-		return tokens.stream()
-			.collect(Collectors.groupingBy(
-				token -> token.getUser().getUserId(),
-				Collectors.mapping(FirebaseToken::getToken, Collectors.toList())
-			));
+		log.info("tkens: {}",tokens);
+		return FirebaseTokenMapper.toTokenMap(tokens);
 	}
 
 
 	@Transactional
-	public List<String> findAllNotificationByUser(final Long userId) {
+	public List<Token> findAllNotificationByUser(final Long userId) {
 		final UserEntity user = userRepository.findByUserId(userId);
 		return firebaseTokenRepository.findAllAvailableByUser(List.of(user)).stream()
-			.map(FirebaseToken::getToken)
+			.map(FirebaseTokenMapper::toTokenDto)
 			.toList();
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void invalidFirebaseHandler(final String firebaseToken, final Long userId) {
-		final Optional<FirebaseToken> token = firebaseTokenRepository.findByToken(firebaseToken, userId);
-		token.ifPresent(FirebaseToken::mark);
+	public void invalidFirebaseHandler(final Token token) {
+		final Optional<FirebaseToken> find = firebaseTokenRepository.findById(token.tokenId());
+		find.ifPresent(FirebaseToken::mark);
 	}
 }

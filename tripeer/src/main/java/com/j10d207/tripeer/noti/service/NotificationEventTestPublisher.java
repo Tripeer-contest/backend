@@ -24,7 +24,7 @@ public class NotificationEventTestPublisher {
 		publisher.publishEvent(CompletePlanEvent.builder()
 			.planTitle("내일 여행여행 테스트")
 				.coworkers(List.of(new CoworkerDto(75L, "김회창")))
-				.startAt(LocalDate.now().plusDays(1L))
+				.startAt(LocalDate.now())
 				.endAt(LocalDate.now().plusDays(2L))
 			.build());
 	}

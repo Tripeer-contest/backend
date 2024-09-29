@@ -2,6 +2,7 @@ package com.j10d207.tripeer.noti.db.firebase;
 
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.WebpushConfig;
+import com.j10d207.tripeer.noti.dto.Token;
 
 public class MessageBuilder {
 
@@ -47,10 +48,10 @@ public class MessageBuilder {
 		return new MessageBody(title, content, MessageType.USER_INVITED);
 	}
 
-	public static Message toFirebaseMessage(final MessageBody messageBody, final String firebaseToken) {
+	public static Message toFirebaseMessage(final MessageBody messageBody, final Token token) {
 
 		return Message.builder()
-			.setToken(firebaseToken)
+			.setToken(token.firebaseToken())
 			.putAllData(messageBody.getBody())
 			.setWebpushConfig(WebpushConfig.builder()
 				.putHeader("ttl", "300")

@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import com.j10d207.tripeer.noti.dto.Token;
+import com.j10d207.tripeer.noti.mapper.FirebaseTokenMapper;
 import org.springframework.stereotype.Service;
 
 import com.google.firebase.FirebaseException;
@@ -48,10 +50,11 @@ public class TestNotificationService {
 		MessageBody msgBody = MessageBuilder.getMessageBody(MessageType.TRIPEER_START, planTitle, userNickname);
 
 		firebaseTokens.forEach(token -> {
+			final Token tokenDto = FirebaseTokenMapper.toTokenDto(token);
 			try {
-				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, token.getToken()));
+				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, tokenDto));
 			} catch (FirebaseException e) {
-				firebaseTokenService.invalidFirebaseHandler(token.getToken(), userId);
+				firebaseTokenService.invalidFirebaseHandler(tokenDto);
 			}
 
 		});
@@ -69,10 +72,11 @@ public class TestNotificationService {
 
 
 		firebaseTokens.forEach(token -> {
+			final Token tokenDto = FirebaseTokenMapper.toTokenDto(token);
 			try {
-				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, token.getToken()));
+				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, tokenDto));
 			} catch (FirebaseException e) {
-				firebaseTokenService.invalidFirebaseHandler(token.getToken(), userId);
+				firebaseTokenService.invalidFirebaseHandler(tokenDto);
 			}
 
 		});
@@ -88,11 +92,12 @@ public class TestNotificationService {
 
 
 		firebaseTokens.forEach(token -> {
+			final Token tokenDto = FirebaseTokenMapper.toTokenDto(token);
 			try {
 				log.info("target token : {}", token.getToken());
-				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, token.getToken()));
+				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, tokenDto));
 			} catch (FirebaseException e) {
-				firebaseTokenService.invalidFirebaseHandler(token.getToken(), token.getUser().getUserId());
+				firebaseTokenService.invalidFirebaseHandler(tokenDto);
 			}
 		});
 		notificationRepository.save(Notification.of(msgBody, userId, LocalDateTime.now(), planId));
