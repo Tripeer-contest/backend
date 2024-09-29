@@ -3,6 +3,7 @@ package com.j10d207.tripeer.noti.controller;
 
 import java.util.Optional;
 
+import com.j10d207.tripeer.noti.db.entity.FirebaseToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,10 +61,11 @@ public class NotificationController {
 
 	@PostMapping
 	public Response<Void> addFirebaseToken(
-		@AuthenticationPrincipal CustomOAuth2User user,
-		@RequestParam String token
+			@AuthenticationPrincipal CustomOAuth2User user,
+			@RequestParam String token,
+			@RequestParam(defaultValue = "WEB") FirebaseToken.Type type
 	) {
-		firebaseTokenService.addFirebaseToken(user.getUserId(), token);
+		firebaseTokenService.addFirebaseToken(user.getUserId(), token, type);
 		return Response.of(
 			ResponseHeader.FIREBASE_ADDED.getStatus(),
 			ResponseHeader.FIREBASE_ADDED.getMessage(),

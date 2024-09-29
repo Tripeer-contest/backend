@@ -18,12 +18,12 @@ public class FirebaseTokenMapper {
         final Map<Long, List<Token>> tokenMap = tokens.stream()
                 .collect(Collectors.groupingBy(
                         token -> token.getUser().getUserId(),
-                        Collectors.mapping(token -> Token.of(token.getToken(), token.getId()), Collectors.toList())
+                        Collectors.mapping(token -> Token.of(token.getToken(), token.getId(), token.getType()), Collectors.toList())
                 ));
         return new TokenMap(tokenMap);
     }
 
     public static Token toTokenDto(final FirebaseToken token) {
-        return Token.of(token.getToken(), token.getId());
+        return Token.of(token.getToken(), token.getId(), token.getType());
     }
 }

@@ -26,6 +26,9 @@ public class FirebaseToken {
     private String token;
 
     @Builder.Default
+    private Type type = Type.WEB;
+
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private Mark checked = Mark.UNCHECKED;
 
@@ -36,17 +39,31 @@ public class FirebaseToken {
             .build();
     }
 
-    public static FirebaseToken from(final Long tokenId, final String firebaseToken) {
+    public static FirebaseToken of(final UserEntity user, final String firebaseToken, final FirebaseToken.Type type) {
+        return FirebaseToken.builder()
+                .user(user)
+                .token(firebaseToken)
+                .type(type)
+                .build();
+    }
+
+    public static FirebaseToken from(final Long tokenId, final String firebaseToken, final Type type) {
         return FirebaseToken.builder()
             .id(tokenId)
             .token(firebaseToken)
+            .type(type)
             .build();
     }
-
 
     private enum Mark {
         CHECKED,
         UNCHECKED
+    }
+
+    public enum Type {
+
+        APP,
+        WEB
     }
 
 
