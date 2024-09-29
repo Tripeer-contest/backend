@@ -50,7 +50,7 @@ public class FirebaseTokenService {
 	 * @param firebaseToken: requestParam firebaseToken
 	 * */
 	@Transactional
-	public void addFirebaseToken(final Long userId, final String firebaseToken) {
+	public void addFirebaseToken(final Long userId, final String firebaseToken, final FirebaseToken.Type type) {
 		final UserEntity user = userRepository.findByUserId(userId);
 		final List<FirebaseToken> hasTokens = firebaseTokenRepository.findAllByUser(List.of(user));
 		hasTokens.stream()
@@ -59,7 +59,7 @@ public class FirebaseTokenService {
 			.ifPresentOrElse(
 				FirebaseToken::unMark,
 				() -> {
-					final FirebaseToken notification = FirebaseToken.of(user, firebaseToken);
+					final FirebaseToken notification = FirebaseToken.of(user, firebaseToken, type);
 					firebaseTokenRepository.save(notification);
 				}
 			);

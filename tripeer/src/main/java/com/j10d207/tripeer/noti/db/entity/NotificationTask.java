@@ -57,7 +57,7 @@ public class NotificationTask {
 					.content(notification.content())
 					.startAt(notification.startAt())
 					.build())
-			.targetToken(FirebaseToken.from(token.tokenId(), token.firebaseToken()))
+			.targetToken(FirebaseToken.from(token.tokenId(), token.firebaseToken(), token.type()))
 			.build();
 	}
 
