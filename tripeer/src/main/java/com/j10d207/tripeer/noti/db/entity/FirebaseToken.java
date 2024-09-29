@@ -26,6 +26,7 @@ public class FirebaseToken {
     private String token;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private Type type = Type.WEB;
 
     @Builder.Default

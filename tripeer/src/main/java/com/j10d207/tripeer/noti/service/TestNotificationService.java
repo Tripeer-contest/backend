@@ -73,6 +73,7 @@ public class TestNotificationService {
 
 		firebaseTokens.forEach(token -> {
 			final Token tokenDto = FirebaseTokenMapper.toTokenDto(token);
+			log.info("token: {}, userId: {}", token.getToken(), userId);
 			try {
 				firebasePublisher.sendFirebaseMessage(MessageBuilder.toFirebaseMessage(msgBody, tokenDto));
 			} catch (FirebaseException e) {
