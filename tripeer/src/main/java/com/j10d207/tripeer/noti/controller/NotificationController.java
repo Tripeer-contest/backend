@@ -65,6 +65,7 @@ public class NotificationController {
 			@RequestParam String token,
 			@RequestParam(defaultValue = "WEB") FirebaseToken.Type type
 	) {
+		log.info("controller: userId: {}, token: {}, type: {}", user.getUserId(), token, type);
 		firebaseTokenService.addFirebaseToken(user.getUserId(), token, type);
 		return Response.of(
 			ResponseHeader.FIREBASE_ADDED.getStatus(),
