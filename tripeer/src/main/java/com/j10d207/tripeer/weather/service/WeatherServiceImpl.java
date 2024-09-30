@@ -25,6 +25,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -142,27 +143,28 @@ public class WeatherServiceImpl implements WeatherService{
 
 //    db에 새로 만들지, 업데이트할지, db단순 조회할지 분기처리
     @Override
-    public List<WeatherDataDTO> checkIsUpdateOrCreate(int cityId, int townId) throws IOException {
+    public WeatherDataDTO checkIsUpdateOrCreate(int cityId, int townId) throws IOException {
 
         Optional<WeatherEntity> optionalWeatherEntity = weatherRepository.findByCityIdAndTownId(cityId, townId);
 
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         String formattedDate = currentDate.format(formatter);
-
+        LocalTime now = LocalTime.now();
+        int hour = now.getHour();
         if (optionalWeatherEntity.isPresent()) {
             if (!Objects.equals(optionalWeatherEntity.get().getDay(), formattedDate)) {
                 List<WeatherDataDTO> weatherDataDTOS = getWeatherJsonAPIAndData(cityId, townId);
 //                오늘 날짜랑 db에 있는 해당지역 날짜랑 같지 않다면
-                return updateWeather(optionalWeatherEntity.get(), weatherDataDTOS, formattedDate);
+                return updateWeather(optionalWeatherEntity.get(), weatherDataDTOS, formattedDate).get(hour);
             }
         } else {
             List<WeatherDataDTO> weatherDataDTOS = getWeatherJsonAPIAndData(cityId, townId);
 //               DB에 새로 추가
-            return createWeather(cityId, townId, weatherDataDTOS, formattedDate);
+            return createWeather(cityId, townId, weatherDataDTOS, formattedDate).get(hour);
         }
 
-        return getWeatherInDB(cityId, townId);//db에서 꺼내서 반환해주기;;
+        return getWeatherInDB(cityId, townId).get(hour);//db에서 꺼내서 반환해주기;;
     }
 
 
