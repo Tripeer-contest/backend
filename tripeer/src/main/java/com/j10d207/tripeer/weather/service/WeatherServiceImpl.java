@@ -220,6 +220,7 @@ public class WeatherServiceImpl implements WeatherService{
                 "&" + URLEncoder.encode("ny", StandardCharsets.UTF_8) + "=" + longitude;
 
         URL url = new URL(urlBuilder);
+        System.out.println(url);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Content-type", "application/json");

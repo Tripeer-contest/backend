@@ -100,7 +100,7 @@ kakao:
   apikey2: ENC(LmbA3fzJrrZsxzL3ulNlICYW+SZdR7H84p0yrbylVFm/5YcdoNnEBmZB8ml4QVN/)
 
 weather:
-  apikey: ENC(/KMRGTnKpN+JVY7DwV8+Dt2GryLXkyd7j8gbTgWCl5p8p0P253PUobcm+s2BV6+jyzkxMPEjzzucQgCZiijtALp6aTHD/PeOhWbLkPmJkRrb9qVAotLJuSUvL+RuFqzWBleCf5gCtnJ8psbLhnwBsg==)
+  apikey: ENC(WgklgFHTOh8rQeyL+c475i5o48InrjPLAlkzE9rF30ZFK6+PSLxdYXIP68VbrGhpx01C8U7fxb8IRIjy1c03YobUpMxjOAyu2uTY6/xx20VtfNFYsyFsTzayeX8hOY+hmUObe/NMNEUDkXw0RAM+Hw==)
 
 cloud:
   aws:
