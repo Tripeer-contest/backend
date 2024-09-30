@@ -9,8 +9,8 @@ COPY ${JAR_FILE} test.jar
 # Auto Exctraction으로 압축된 파일을 해제하여 test.jar에 그 내용을 복사, 결국 스프링부트를 실행하는 컨테이너 내에는 test.jar가 있게 됨
 
 # 타임존 한국 시간으로 설정
-RUN apt-get update && apt-get install -y tzdata \
-    && ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+RUN apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
     && echo "Asia/Seoul" > /etc/timezone
 
 ENTRYPOINT ["java", "-jar","test.jar", "-DJASYPT_KEY=${JASYPT_KEY}"]
