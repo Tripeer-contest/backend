@@ -61,30 +61,30 @@ public interface ElasticSpotRepository extends ElasticsearchRepository<ElasticSp
 	@Query("{\"match\": {\"keyword\": {\"query\": \"?0\", \"operator\": \"and\"}}}")
 	Page<ElasticSpotEntity> findByKeywordMatchAll(String keyword, Pageable pageable);
 
-	// @Query("{\"bool\": {" +
-	// 			"\"must\": {" +
-	// 				"\"match\": {" +
-	// 					"\"keyword\": {" +
-	// 						"\"query\": \"?0\"," +
-	// 						"\"operator\": \"and\"" +
-	// 					"}" +
-	// 				"}" +
-	// 			"}," +
-	// 			"\"filter\": [" +
-	// 				"{\"terms\": {" +
-	// 					"\"content_type_id\": ?1" +
-	// 				"}}," +
-	// 				"{\"terms\": {" +
-	// 					"\"city_id\": ?2" +
-	// 				"}}," +
-	// 				"{\"terms\": {" +
-	// 					"\"town_id\": ?3" +
-	// 				"}}" +
-	// 			"]" +
-	// 		"}}")
-	// Page<ElasticSpotEntity> searchSpotsInArea(
-	// 	String keyword, List<Integer> contentTypeIds, List<Integer> cityIds, List<Integer> townIds, Pageable pageable);
-	//
+	@Query("{\"bool\": {" +
+				"\"must\": {" +
+					"\"match\": {" +
+						"\"keyword\": {" +
+							"\"query\": \"?0\"," +
+							"\"operator\": \"and\"" +
+						"}" +
+					"}" +
+				"}," +
+				"\"filter\": [" +
+					"{\"terms\": {" +
+						"\"content_type_id\": ?1" +
+					"}}," +
+					"{\"terms\": {" +
+						"\"city_id\": ?2" +
+					"}}," +
+					"{\"terms\": {" +
+						"\"town_id\": ?3" +
+					"}}" +
+				"]" +
+			"}}")
+	Page<ElasticSpotEntity> searchSpotsInArea(
+		String keyword, List<Integer> contentTypeIds, List<Integer> cityIds, List<Integer> townIds, Pageable pageable);
+
 	// @Query("{\"bool\": {" +
 	// 	"\"filter\": [" +
 	// 	"{\"terms\": {" +
