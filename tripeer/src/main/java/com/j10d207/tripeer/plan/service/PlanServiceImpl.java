@@ -436,13 +436,11 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public List<SpotSearchResDTO.SearchResult> getWishList(long userId, long planId) {
         List<WishListEntity> wishList = wishListRepository.findByUser_UserId(userId);
-        return  wishList.stream()
-                .map(wishListEntity ->
-                SpotSearchResDTO.SearchResult.fromWishListEntity
-                        (wishListEntity,
-                                planBucketRepository.existsByPlan_PlanIdAndSpotInfo_SpotInfoId(planId, wishListEntity.getSpotInfo().getSpotInfoId()))
-                        )
-                .toList();
+        List<SpotInfoEntity> spots = wishList.stream().map(WishListEntity::getSpotInfo).toList();
+        return spots.stream()
+            .map(spot -> SpotSearchResDTO.SearchResult.fromSpotInfoEntity(spot,true,false)  // 버킷에 있는지
+            )
+            .toList();
     }
 
     //플랜 디테일 저장
