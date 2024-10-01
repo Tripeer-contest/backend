@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwsHeader;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -17,8 +18,13 @@ import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCo
 import org.springframework.util.MultiValueMap;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class CustomRequestEntityConverter implements Converter<OAuth2AuthorizationCodeGrantRequest, RequestEntity<?>> {
@@ -29,58 +35,56 @@ public class CustomRequestEntityConverter implements Converter<OAuth2Authorizati
         defaultConverter = new OAuth2AuthorizationCodeGrantRequestEntityConverter();
     }
 
+    private final String APPLE_URL = "https://appleid.apple.com";
+    private final String APPLE_KEY_PATH = "/app/AuthKey_XKN39QTTDC.p8";
+    private final String APPLE_CLIENT_ID = "TripeerService";
+    private final String APPLE_TEAM_ID = "7RBWP4PK88";
+    private final String APPLE_KEY_ID = "XKN39QTTDC";
+
+
     @Override
     public RequestEntity<?> convert(OAuth2AuthorizationCodeGrantRequest req) {
         RequestEntity<?> entity = defaultConverter.convert(req);
         String registrationId = req.getClientRegistration().getRegistrationId();
-        MultiValueMap<String, String> params = (MultiValueMap<String,String>) entity.getBody();
-        //Apple일 경우 secret key를 동적으로 세팅
-        if(registrationId.contains("apple")){
-            params.set("client_secret", createAppleClientSecret(params.get("client_id").get(0), params.get("client_secret").get(0)));
+        MultiValueMap<String, String> params = (MultiValueMap<String, String>) entity.getBody();
+        if (registrationId.contains("apple")) {
+            try {
+                params.set("client_secret", createClientSecret());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         return new RequestEntity<>(params, entity.getHeaders(),
                 entity.getMethod(), entity.getUrl());
     }
 
-    //Apple Secret Key를 만드는 메서드
-    public String createAppleClientSecret(String clientId, String secretKeyResource) {
-        String clientSecret = "";
-        //application-oauth.yml에 설정해놓은 apple secret Key를 /를 기준으로 split
-        String[] secretKeyResourceArr = secretKeyResource.split("/");
-        try {
-            InputStream inputStream = new ClassPathResource("/app/" + secretKeyResourceArr[0]).getInputStream();
-            File file = File.createTempFile("appleKeyFile",".p8");
-            try (InputStream in = inputStream) {  // try-with-resources로 InputStream을 자동으로 닫음
-                FileUtils.copyInputStreamToFile(in, file);
-            } catch (IOException e) {
-                // 오류 처리
-                e.printStackTrace();
-            }
+    public PrivateKey getPrivateKey() throws IOException {
+        ClassPathResource resource = new ClassPathResource(APPLE_KEY_PATH);
+        // 배포시 jar 파일을 찾지 못함
+        //String privateKey = new String(Files.readAllBytes(Paths.get(resource.getURI())));
 
-            String appleKeyId = secretKeyResourceArr[1];
-            String appleTeamId = secretKeyResourceArr[2];
-            String appleClientId = clientId;
+        InputStream in = resource.getInputStream();
+        PEMParser pemParser = new PEMParser(new StringReader(IOUtils.toString(in, StandardCharsets.UTF_8)));
+        PrivateKeyInfo object = (PrivateKeyInfo) pemParser.readObject();
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+        return converter.getPrivateKey(object);
+    }
 
-            PEMParser pemParser = new PEMParser(new FileReader(file));
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-            PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) pemParser.readObject();
 
-            PrivateKey privateKey = converter.getPrivateKey(privateKeyInfo);
+    public String createClientSecret() throws IOException {
+        Date expirationDate = Date.from(LocalDateTime.now().plusDays(15).atZone(ZoneId.systemDefault()).toInstant());
+        Map<String, Object> jwtHeader = new HashMap<>();
+        jwtHeader.put("kid", APPLE_KEY_ID);
+        jwtHeader.put("alg", "ES256");
 
-            clientSecret = Jwts.builder()
-                    .setHeaderParam(JwsHeader.KEY_ID, appleKeyId)
-                    .setIssuer(appleTeamId)
-                    .setAudience("https://appleid.apple.com")
-                    .setSubject(appleClientId)
-                    .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 5)))
-                    .setIssuedAt(new Date(System.currentTimeMillis()))
-                    .signWith(privateKey, SignatureAlgorithm.ES256)
-                    .compact();
-
-        } catch (IOException e) {
-            log.error("Error_createAppleClientSecret : {}-{}", e.getMessage(), e.getCause());
-        }
-        log.info("createAppleClientSecret : {}", clientSecret);
-        return clientSecret;
+        return Jwts.builder()
+                .setHeaderParams(jwtHeader)
+                .setIssuer(APPLE_TEAM_ID)
+                .setIssuedAt(new Date(System.currentTimeMillis())) // 발행 시간 - UNIX 시간
+                .setExpiration(expirationDate) // 만료 시간
+                .setAudience(APPLE_URL)
+                .setSubject(APPLE_CLIENT_ID)
+                .signWith(getPrivateKey())
+                .compact();
     }
 }
