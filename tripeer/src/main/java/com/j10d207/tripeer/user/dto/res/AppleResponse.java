@@ -17,12 +17,12 @@ public class AppleResponse implements OAuth2Response {
 
     @Override
     public String getProviderId() {
-        return attribute.get("id_token").toString();
+        return attribute.get("sub").toString();
     }
 
     @Override
     public String getEmail() {
-        return "1";
+        return attribute.get("email").toString();
     }
 
     @Override
