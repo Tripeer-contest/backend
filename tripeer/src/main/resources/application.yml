@@ -34,7 +34,7 @@ spring:
     path: ENC(Tg8LdfoWL+xcdboaDmi2xr8ew05VgLl54W0vvNzH9l4=)
     client: ENC(Z7UoHZBIg7j59FN7D/MTUjltv9kH2IjZm98HgKhfzww=)
     team: ENC(87x68MTJbd5UOO+d5VOj3A3x2+daClK1)
-    key: ENC(+r4MaVJBBtJ89JjOijH1BNAEm9ZNjigL)
+    key: ENC(cTYWSVUzAM4J3hTLvKT/kKJ1uh0kKMQ7)
 
   #Oauth2 login info
   security:
