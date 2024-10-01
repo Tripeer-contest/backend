@@ -38,8 +38,7 @@ public class CustomRequestEntityConverter implements Converter<OAuth2Authorizati
     }
 
     private final String APPLE_URL = "https://appleid.apple.com";
-//    private final String APPLE_KEY_PATH = "/app/AuthKey_XKN39QTTDC.p8";
-    private final String APPLE_KEY_PATH = "1";
+    private final String APPLE_KEY_PATH = "AuthKey_XKN39QTTDC.p8";
     private final String APPLE_CLIENT_ID = "tripeer.tripeer.com";
     private final String APPLE_TEAM_ID = "7RBWP4PK88";
     private final String APPLE_KEY_ID = "XKN39QTTDC";
