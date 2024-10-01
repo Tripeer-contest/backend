@@ -48,7 +48,7 @@ public class CustomRequestEntityConverter implements Converter<OAuth2Authorizati
         //application-oauth.yml에 설정해놓은 apple secret Key를 /를 기준으로 split
         String[] secretKeyResourceArr = secretKeyResource.split("/");
         try {
-            InputStream inputStream = new ClassPathResource("https://dongtest.s3.ap-northeast-2.amazonaws.com/" + secretKeyResourceArr[0]).getInputStream();
+            InputStream inputStream = new ClassPathResource("/app/" + secretKeyResourceArr[0]).getInputStream();
             File file = File.createTempFile("appleKeyFile",".p8");
             try (InputStream in = inputStream) {  // try-with-resources로 InputStream을 자동으로 닫음
                 FileUtils.copyInputStreamToFile(in, file);
