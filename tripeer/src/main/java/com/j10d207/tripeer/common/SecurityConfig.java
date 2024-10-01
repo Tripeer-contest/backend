@@ -1,5 +1,6 @@
 package com.j10d207.tripeer.common;
 
+import com.j10d207.tripeer.user.config.CustomRequestEntityConverter;
 import com.j10d207.tripeer.user.config.CustomSuccessHandler;
 import com.j10d207.tripeer.user.config.JWTFilter;
 import com.j10d207.tripeer.user.config.JWTUtil;
@@ -14,6 +15,9 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -34,6 +38,14 @@ public class SecurityConfig {
     //OAuth 로그인
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
+
+    @Bean
+    public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
+        DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
+        accessTokenResponseClient.setRequestEntityConverter(new CustomRequestEntityConverter());
+
+        return accessTokenResponseClient;
+    }
 
     //AuthenticationManager Bean 등록
     @Bean
@@ -85,6 +97,8 @@ public class SecurityConfig {
         // Oauth 소셜로그인
         http
                 .oauth2Login((oauth2) -> oauth2
+                        .tokenEndpoint(tokenEndpointConfig ->
+                                tokenEndpointConfig.accessTokenResponseClient(accessTokenResponseClient()))
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService)).successHandler(customSuccessHandler));
 
