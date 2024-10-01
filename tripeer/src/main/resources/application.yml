@@ -51,7 +51,7 @@ spring:
             user-name-attribute: response
         registration:
           apple:
-            clientId: TripeerService
+            clientId: tripeer.tripeer.com
             clientSecret: ENC(qXlzbfeM3yV4/q5DTvsS6fi8js4NghcdYbty0WjoC/0=)
             #redirect-uri: https://tripeer.co.kr/api/callback.apple
             redirect-uri: https://tripeer.co.kr/api/login/oauth2/code/apple
