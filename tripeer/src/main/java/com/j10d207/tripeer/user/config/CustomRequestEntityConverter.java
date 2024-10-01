@@ -41,14 +41,19 @@ public class CustomRequestEntityConverter implements Converter<OAuth2Authorizati
     }
 
     private final String APPLE_URL = "https://appleid.apple.com";
-    @Value("${spring.apple.path}")
-    private String APPLE_KEY_PATH;
-    @Value("${spring.apple.client}")
-    private String APPLE_CLIENT_ID;
-    @Value("${spring.apple.team}")
-    private String APPLE_TEAM_ID;
-    @Value("${spring.apple.key}")
-    private String APPLE_KEY_ID;
+//    @Value("${spring.apple.path}")
+//    private String APPLE_KEY_PATH;
+//    @Value("${spring.apple.client}")
+//    private String APPLE_CLIENT_ID;
+//    @Value("${spring.apple.team}")
+//    private String APPLE_TEAM_ID;
+//    @Value("${spring.apple.key}")
+//    private String APPLE_KEY_ID;
+
+    private final String APPLE_KEY_PATH = "AuthKey_4RG23BJ7C8.p8";
+    private final String APPLE_CLIENT_ID = "tripeer.tripeer.com";
+    private final String APPLE_TEAM_ID = "7RBWP4PK88";
+    private final String APPLE_KEY_ID = "4RG23BJ7C8";
 
 
     @Override
