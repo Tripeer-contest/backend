@@ -38,11 +38,12 @@ public class SecurityConfig {
     //OAuth 로그인
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
+    private final CustomRequestEntityConverter customRequestEntityConverter;
 
     @Bean
     public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
         DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
-        accessTokenResponseClient.setRequestEntityConverter(new CustomRequestEntityConverter());
+        accessTokenResponseClient.setRequestEntityConverter(customRequestEntityConverter);
 
         return accessTokenResponseClient;
     }
