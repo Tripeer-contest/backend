@@ -34,6 +34,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else if (registrationId.equals("naver")) {
             oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
             user = loginAndJoin(oAuth2Response);
+        } else if(registrationId.contains("apple")){
+            String idToken = userRequest.getAdditionalParameters().get("id_token").toString();
+            user = loginAndJoin(oAuth2Response);
+//            attributes = decodeJwtTokenPayload(idToken);
+//            attributes.put("id_token", idToken);
         } else {
             return null;
         }
