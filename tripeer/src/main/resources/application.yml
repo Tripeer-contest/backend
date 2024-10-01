@@ -52,9 +52,9 @@ spring:
         registration:
           apple:
             clientId: TripeerService
-            clientSecret: ENC(r+W/mnX26f1GVv5ri7/lEPc4282yudS0U7ypdZzwvvezd9SJCpYJENYSD6gMKjCwfGE3X5bBCn8=)
-            redirect-uri: https://tripeer.co.kr/api/callback.apple
-            #redirect-uri: https://tripeer.co.kr/api/login/oauth2/code/apple
+            clientSecret: ENC(qXlzbfeM3yV4/q5DTvsS6fi8js4NghcdYbty0WjoC/0=)
+            #redirect-uri: https://tripeer.co.kr/api/callback.apple
+            redirect-uri: https://tripeer.co.kr/api/login/oauth2/code/apple
             authorization-grant-type: authorization_code
             client-authentication-method: POST
             client-name: Apple
