@@ -179,6 +179,15 @@ public class PlanServiceImpl implements PlanService {
     @Override
     public void planOut(long planId, long userId) {
         Optional<CoworkerEntity> coworkerOptional = coworkerRepository.findByPlan_PlanIdAndUser_UserId(planId, userId);
+        webClient.post()
+            .uri("/node/plan/out")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(new PlanNodeOutDTO(userId, planId))
+            .retrieve()
+            .bodyToMono(Void.class)  // 응답 본문이 없을 경우
+            .doOnSuccess(result -> log.info("Successfully sent request to node server"))
+            .doOnError(error -> log.error("Failed to send request to node server", error))
+            .subscribe();  // 비동기 처리
         if(coworkerOptional.isPresent()) {
             coworkerRepository.delete(coworkerOptional.get());
         } else {
