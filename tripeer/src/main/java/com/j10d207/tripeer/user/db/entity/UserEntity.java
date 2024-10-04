@@ -2,6 +2,7 @@ package com.j10d207.tripeer.user.db.entity;
 
 
 import com.j10d207.tripeer.user.db.TripStyleEnum;
+import com.j10d207.tripeer.user.dto.req.CustomJoinReq;
 import com.j10d207.tripeer.user.dto.req.NotiReq;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
@@ -14,6 +15,7 @@ import lombok.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 
@@ -86,5 +88,22 @@ public class UserEntity {
 
     public void setAllowNotifications(NotiReq notiReq) {
         this.allowNotifications = notiReq.isAllowNotifications();
+    }
+
+    public static UserEntity from(CustomJoinReq customJoinReq, String encodedPassword) {
+        return UserEntity.builder()
+            .provider("tripeer")
+            .providerId(encodedPassword)
+            .email(customJoinReq.getEmail())
+            .nickname(customJoinReq.getNickname())
+            .birth(LocalDate.parse(customJoinReq.getYear() + "-" + customJoinReq.getMonth() + "-" + customJoinReq.getDay()))
+            .profileImage("https://tripeer207.s3.ap-northeast-2.amazonaws.com/front/static/profileImg.png")
+            .role("ROLE_USER")
+            .style1(customJoinReq.getStyle1() == null ? null : TripStyleEnum.getNameOfCode(customJoinReq.getStyle1()))
+            .style2(customJoinReq.getStyle2() == null ? null : TripStyleEnum.getNameOfCode(customJoinReq.getStyle2()))
+            .style3(customJoinReq.getStyle3() == null ? null : TripStyleEnum.getNameOfCode(customJoinReq.getStyle3()))
+            .isOnline(false)
+            .allowNotifications(true)
+            .build();
     }
 }
