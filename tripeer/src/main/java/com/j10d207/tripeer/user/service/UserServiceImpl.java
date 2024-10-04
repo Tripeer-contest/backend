@@ -355,7 +355,7 @@ public class UserServiceImpl implements UserService{
         cookie.setMaxAge(24*60*60);
         cookie.setSecure(true);
         cookie.setPath("/");
-        if(key.equals("AuthorizationRe")) {
+        if(key.equals("Authorization-re")) {
             cookie.setHttpOnly(true);
         }
 
