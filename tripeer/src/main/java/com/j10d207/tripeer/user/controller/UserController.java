@@ -3,6 +3,9 @@ package com.j10d207.tripeer.user.controller;
 import com.j10d207.tripeer.exception.CustomException;
 import com.j10d207.tripeer.exception.ErrorCode;
 import com.j10d207.tripeer.response.Response;
+import com.j10d207.tripeer.user.dto.req.CustomJoinReq;
+import com.j10d207.tripeer.user.dto.req.CustomLoginReq;
+import com.j10d207.tripeer.user.dto.req.EmailVerifyReq;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
 import com.j10d207.tripeer.user.dto.req.NotiReq;
@@ -40,6 +43,28 @@ public class UserController {
     public Response<String> memberSignup(@RequestBody @Valid JoinReq join, HttpServletResponse response) {
         String jwt = userService.memberSignup(join, response);
         return Response.of(HttpStatus.OK, "회원가입, 토큰발급 완료", jwt);
+    }
+
+    @PostMapping("/signup/custom")
+    public Response<String> customSignup(@RequestBody @Valid CustomJoinReq join, HttpServletResponse response) {
+        String jwt = userService.customSignup(join, response);
+        return Response.of(HttpStatus.OK, "회원가입, 토큰발급 완료", jwt);
+    }
+
+    @PostMapping("/login/custom")
+    public Response<String> customSignup(@RequestBody @Valid CustomLoginReq join, HttpServletResponse response) {
+        String jwt = userService.customLogin(join, response);
+        return Response.of(HttpStatus.OK, "로그인, 토큰발급 완료", jwt);
+    }
+
+    @PostMapping("/valid/email")
+    public Response<Boolean> emailVerification(@RequestBody EmailVerifyReq emailVerifyReq) {
+        return Response.of(HttpStatus.OK, "이메일 인증 완료", userService.emailVerification(emailVerifyReq.getEmail(),emailVerifyReq.getCode()));
+    }
+
+    @GetMapping("/valid/email/{email}")
+    public Response<Boolean> emailDuplicateCheck(@PathVariable("email") String email) {
+        return Response.of(HttpStatus.OK, "인증 이메일 발송", userService.sendValidEmail(email));
     }
 
     //소셜정보 불러오기

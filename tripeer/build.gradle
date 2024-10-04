@@ -93,6 +93,8 @@ dependencies {
 
 	implementation 'commons-io:commons-io:2.11.0'  // commons-io 의존성 추가
 
+	implementation 'org.springframework.boot:spring-boot-starter-cache:3.3.4'
+	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.2'
 }
 
 tasks.named('test') {

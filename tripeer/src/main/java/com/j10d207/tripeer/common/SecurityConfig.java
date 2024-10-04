@@ -112,10 +112,13 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/error", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/admin/**").permitAll()
-
                         //비회원 포함 //배포시 test 삭제 필요
                         .requestMatchers(HttpMethod.GET, "/user/test/**", "/user/social/info", "/weather", "/history/*").hasAnyRole("NONE", "USER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/user/reissue").hasAnyRole("NONE", "USER", "ADMIN")
+
+                        // 자체 회원 가입 관련
+                        .requestMatchers(HttpMethod.GET, "/user/valid/email/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/valid/email","user/login/custom", "user/signup/custom").permitAll()
 
                         //가입대기 상태 (소셜 로그인만 된 상태)
                         .requestMatchers(HttpMethod.POST, "/user/signup").hasAnyRole("VALIDATE")

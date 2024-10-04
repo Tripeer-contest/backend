@@ -1,5 +1,8 @@
 package com.j10d207.tripeer.user.service;
 
+import com.j10d207.tripeer.user.dto.req.CustomJoinReq;
+import com.j10d207.tripeer.user.dto.req.CustomLoginReq;
+import com.j10d207.tripeer.user.dto.req.EmailVerifyReq;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
 import com.j10d207.tripeer.user.dto.req.NotiReq;
@@ -17,14 +20,22 @@ public interface UserService {
 
     //회원가입
     public String memberSignup(JoinReq join, HttpServletResponse response);
+    //커스텀 회원가입
+    public String customSignup(CustomJoinReq join, HttpServletResponse response);
+    //커스텀 로그인
+    public String customLogin(CustomLoginReq loginReq, HttpServletResponse response);
     //프로필 사진 변경
     public String uploadProfileImage(MultipartFile file, long userId);
     //내 정보 수정
     public void modifyMyInfo(long userId, InfoReq infoReq);
     //소셜 정보 획득
     public UserDTO.Social getSocialInfo();
+    //이메일 중복체크
+    public boolean sendValidEmail(String email);
     //닉네임 중복체크
     public boolean nicknameDuplicateCheck(String nickname);
+    //이메일 인증
+    public boolean emailVerification(String email, String code);
     //유저 검색
     public List<UserDTO.Search> userSearch(String nickname);
     //내 정보 불러오기
