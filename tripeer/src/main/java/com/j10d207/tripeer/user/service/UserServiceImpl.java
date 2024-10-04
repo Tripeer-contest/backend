@@ -16,6 +16,7 @@ import com.j10d207.tripeer.user.config.JWTUtil;
 import com.j10d207.tripeer.user.db.entity.UserEntity;
 import com.j10d207.tripeer.user.db.repository.UserRepository;
 import com.j10d207.tripeer.user.dto.req.NotiReq;
+import com.j10d207.tripeer.user.dto.req.PasswordChangeReq;
 import com.j10d207.tripeer.user.dto.req.WishlistReq;
 import com.j10d207.tripeer.user.dto.res.JWTDto;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
@@ -151,12 +152,29 @@ public class UserServiceImpl implements UserService{
         return UserDTO.Social.getContext();
     }
 
-    //이메일 중복체크
+    //비밀번호 변경
+    @Override
+    public void changePassword(PasswordChangeReq passwordChangeReq) {
+        UserEntity user = userRepository.findByEmail(passwordChangeReq.getEmail()).orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
+        if (!(user.getProvider().equals("tripeer"))) throw new CustomException(ErrorCode.NOT_TRIPPER_USER);
+        Cache cache = cacheManager.getCache("passwordCodes");
+        String cachedCode = cache.get(passwordChangeReq.getEmail(), String.class);
+        if (!passwordChangeReq.getCode().equals(cachedCode)) {
+            throw new CustomException(ErrorCode.INVALID_CODE);
+        }
+        if (!passwordChangeReq.getConfirmPassword().equals(passwordChangeReq.getPassword())) throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        String encodedPassword = passwordEncoder.encode(passwordChangeReq.getPassword());
+        user.setProviderId(encodedPassword);
+        userRepository.save(user);
+    }
+
+    //인증 이메일 발송
     @Override
     public boolean sendValidEmail(String email) {
         if (userRepository.existsByEmail(email)) return false;
         String code = String.format("%06d", new Random().nextInt(999999));
-        saveVerificationCode(email, code);
+        Cache cache = cacheManager.getCache("emailCodes");
+        cache.put(email, code);
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
             messageHelper.setTo(email);
@@ -174,11 +192,47 @@ public class UserServiceImpl implements UserService{
         return true;
     }
 
+    //인증 이메일 발송
+    @Override
+    public boolean sendValidPassword(String email) {
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
+        if (!(user.getProvider().equals("tripeer"))) throw new CustomException(ErrorCode.NOT_TRIPPER_USER);
+        String code = String.format("%06d", new Random().nextInt(999999));
+        Cache cache = cacheManager.getCache("passwordCodes");
+        cache.put(email, code);
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
+            messageHelper.setTo(email);
+            messageHelper.setSubject("[Tripeer] " + "인증코드 안내");
+            messageHelper.setFrom("tripeer@gmail.com");
+            String content = buildEmailContent(code);
+            messageHelper.setText(content, true); // true는 HTML 메일을 보내겠다는 의미.
+        };
+        try {
+            javaMailSender.send(messagePreparator);
+        } catch (MailException e) {
+            // 이메일 발송 실패
+            return false;
+        }
+        return true;
+    }
+
+    // 인증 이메일 검증
     public boolean emailVerification(String email, String code) {
         Cache cache = cacheManager.getCache("emailCodes");
         if (cache != null) {
             String cachedCode = cache.get(email, String.class);
 			return code.equals(cachedCode);
+        }
+        return false;
+    }
+
+    // 인증 이메일 검증 (for 비밀번호 변경)
+    public boolean passwordVerification(String email, String code) {
+        Cache cache = cacheManager.getCache("passwordCodes");
+        if (cache != null) {
+            String cachedCode = cache.get(email, String.class);
+            return code.equals(cachedCode);
         }
         return false;
     }
@@ -328,8 +382,4 @@ public class UserServiceImpl implements UserService{
             "</html>";
     }
 
-    public void saveVerificationCode(String email, String code) {
-        Cache cache = cacheManager.getCache("emailCodes");
-        cache.put(email, code);
-    }
 }

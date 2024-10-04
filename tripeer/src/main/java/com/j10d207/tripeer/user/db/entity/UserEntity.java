@@ -31,6 +31,7 @@ public class UserEntity {
     // PK
     private long userId;
     private String provider;
+    @Setter
     private String providerId;
     private String email;
     private String nickname;
