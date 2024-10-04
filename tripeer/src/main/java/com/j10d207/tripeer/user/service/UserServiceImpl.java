@@ -83,6 +83,7 @@ public class UserServiceImpl implements UserService{
         // 코드 검증(이메일 코드가 일치할때만 회원가입 허용)
         Cache cache = cacheManager.getCache("emailCodes");
         String cachedCode = cache.get(join.getEmail(), String.class);
+        if (userRepository.existsByEmail(join.getEmail())) throw new CustomException(ErrorCode.DUPLICATE_USER);
         if (!join.getCode().equals(cachedCode)) {
             throw new CustomException(ErrorCode.INVALID_CODE);
         }
