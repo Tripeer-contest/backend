@@ -117,7 +117,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user/reissue").hasAnyRole("NONE", "USER", "ADMIN")
 
                         // 자체 회원 가입 관련
-                        .requestMatchers(HttpMethod.GET, "/user/valid/email/**", "/user/valid/password/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user/valid/email/**", "/user/valid/password/**", "user/name/duplicatecheck/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/user/password").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/valid/email","/user/valid/password","user/login/custom", "user/signup/custom").permitAll()
 
