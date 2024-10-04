@@ -9,6 +9,7 @@ import com.j10d207.tripeer.user.dto.req.EmailVerifyReq;
 import com.j10d207.tripeer.user.dto.req.InfoReq;
 import com.j10d207.tripeer.user.dto.req.JoinReq;
 import com.j10d207.tripeer.user.dto.req.NotiReq;
+import com.j10d207.tripeer.user.dto.req.PasswordChangeReq;
 import com.j10d207.tripeer.user.dto.req.WishlistReq;
 import com.j10d207.tripeer.user.dto.res.CustomOAuth2User;
 import com.j10d207.tripeer.user.dto.res.UserDTO;
@@ -63,8 +64,24 @@ public class UserController {
     }
 
     @GetMapping("/valid/email/{email}")
-    public Response<Boolean> emailDuplicateCheck(@PathVariable("email") String email) {
+    public Response<Boolean> sendValidEmail(@PathVariable("email") String email) {
         return Response.of(HttpStatus.OK, "인증 이메일 발송", userService.sendValidEmail(email));
+    }
+
+    @PostMapping("/valid/password")
+    public Response<Boolean> passwordVerification(@RequestBody EmailVerifyReq emailVerifyReq) {
+        return Response.of(HttpStatus.OK, "이메일 인증 완료", userService.passwordVerification(emailVerifyReq.getEmail(),emailVerifyReq.getCode()));
+    }
+
+    @GetMapping("/valid/password/{email}")
+    public Response<Boolean> sendValidPassword(@PathVariable("email") String email) {
+        return Response.of(HttpStatus.OK, "인증 이메일 발송", userService.sendValidPassword(email));
+    }
+
+    @PatchMapping("/password")
+    public Response<?> changePassword(@RequestBody PasswordChangeReq passwordChangeReq) {
+        userService.changePassword(passwordChangeReq);
+        return Response.of(HttpStatus.OK, "비밀번호 변경 완료", null);
     }
 
     //소셜정보 불러오기

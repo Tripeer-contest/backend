@@ -27,6 +27,7 @@ public enum ErrorCode {
     HAS_WISHLIST(HttpStatus.BAD_REQUEST, "ACCOUNT-009", "이미 찜목록에 등록된 장소입니다"),
     DONT_HAVE_PERMISSION(HttpStatus.FORBIDDEN, "ACCOUNT-010", "작성자가 아니거나 권한이 없습니다"),
     INVALID_CODE(HttpStatus.BAD_REQUEST, "ACCOUNT-011", "이메일 코드가 일치하지 않거나 만료돠었습니다."),
+    NOT_TRIPPER_USER(HttpStatus.BAD_REQUEST, "ACCOUNT-011", "자체로그인 유저가 아닙니다."),
 
     // plan
     HAS_BUCKET(HttpStatus.BAD_REQUEST, "PLAN-001", "이미 등록된 장소입니다."),

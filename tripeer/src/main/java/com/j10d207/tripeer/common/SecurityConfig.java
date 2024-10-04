@@ -117,8 +117,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user/reissue").hasAnyRole("NONE", "USER", "ADMIN")
 
                         // 자체 회원 가입 관련
-                        .requestMatchers(HttpMethod.GET, "/user/valid/email/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/user/valid/email","user/login/custom", "user/signup/custom").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user/valid/email/**", "/user/valid/password/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/user/password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/valid/email","/user/valid/password","user/login/custom", "user/signup/custom").permitAll()
 
                         //가입대기 상태 (소셜 로그인만 된 상태)
                         .requestMatchers(HttpMethod.POST, "/user/signup").hasAnyRole("VALIDATE")
