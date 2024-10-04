@@ -291,6 +291,9 @@ public class UserServiceImpl implements UserService{
             if (cookie.getName().equals("AuthorizationRe")) {
                 refresh = cookie.getValue();
             }
+            else if (cookie.getName().equals("Authorization-re")) {
+                refresh = cookie.getValue();
+            }
         }
         // refresh 만료 확인 만료확인의 try/catch를 isExpired 메소드 안으로 넣어버림 0802
         jwtUtil.getPayload(refresh).getExpiration().before(new Date());
