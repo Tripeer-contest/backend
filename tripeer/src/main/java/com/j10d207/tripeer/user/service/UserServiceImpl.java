@@ -104,6 +104,7 @@ public class UserServiceImpl implements UserService{
     public String customLogin(CustomLoginReq loginReq, HttpServletResponse response) {
         // 이메일 해당 유저가 있나 검사
         UserEntity user = userRepository.findByEmail(loginReq.getEmail()).orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+        if (!user.getProvider().equals("tripper")) throw new CustomException(ErrorCode.NOT_TRIPPER_USER);
         // 비밀번호가 일치하는지 겁사
         if (!passwordEncoder.matches(loginReq.getPassword(), user.getProviderId())) throw new CustomException(ErrorCode.INVALID_PASSWORD);
         // 일치하면 즉시 로그인을 위한 토큰 발급
