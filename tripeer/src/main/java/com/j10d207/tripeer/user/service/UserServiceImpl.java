@@ -164,7 +164,6 @@ public class UserServiceImpl implements UserService{
         if (!passwordChangeReq.getCode().equals(cachedCode)) {
             throw new CustomException(ErrorCode.INVALID_CODE);
         }
-        if (!passwordChangeReq.getConfirmPassword().equals(passwordChangeReq.getPassword())) throw new CustomException(ErrorCode.INVALID_PASSWORD);
         String encodedPassword = passwordEncoder.encode(passwordChangeReq.getPassword());
         user.setProviderId(encodedPassword);
         userRepository.save(user);
