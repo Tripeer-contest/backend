@@ -97,7 +97,7 @@ public class UserEntity {
             .providerId(encodedPassword)
             .email(customJoinReq.getEmail())
             .nickname(customJoinReq.getNickname())
-            .birth(LocalDate.parse(customJoinReq.getYear() + "-" + customJoinReq.getMonth() + "-" + customJoinReq.getDay()))
+            .birth(LocalDate.parse(String.format("%d-%02d-%02d", customJoinReq.getYear(), customJoinReq.getMonth(), customJoinReq.getDay())))
             .profileImage("https://tripeer207.s3.ap-northeast-2.amazonaws.com/front/static/profileImg.png")
             .role("ROLE_USER")
             .style1(customJoinReq.getStyle1() == null ? null : TripStyleEnum.getNameOfCode(customJoinReq.getStyle1()))
