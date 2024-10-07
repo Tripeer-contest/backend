@@ -19,11 +19,11 @@ public class CustomJoinReq {
     private String code;
     @NotBlank(message = "닉네임이 입력되지 않았거나 공백입니다. ${validatedValue}")
     private String nickname;
-    @Size(min = 4, max = 4, message = "입력 연도의 형식이 잘못되었습니다. ${validatedValue}")
+    @Size(min = 1800, max = 2200, message = "입력 연도의 형식이 잘못되었습니다. ${validatedValue}")
     private int year;
-    @Size(min = 1, max = 2, message = "입력 달의 형식이 잘못되었습니다. ${validatedValue}")
+    @Size(min = 1, max = 12, message = "입력 달의 형식이 잘못되었습니다. ${validatedValue}")
     private int month;
-    @Size(min = 1, max = 2, message = "입력 일의 형식이 잘못되었습니다. ${validatedValue}")
+    @Size(min = 1, max = 31, message = "입력 일의 형식이 잘못되었습니다. ${validatedValue}")
     private int day;
     @Max(value = 8, message = "지정할 수 있는 관심사의 범위를 초과하였습니다. ${validatedValue}")
     private Integer style1;
