@@ -107,4 +107,12 @@ public class UserEntity {
             .allowNotifications(true)
             .build();
     }
+
+    public UserEntity withdraw() {
+        return UserEntity.builder()
+            .userId(this.userId)
+            .nickname(this.nickname + "(탈퇴)")
+            .role("ROLE_WITHDRAWAL")
+            .build();
+    }
 }

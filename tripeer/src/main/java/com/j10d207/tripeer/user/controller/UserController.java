@@ -103,6 +103,13 @@ public class UserController {
         return Response.of(HttpStatus.OK, "유저 검색", userService.userSearch(nickname));
     }
 
+    //유저 탈퇴
+    @DeleteMapping("")
+    public Response<?> deleteUser(@AuthenticationPrincipal CustomOAuth2User user) {
+        userService.withdrawUser(user.getUserId());
+        return Response.of(HttpStatus.NO_CONTENT, "유저 삭제", null);
+    }
+
     //내 정보 불러오기
     @GetMapping("/myinfo")
     public Response<UserDTO.Info> myInfo(@AuthenticationPrincipal CustomOAuth2User user) {
