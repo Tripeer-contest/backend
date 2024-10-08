@@ -252,6 +252,14 @@ public class UserServiceImpl implements UserService{
         return userEntityList.stream().map(UserDTO.Search::fromUserEntity).toList();
     }
 
+    //유저 탈퇴
+    @Override
+    public void withdrawUser(long userId) {
+        UserEntity user = userRepository.findByUserId(userId);
+        user = user.withdraw();
+        userRepository.save(user);
+    }
+
     //내 정보 불러오기 0802
     @Override
     public UserDTO.Info getMyInfo(long userId) {

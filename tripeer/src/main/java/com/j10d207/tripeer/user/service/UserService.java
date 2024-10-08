@@ -45,6 +45,8 @@ public interface UserService {
     public boolean passwordVerification(String email, String code);
     //유저 검색
     public List<UserDTO.Search> userSearch(String nickname);
+    //유저 탈퇴
+    public void withdrawUser(long userId);
     //내 정보 불러오기
     public UserDTO.Info getMyInfo(long userId);
     //내 찜목록 전체 불러오기
