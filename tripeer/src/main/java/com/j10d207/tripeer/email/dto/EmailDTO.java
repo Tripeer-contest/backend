@@ -1,4 +1,4 @@
-package com.j10d207.tripeer.email.db.dto;
+package com.j10d207.tripeer.email.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

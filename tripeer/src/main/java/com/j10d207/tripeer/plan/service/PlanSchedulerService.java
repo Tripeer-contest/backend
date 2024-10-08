@@ -1,6 +1,6 @@
 package com.j10d207.tripeer.plan.service;
 
-import com.j10d207.tripeer.email.db.dto.EmailDTO;
+import com.j10d207.tripeer.email.dto.EmailDTO;
 import com.j10d207.tripeer.email.service.EmailService;
 import com.j10d207.tripeer.plan.db.entity.PlanEntity;
 import com.j10d207.tripeer.plan.db.repository.PlanRepository;
@@ -47,7 +47,7 @@ public class PlanSchedulerService {
                 .title("내일 여행이 시작됩니다.")
                 .content(startDate + "부터 여행이 시작됩니다! 여행계획을 확인해보세요!")
                 .build();
-        emailService.sendEmail(emailDTO);
+        emailService.sendSimpleEmail(emailDTO);
     }
 
     // 종료 날짜에 실행할 메서드
@@ -58,6 +58,6 @@ public class PlanSchedulerService {
                 .title("여행 잘 다녀 오셨나요?")
                 .content("다이어리에서 "+ title + "여행의 추억을 확인해보세요!")
                 .build();
-        emailService.sendEmail(emailDTO);
+        emailService.sendSimpleEmail(emailDTO);
     }
 }
