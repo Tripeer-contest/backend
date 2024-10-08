@@ -121,6 +121,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/user/password").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/valid/email","/user/valid/password","user/login/custom", "user/signup/custom").permitAll()
 
+                        // 문의사항 이메일 관련
+                        .requestMatchers(HttpMethod.POST, "/email/helpdesk").permitAll()
+
                         //가입대기 상태 (소셜 로그인만 된 상태)
                         .requestMatchers(HttpMethod.POST, "/user/signup").hasAnyRole("VALIDATE")
                         // 가입대기 + 모든 사용자 => 닉네임 중복체크
