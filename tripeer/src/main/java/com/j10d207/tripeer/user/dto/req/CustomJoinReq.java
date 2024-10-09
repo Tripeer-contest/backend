@@ -19,9 +19,6 @@ public class CustomJoinReq {
     private String code;
     @NotBlank(message = "닉네임이 입력되지 않았거나 공백입니다. ${validatedValue}")
     private String nickname;
-    private int year;
-    private int month;
-    private int day;
     @Max(value = 8, message = "지정할 수 있는 관심사의 범위를 초과하였습니다. ${validatedValue}")
     private Integer style1;
     @Max(value = 8, message = "지정할 수 있는 관심사의 범위를 초과하였습니다. ${validatedValue}")

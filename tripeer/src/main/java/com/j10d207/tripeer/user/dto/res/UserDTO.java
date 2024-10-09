@@ -24,7 +24,6 @@ public class UserDTO {
         private long userId;
         private String email;
         private String nickname;
-        private LocalDate birth;
         private String profileImage;
         private String style1;
         private int style1Num;
@@ -40,7 +39,6 @@ public class UserDTO {
                     .userId(userEntity.getUserId())
                     .nickname(userEntity.getNickname())
                     .email(userEntity.getEmail())
-                    .birth(userEntity.getBirth())
                     .profileImage(userEntity.getProfileImage())
                     .style1(userEntity.getStyle1())
                     .style1Num(TripStyleEnum.getCodeOfName(userEntity.getStyle1()))
@@ -116,7 +114,6 @@ public class UserDTO {
     @Builder
     public static class Social {
         private String nickname;
-        private String birth;
         private String profileImage;
 
         public static Social getContext() {

@@ -35,7 +35,6 @@ public class UserEntity {
     private String providerId;
     private String email;
     private String nickname;
-    private LocalDate birth;
     @Setter
     private String profileImage;
     private String role;
@@ -69,7 +68,6 @@ public class UserEntity {
                 .providerId(customOAuth2User.getProviderId())
                 .email(customOAuth2User.getEmail())
                 .nickname(join.getNickname())
-                .birth(LocalDate.parse(join.getYear() + "-" + join.getMonth() + "-" + join.getDay()))
                 .profileImage(newImg)
                 .role("ROLE_USER")
                 .style1(join.getStyle1() == null ? null : TripStyleEnum.getNameOfCode(join.getStyle1()))
@@ -97,7 +95,6 @@ public class UserEntity {
             .providerId(encodedPassword)
             .email(customJoinReq.getEmail())
             .nickname(customJoinReq.getNickname())
-            .birth(LocalDate.parse(String.format("%d-%02d-%02d", customJoinReq.getYear(), customJoinReq.getMonth(), customJoinReq.getDay())))
             .profileImage("https://tripeer207.s3.ap-northeast-2.amazonaws.com/front/static/profileImg.png")
             .role("ROLE_USER")
             .style1(customJoinReq.getStyle1() == null ? null : TripStyleEnum.getNameOfCode(customJoinReq.getStyle1()))
