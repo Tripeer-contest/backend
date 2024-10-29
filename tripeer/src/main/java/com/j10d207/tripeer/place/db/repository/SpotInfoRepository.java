@@ -65,4 +65,7 @@ public interface SpotInfoRepository extends JpaRepository <SpotInfoEntity, Integ
 
     @Query("SELECT s FROM spot_info s LEFT JOIN FETCH s.spotReviewList WHERE s.spotInfoId IN :ids")
     List<SpotInfoEntity> findAllWithReviewsById(@Param("ids") List<Integer> ids);
+
+    @Query("SELECT s FROM spot_info s WHERE s.title LIKE %:keyword%")
+    Page<SpotInfoEntity> searchSpotsByKeyword( @Param("keyword") String keyword, Pageable pageable);
 }

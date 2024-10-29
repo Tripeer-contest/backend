@@ -45,7 +45,6 @@ public class SpotServiceImpl implements SpotService{
     private final TownRepository townRepository;
     private final SpotDetailRepository spotDetailRepository;
     private final UserRepository userRepository;
-    private final ElasticSpotRepository elasticSpotRepository;
 
 
     private static final int ALL = -1;
@@ -113,11 +112,9 @@ public class SpotServiceImpl implements SpotService{
     @Override
     public SpotDTO.SpotListDTO getHomeSearch(String keyword, int page, long userId) {
         Pageable pageable = PageRequest.of(page-1, SPOT_SEARCH_PER_PAGE);
-        Page<ElasticSpotEntity> elasticSpotList = elasticSpotRepository.findByKeywordMatchAll(keyword, pageable);
-        List<Integer> idList = elasticSpotList.stream().map(ElasticSpotEntity::getId).toList();
-        List<SpotInfoEntity> spotInfoEntities = spotInfoRepository.findAllWithReviewsById(idList);
-        List<SpotDTO.SpotInfoDTO> spotInfoDTOList = convertToDtoList(spotInfoEntities, userId);
-        return new SpotDTO.SpotListDTO(elasticSpotList.isLast(), spotInfoDTOList);
+        Page<SpotInfoEntity> spotInfoEntities = spotInfoRepository.searchSpotsByKeyword(keyword, pageable);
+        List<SpotDTO.SpotInfoDTO> spotInfoDTOList = convertToDtoList(spotInfoEntities.stream().toList(), userId);
+        return new SpotDTO.SpotListDTO(spotInfoEntities.isLast(), spotInfoDTOList);
     }
 
     //타입별 오버로딩, -1은 전체를 의미
