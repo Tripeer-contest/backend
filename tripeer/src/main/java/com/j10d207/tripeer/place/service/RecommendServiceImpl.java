@@ -112,8 +112,6 @@ public class RecommendServiceImpl implements RecommendService {
 
 		Set<Integer> wishList = wishListRepository.findAllSpotInfoIdsByUserId(userId);
 
-		Set<Integer> bucket = planBucketRepository.findAllSpotInfoIdsByUserId(userId);
-
 		// 각 스팟을 한번에 하나씩 들고 오는것이 아닌 한번에 들고 오기위해서 id 리스트를 만들고
 		List<Integer> allSpotInfoIds = recommendReqList.stream()
 			.flatMap(recommendReq -> recommendReq.getIdList().stream())
@@ -132,7 +130,7 @@ public class RecommendServiceImpl implements RecommendService {
 					.map(el -> SpotSearchResDTO.SearchResult.fromSpotInfoEntity(
 						spotInfoMap.get(el),
 						wishList.contains(el),
-						bucket.contains(el))
+						false)
 					)
 					.toList())
 				.build())

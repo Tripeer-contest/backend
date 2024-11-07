@@ -178,10 +178,10 @@ public class SpotServiceImpl implements SpotService{
     }
 
     private List<SpotDTO.SpotInfoDTO> convertToDtoList(List<SpotInfoEntity> spotInfoEntities, long userId) {
+        Set<Integer> wishList = wishListRepository.findAllSpotInfoIdsByUserId(userId);
         return spotInfoEntities.stream()
                 .map(spotInfoEntity -> {
-                    boolean isWishlist = wishListRepository.existsByUser_UserIdAndSpotInfo_SpotInfoId(userId, spotInfoEntity.getSpotInfoId());
-                    return SpotDTO.SpotInfoDTO.convertToDto(spotInfoEntity, isWishlist);
+                    return SpotDTO.SpotInfoDTO.convertToDto(spotInfoEntity, wishList.contains(spotInfoEntity.getSpotInfoId()));
                 })
                 .toList();
     }
