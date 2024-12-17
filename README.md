@@ -147,7 +147,7 @@ version1 에서 부터 version2 로 올라오면서 변경된 사항
 
 ## 아키텍쳐
 
-사진
+<img width="75%" height="75%" src="./readmeImg/architecture.png"> 
 
 ## 기술 스택
 
